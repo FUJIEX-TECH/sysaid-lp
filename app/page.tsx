@@ -80,37 +80,56 @@ export default function Home() {
       <main>
         {/* HERO */}
         <section className="hero">
-          <div className="container hero__grid">
-            <div className="hero__copy">
-              <p className="eyebrow">SysAid Brasil · ITSM com IA</p>
-              <h1>
-                A plataforma de ITSM com IA que resolve até{" "}
-                <span className="hl">90% dos chamados</span> antes de virarem
-                ticket
-              </h1>
-              <p className="hero__sub">
-                Service desk, gestão de ativos e automação de TI em uma só
-                plataforma. Mais de 400 empresas no Brasil confiam na SysAid.
-              </p>
-              <LeadForm variant="hero" />
-              <p className="hero__trust">
-                Resolução até 12x mais rápida · Suporte local em português ·
-                Reconhecida por G2, Gartner e TrustRadius
-              </p>
+          <div className="hero__bg" aria-hidden="true">
+            <span className="hero__glow" />
+            <div className="hero__ticket hero__ticket--1">
+              <span className="hero__dot hero__dot--red" />
+              <div>
+                <strong>Lentidão na rede WLAN</strong>
+                <span>Filial SP · Infraestrutura</span>
+              </div>
             </div>
+            <div className="hero__ticket hero__ticket--2">
+              <span className="hero__dot hero__dot--amber" />
+              <div>
+                <strong>31 usuários: reset de senha</strong>
+                <span>Salesforce · Acessos</span>
+              </div>
+            </div>
+            <div className="hero__ticket hero__ticket--3">
+              <span className="hero__dot hero__dot--amber" />
+              <div>
+                <strong>Garantia expirando: 25 notebooks</strong>
+                <span>Ativos · Dell</span>
+              </div>
+            </div>
+            <div className="hero__ticket hero__ticket--4">
+              <span className="hero__dot hero__dot--green" />
+              <div>
+                <strong>Onboarding: acesso + VPN</strong>
+                <span>Novo colaborador · RH</span>
+              </div>
+            </div>
+            <div className="hero__resolved">✓ Resolvido pela IA</div>
+          </div>
 
-            <div className="hero__media">
-              <video
-                className="hero__video"
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="metadata"
-              >
-                <source src="/video/hero.mp4" type="video/mp4" />
-              </video>
+          <div className="container hero__inner">
+            <p className="eyebrow">SysAid Brasil · ITSM com IA</p>
+            <h1>
+              A plataforma de ITSM com IA que resolve até{" "}
+              <span className="hl">90% dos chamados</span> antes de virarem ticket
+            </h1>
+            <p className="hero__sub">
+              Service desk, gestão de ativos e automação de TI em uma só
+              plataforma. Mais de 400 empresas no Brasil confiam na SysAid.
+            </p>
+            <div className="hero__form">
+              <LeadForm variant="hero" />
             </div>
+            <p className="hero__trust">
+              Resolução até 12x mais rápida · Suporte local em português ·
+              Reconhecida por G2, Gartner e TrustRadius
+            </p>
           </div>
         </section>
 
