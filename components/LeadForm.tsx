@@ -96,6 +96,7 @@ export default function LeadForm({ variant = "hero", submitLabel }: Props) {
           placeholder="Seu e-mail corporativo"
           aria-label="E-mail corporativo"
           onFocus={() => setExpanded(true)}
+          onClick={() => setExpanded(true)}
           onInput={() => setExpanded(true)}
         />
         {!expanded && (

@@ -168,10 +168,10 @@ img, svg { max-width: 100%; height: auto; display: block; }
 .proof { padding-block: 36px; border-bottom: 1px solid var(--line); }
 .proof__label { text-align: center; color: var(--ink-400); font-size: 0.92rem; margin-bottom: 22px; }
 .proof__logos {
-  display: flex; flex-wrap: wrap; gap: 34px;
+  display: flex; flex-wrap: wrap; gap: 42px;
   align-items: center; justify-content: center;
 }
-.proof__logo { height: 38px; width: auto; opacity: 0.62; filter: grayscale(1); transition: opacity 0.2s; }
+.proof__logo { height: 50px; width: auto; opacity: 0.62; filter: grayscale(1); transition: opacity 0.2s; }
 .proof__logo:hover { opacity: 1; filter: none; }
 
 /* SECTION HEADS */
@@ -287,7 +287,7 @@ img, svg { max-width: 100%; height: auto; display: block; }
   .grid-3 { grid-template-columns: 1fr; }
   .compare { grid-template-columns: 1fr; }
   .leadform__row { flex-direction: column; }
-  .proof__logos { gap: 22px; }
-  .proof__logo { height: 30px; }
+  .proof__logos { gap: 26px; }
+  .proof__logo { height: 40px; }
 }
 

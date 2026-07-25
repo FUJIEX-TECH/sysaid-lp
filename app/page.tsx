@@ -113,8 +113,8 @@ export default function Home() {
                   key={c}
                   src={`/clientes/${c}.png`}
                   alt={c}
-                  width={110}
-                  height={44}
+                  width={150}
+                  height={60}
                   className="proof__logo"
                 />
               ))}
