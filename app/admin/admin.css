@@ -1,0 +1,79 @@
+.admin {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 28px 24px 80px;
+}
+.admin__top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 16px; margin-bottom: 24px;
+}
+.admin__top h1 { font-family: var(--font-serif); color: var(--green-700); margin: 0; }
+.admin__sub { color: var(--ink-400); margin: 4px 0 0; }
+.admin__logout {
+  background: transparent; border: 1.5px solid var(--line); color: var(--ink-400);
+  padding: 8px 16px; border-radius: var(--radius-sm); cursor: pointer; font-weight: 600;
+}
+.admin__logout:hover { border-color: var(--green-700); color: var(--green-700); }
+
+.admin__error {
+  background: #fdecea; color: #b71c1c; border: 1px solid #f5c6cb;
+  padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 16px;
+}
+
+.admin__controls {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px;
+}
+.admin__controls input, .admin__controls select {
+  padding: 11px 14px; border: 1.5px solid var(--line); border-radius: var(--radius-sm);
+  font-size: 0.95rem; font-family: var(--font-sans); background: #fff;
+}
+.admin__controls input { flex: 1; min-width: 240px; }
+.admin__count { color: var(--ink-400); font-size: 0.9rem; }
+.admin__export {
+  background: var(--green-700); color: #fff; border: none; padding: 11px 20px;
+  border-radius: var(--radius-sm); cursor: pointer; font-weight: 600;
+}
+.admin__export:hover { background: #12503f; }
+
+.admin__tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+.admin__table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.admin__table thead th {
+  text-align: left; background: var(--bg-soft); color: var(--ink-400);
+  font-weight: 600; padding: 12px 14px; border-bottom: 1px solid var(--line);
+  white-space: nowrap; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.03em;
+}
+.admin__table tbody td { padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.admin__table tbody tr:hover { background: var(--bg-soft); }
+.admin__table .nowrap { white-space: nowrap; }
+.admin__table .gclid { text-align: center; color: var(--green-700); font-weight: 700; cursor: default; }
+.admin__empty { text-align: center; color: var(--ink-400); padding: 40px 0; }
+
+.pill {
+  display: inline-block; padding: 3px 10px; border-radius: 999px;
+  font-size: 0.75rem; font-weight: 600; text-transform: capitalize;
+}
+.pill--sent { background: #e6f4ea; color: #1e7e34; }
+.pill--failed { background: #fdecea; color: #c0392b; }
+.pill--pending { background: #fff4e5; color: #b26a00; }
+
+/* LOGIN */
+.admin-login {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: var(--green-900); padding: 24px;
+}
+.admin-login__box {
+  background: #fff; border-radius: var(--radius); padding: 40px;
+  width: 100%; max-width: 380px; box-shadow: var(--shadow-lg);
+}
+.admin-login__box h1 { font-family: var(--font-serif); font-size: 1.5rem; color: var(--green-700); margin: 0 0 4px; }
+.admin-login__box p { color: var(--ink-400); margin: 0 0 20px; }
+.admin-login__box input {
+  width: 100%; padding: 13px 15px; border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm); font-size: 1rem; margin-bottom: 14px;
+}
+.admin-login__box button {
+  width: 100%; background: var(--green-700); color: #fff; border: none;
+  padding: 13px; border-radius: var(--radius-sm); font-weight: 600; font-size: 1rem; cursor: pointer;
+}
+.admin-login__box button:hover { background: #12503f; }
+.admin-login__error { color: #c0392b; font-size: 0.9rem; margin: -6px 0 12px !important; }
