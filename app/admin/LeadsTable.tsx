@@ -35,6 +35,18 @@ export default function LeadsTable({
 }) {
   const [q, setQ] = useState("");
   const [campaign, setCampaign] = useState("");
+  const [modalLead, setModalLead] = useState<Lead | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  async function copyGclid(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback silencioso
+    }
+  }
 
   const campaigns = useMemo(() => {
     const set = new Set<string>();
@@ -140,8 +152,18 @@ export default function LeadsTable({
                 <td>{l.num_admins || "—"}</td>
                 <td>{l.utm_campaign || "—"}</td>
                 <td>{l.utm_source || "—"}</td>
-                <td className="gclid" title={l.gclid || ""}>
-                  {l.gclid ? "✓" : "—"}
+                <td className="gclid">
+                  {l.gclid ? (
+                    <button
+                      className="gclid-btn"
+                      onClick={() => { setModalLead(l); setCopied(false); }}
+                      title="Ver e copiar GCLID"
+                    >
+                      ✓
+                    </button>
+                  ) : (
+                    "—"
+                  )}
                 </td>
                 <td>
                   <span className={`pill pill--${l.rdstation_status}`}>
@@ -153,6 +175,38 @@ export default function LeadsTable({
           </tbody>
         </table>
       </div>
+
+      {modalLead && (
+        <div className="modal" onClick={() => setModalLead(null)}>
+          <div className="modal__box" onClick={(e) => e.stopPropagation()}>
+            <button className="modal__close" onClick={() => setModalLead(null)} aria-label="Fechar">
+              ×
+            </button>
+            <h2>Atribuição do lead</h2>
+            <p className="modal__who">
+              {modalLead.name || modalLead.email}
+              {modalLead.company ? ` · ${modalLead.company}` : ""}
+            </p>
+
+            <label className="modal__label">GCLID</label>
+            <div className="modal__code">
+              <code>{modalLead.gclid}</code>
+              <button onClick={() => copyGclid(modalLead.gclid || "")}>
+                {copied ? "Copiado!" : "Copiar"}
+              </button>
+            </div>
+
+            <div className="modal__grid">
+              <div><span>Campanha</span>{modalLead.utm_campaign || "—"}</div>
+              <div><span>Origem</span>{modalLead.utm_source || "—"}</div>
+              <div><span>Mídia</span>{modalLead.utm_medium || "—"}</div>
+              <div><span>Conteúdo</span>{modalLead.utm_content || "—"}</div>
+              <div><span>Termo</span>{modalLead.utm_term || "—"}</div>
+              <div><span>Página</span>{modalLead.page_url || "—"}</div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
