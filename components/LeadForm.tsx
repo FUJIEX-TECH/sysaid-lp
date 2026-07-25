@@ -16,20 +16,9 @@ const UTM_KEYS = [
   "gclid",
 ] as const;
 
-function fireGoogleAdsConversion() {
-  const id = process.env.NEXT_PUBLIC_GADS_CONVERSION_ID;
-  const label = process.env.NEXT_PUBLIC_GADS_CONVERSION_LABEL;
-  if (!id || !label) return;
-  const w = window as unknown as { gtag?: (...args: unknown[]) => void };
-  if (typeof w.gtag === "function") {
-    w.gtag("event", "conversion", { send_to: `${id}/${label}` });
-  }
-}
-
 export default function LeadForm({ variant = "hero", submitLabel }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [sending, setSending] = useState(false);
-  const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const utm = useRef<Record<string, string>>({});
 
@@ -74,24 +63,13 @@ export default function LeadForm({ variant = "hero", submitLabel }: Props) {
         setSending(false);
         return;
       }
-      fireGoogleAdsConversion();
-      setDone(true);
+      // marca o envio para a /obrigado disparar a conversao, e redireciona
+      sessionStorage.setItem("sysaid_lead", "1");
+      window.location.href = "/obrigado";
     } catch {
       setError("Erro de conexão. Tente novamente em instantes.");
       setSending(false);
     }
-  }
-
-  if (done) {
-    return (
-      <div className={`leadform leadform--${variant} leadform--done`}>
-        <h3>Recebemos seu contato ✓</h3>
-        <p>
-          Um especialista da SysAid vai falar com você em breve para agendar
-          a demonstração. Fique de olho no seu e-mail e telefone.
-        </p>
-      </div>
-    );
   }
 
   return (

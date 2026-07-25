@@ -265,6 +265,18 @@ img, svg { max-width: 100%; height: auto; display: block; }
 .leadform--done h3 { color: var(--green-700); }
 .section--dark .leadform--done h3 { color: var(--lime); }
 
+/* THANK YOU */
+.ty { padding-block: clamp(60px, 12vw, 140px); }
+.ty__check {
+  width: 84px; height: 84px; margin: 0 auto 28px; border-radius: 50%;
+  background: var(--green-100); color: var(--green-700);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 42px; font-weight: 700;
+}
+.ty h1 { color: var(--green-700); }
+.ty__lead { font-size: 1.2rem; color: var(--ink-700); max-width: 48ch; margin: 0 auto 10px; }
+.ty__meta { color: var(--ink-400); margin-bottom: 28px; }
+
 /* RESPONSIVO */
 @media (max-width: 900px) {
   .grid-3 { grid-template-columns: 1fr 1fr; }
