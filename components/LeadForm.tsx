@@ -95,9 +95,10 @@ export default function LeadForm({ variant = "hero", submitLabel }: Props) {
           required
           placeholder="Seu e-mail corporativo"
           aria-label="E-mail corporativo"
-          onFocus={() => setExpanded(true)}
-          onClick={() => setExpanded(true)}
-          onInput={() => setExpanded(true)}
+          onInput={(e) => {
+            // abre os demais campos ao digitar a primeira letra (nao no clique/foco)
+            if (e.currentTarget.value.length > 0) setExpanded(true);
+          }}
         />
         {!expanded && (
           <button type="submit" className="btn btn--primary">

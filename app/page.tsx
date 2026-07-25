@@ -98,6 +98,19 @@ export default function Home() {
                 Reconhecida por G2, Gartner e TrustRadius
               </p>
             </div>
+
+            <div className="hero__media">
+              <video
+                className="hero__video"
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+              >
+                <source src="/video/hero.mp4" type="video/mp4" />
+              </video>
+            </div>
           </div>
         </section>
 
