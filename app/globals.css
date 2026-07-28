@@ -258,6 +258,26 @@ img, svg { max-width: 100%; height: auto; display: block; }
 .compare__col--us h3 { color: #fff; }
 .compare__col--us li::before { content: "✓"; position: absolute; left: 0; color: var(--lime); font-weight: 700; }
 
+/* CTABLE — comparativo por criterio (LPs de conquista) */
+.ctable { max-width: 980px; margin: 0 auto; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: #fff; }
+.ctable__head, .ctable__row { display: grid; grid-template-columns: 1.1fr 1.3fr 1.5fr; gap: 0; }
+.ctable__head { background: var(--green-900); color: #eaf3ee; font-weight: 600; }
+.ctable__head span { padding: 14px 20px; font-size: 0.95rem; }
+.ctable__head .ctable__us { color: var(--lime); }
+.ctable__row { border-top: 1px solid var(--line); }
+.ctable__row span { padding: 16px 20px; font-size: 0.97rem; }
+.ctable__crit { font-weight: 600; color: var(--ink); background: var(--bg-soft); }
+.ctable__them { color: var(--ink-400); }
+.ctable__mine { color: var(--ink); background: rgba(107, 217, 185, 0.09); position: relative; padding-left: 42px !important; }
+.ctable__mine::before { content: "✓"; position: absolute; left: 20px; color: var(--green-700); font-weight: 700; }
+.ctable__note { max-width: 980px; margin: 16px auto 0; font-size: 0.82rem; color: var(--ink-400); }
+
+/* STEP — passos de migracao */
+.step { padding: 8px 4px; }
+.step__n { display: inline-block; font-family: var(--font-sans); font-weight: 800; font-size: 1.05rem; color: var(--green-700); background: var(--green-100); border-radius: 999px; padding: 6px 14px; margin-bottom: 12px; letter-spacing: 0.02em; }
+.step h3 { color: var(--ink); }
+.step p { color: var(--ink-400); margin: 0; }
+
 /* FAQ */
 .faq__item { border-bottom: 1px solid var(--line); padding: 6px 0; }
 .faq__item summary {
@@ -318,6 +338,15 @@ img, svg { max-width: 100%; height: auto; display: block; }
   .ia__grid { grid-template-columns: 1fr; gap: 28px; }
   .stats { grid-template-columns: 1fr 1fr; gap: 28px; }
 }
+@media (max-width: 760px) {
+  .ctable__head { display: none; }
+  .ctable__row { grid-template-columns: 1fr; }
+  .ctable__row span { padding: 10px 18px; }
+  .ctable__crit { padding-top: 16px !important; font-size: 1.02rem !important; }
+  .ctable__them::before { content: "GLPI: "; font-weight: 600; color: var(--ink); }
+  .ctable__mine { padding-bottom: 18px !important; }
+}
+
 @media (max-width: 620px) {
   .grid-3 { grid-template-columns: 1fr; }
   .compare { grid-template-columns: 1fr; }
