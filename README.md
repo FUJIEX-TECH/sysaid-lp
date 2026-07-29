@@ -22,6 +22,7 @@ resolve velocidade e sai das regras de challenge do Cloudflare.
 ```
 app/
   page.tsx          → landing page (hero + seções + FAQ)
+  glpi/             → LP de conquista para o ad group GLPI (campanha [FJX] Conquista)
   obrigado/         → página de agradecimento (dispara conversão Google Ads)
   admin/            → painel de leads (senha única)
   api/lead/         → recebe o formulário
@@ -46,6 +47,29 @@ scripts/init-db.mjs → aplica o schema no Neon
 2. Preenche o formulário progressivo (captura UTM + gclid da URL).
 3. `POST /api/lead`: valida → grava no Neon → envia RD Station → notifica por e-mail.
 4. Redireciona pra `/obrigado`, que dispara a conversão do Google Ads com o gclid.
+
+O fluxo é o mesmo em todas as rotas de captação (`/` e `/glpi`): as LPs compartilham
+`LeadForm`, `Analytics` e a `/obrigado`.
+
+## Rotas de captação
+
+| Rota | Público | Origem de tráfego |
+|---|---|---|
+| `/` | genérico ITSM / service desk | campanha `[FJX] ITSM - Service Desk` (grupos Service Desk - ITSM e ITSM + IA) |
+| `/glpi` | quem já opera GLPI | campanha `[FJX] Conquista`, ad group `GLPI` |
+
+**Ao criar uma nova LP de conquista** (Movidesk, Milvus, TiFlux, OTRS e afins):
+
+- Usar `app/glpi/page.tsx` como molde **estrutural**, mas **reescrever o texto**. Clonar a
+  página trocando só o nome do concorrente gera conteúdo duplicado e o Google pontua mal.
+- A mensagem muda por família: quem usa ferramenta open source ouve "pare de manter servidor
+  e plugin"; quem já paga SaaS precisa de outro argumento.
+- Tom: creditar o que o concorrente entrega, mover a conversa para custo total de operação,
+  e manter a nota de marca no rodapé do comparativo.
+- **Publicar a LP antes de criar o anúncio.** RSA apontando para 404 dispara
+  `DESTINATION_NOT_WORKING` no Google Ads (foi o que derrubou os anúncios em julho/2026).
+- Classes reaproveitáveis do comparativo: `.ctable` (colapsa em uma coluna abaixo de 760px)
+  e `.step`, ambas em `app/globals.css`.
 
 ## Rodar local
 
