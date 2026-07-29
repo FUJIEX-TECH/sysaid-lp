@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { leadSchema, nullify } from "@/lib/validation";
-import { insertLead, markRdStation } from "@/lib/db";
+import { finalizeLeadSchema, nullify } from "@/lib/validation";
+import { finalizeLead, markRdStation } from "@/lib/db";
 import { sendToRdStation } from "@/lib/rdstation";
 import { notifyNewLead } from "@/lib/email";
 
 export const runtime = "nodejs";
 
+// Finalizacao do formulario (passo 3): so aqui o lead vira completion='complete'
+// e dispara RD Station + notificacao interna. As etapas parciais (email,
+// nome+telefone) vivem em app/api/lead/partial/route.ts e nunca chegam aqui
+// sozinhas - so gravam no banco.
 export async function POST(req: NextRequest) {
   let body: unknown;
   try {
@@ -14,7 +18,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "JSON inválido" }, { status: 400 });
   }
 
-  const parsed = leadSchema.safeParse(body);
+  const parsed = finalizeLeadSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
       { ok: false, error: "Dados inválidos", issues: parsed.error.flatten().fieldErrors },
@@ -52,16 +56,26 @@ export async function POST(req: NextRequest) {
     ip,
   };
 
-  // 1. grava no banco (fonte de verdade). Se isso falhar, o lead falha.
+  // 1. grava no banco (fonte de verdade). Se veio "id" das etapas parciais,
+  // completa a mesma linha (completion='complete'); senao insere direto.
   let id: number;
   try {
-    id = await insertLead(lead);
+    id = await finalizeLead(d.id ?? null, lead);
   } catch (err) {
-    console.error("insertLead falhou:", err);
+    console.error("finalizeLead falhou:", err);
     return NextResponse.json({ ok: false, error: "Erro ao gravar" }, { status: 500 });
   }
 
   // 2. integracoes best-effort: nao derrubam o lead se falharem.
+  // DISABLE_INTEGRATIONS=true (so em .env.local, nunca na Vercel) pula RD
+  // Station e o e-mail de notificacao pra testar o formulario localmente
+  // sem sujar o CRM real nem notificar o time - o banco (dev=prod) ainda grava.
+  if (process.env.DISABLE_INTEGRATIONS === "true") {
+    console.log(`[DISABLE_INTEGRATIONS] lead ${id} finalizado - RD Station e e-mail pulados`, lead);
+    await markRdStation(id, "failed", "pulado (DISABLE_INTEGRATIONS=true, teste local)").catch(() => {});
+    return NextResponse.json({ ok: true, id });
+  }
+
   const rd = await sendToRdStation(lead);
   await markRdStation(id, rd.ok ? "sent" : "failed", rd.detail).catch(() => {});
 

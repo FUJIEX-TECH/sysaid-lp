@@ -11,7 +11,7 @@ function fmtDate(iso: string) {
 }
 
 const CSV_COLS: (keyof Lead)[] = [
-  "created_at", "name", "email", "company", "phone", "num_admins",
+  "created_at", "completion", "name", "email", "company", "phone", "num_admins",
   "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term",
   "gclid", "rdstation_status", "status", "page_url",
 ];
@@ -35,6 +35,7 @@ export default function LeadsTable({
 }) {
   const [q, setQ] = useState("");
   const [campaign, setCampaign] = useState("");
+  const [completion, setCompletion] = useState<"" | "complete" | "partial">("");
   const [modalLead, setModalLead] = useState<Lead | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -58,12 +59,19 @@ export default function LeadsTable({
     const term = q.trim().toLowerCase();
     return leads.filter((l) => {
       if (campaign && l.utm_campaign !== campaign) return false;
+      if (completion && l.completion !== completion) return false;
       if (!term) return true;
       return [l.name, l.email, l.company, l.phone]
         .filter(Boolean)
         .some((v) => String(v).toLowerCase().includes(term));
     });
-  }, [leads, q, campaign]);
+  }, [leads, q, campaign, completion]);
+
+  const completeCount = useMemo(
+    () => leads.filter((l) => l.completion === "complete").length,
+    [leads]
+  );
+  const partialCount = leads.length - completeCount;
 
   const thisMonth = useMemo(() => {
     const now = new Date();
@@ -94,7 +102,7 @@ export default function LeadsTable({
         <div>
           <h1>Leads · LP ITSM</h1>
           <p className="admin__sub">
-            {leads.length} leads no total · {thisMonth} neste mês
+            {completeCount} completos · {partialCount} parciais · {thisMonth} neste mês
           </p>
         </div>
         <button className="admin__logout" onClick={logout}>Sair</button>
@@ -116,6 +124,11 @@ export default function LeadsTable({
             <option key={c} value={c}>{c}</option>
           ))}
         </select>
+        <select value={completion} onChange={(e) => setCompletion(e.target.value as "" | "complete" | "partial")}>
+          <option value="">Completos e parciais</option>
+          <option value="complete">Só completos</option>
+          <option value="partial">Só parciais</option>
+        </select>
         <span className="admin__count">{filtered.length} exibidos</span>
         <button className="admin__export" onClick={exportCsv}>Exportar CSV</button>
       </div>
@@ -125,6 +138,7 @@ export default function LeadsTable({
           <thead>
             <tr>
               <th>Data</th>
+              <th>Status</th>
               <th>Nome</th>
               <th>E-mail</th>
               <th>Empresa</th>
@@ -139,12 +153,17 @@ export default function LeadsTable({
           <tbody>
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={10} className="admin__empty">Nenhum lead ainda.</td>
+                <td colSpan={11} className="admin__empty">Nenhum lead ainda.</td>
               </tr>
             )}
             {filtered.map((l) => (
               <tr key={l.id}>
                 <td className="nowrap">{fmtDate(l.created_at)}</td>
+                <td>
+                  <span className={`pill pill--${l.completion === "complete" ? "sent" : "pending"}`}>
+                    {l.completion === "complete" ? "Completo" : "Parcial"}
+                  </span>
+                </td>
                 <td>{l.name || "—"}</td>
                 <td>{l.email}</td>
                 <td>{l.company || "—"}</td>

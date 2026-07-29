@@ -36,9 +36,21 @@ CREATE TABLE IF NOT EXISTS leads (
 
   -- ciclo de vida comercial (uso no painel)
   status        TEXT NOT NULL DEFAULT 'new',           -- new | contacted | qualified | lost
-  notes         TEXT
+  notes         TEXT,
+
+  -- preenchimento progressivo do formulario (captura silenciosa por etapa)
+  completion    TEXT NOT NULL DEFAULT 'complete'        -- partial | complete
+                CHECK (completion IN ('partial', 'complete'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_leads_created_at ON leads (created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_leads_utm_campaign ON leads (utm_campaign);
 CREATE INDEX IF NOT EXISTS idx_leads_email ON leads (email);
+CREATE INDEX IF NOT EXISTS idx_leads_completion ON leads (completion);
+
+-- migracao idempotente para banco ja existente (schema acima ja cobre banco novo)
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS completion TEXT NOT NULL DEFAULT 'complete';
+DO $$ BEGIN
+  ALTER TABLE leads ADD CONSTRAINT leads_completion_check CHECK (completion IN ('partial', 'complete'));
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
