@@ -23,7 +23,7 @@ export type RdResult = { ok: boolean; detail: string };
 export async function sendToRdStation(lead: RdLead): Promise<RdResult> {
   const token = process.env.RDSTATION_TOKEN;
   const identifier =
-    process.env.RDSTATION_CONVERSION_IDENTIFIER || "form-site-wpforms";
+    process.env.RDSTATION_CONVERSION_IDENTIFIER || "site-fjx";
 
   if (!token) {
     return { ok: false, detail: "RDSTATION_TOKEN ausente" };
