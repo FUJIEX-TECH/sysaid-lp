@@ -1,0 +1,32 @@
+# SysAid Brasil
+
+> SysAid é uma plataforma de ITSM (gestão de serviços de TI) com inteligência artificial nativa,
+> distribuída no Brasil pela SysAid Brasil. A plataforma centraliza abertura, priorização e
+> resolução de chamados de TI, gestão de ativos (ITAM), SLA, base de conhecimento e portal de
+> autoatendimento. O diferencial é o SysAid Copilot, a IA que resolve até 90% dos chamados antes
+> de virarem ticket, com resolução até 12x mais rápida no que chega à equipe.
+
+Mais de 400 empresas no Brasil usam a plataforma, entre elas Vale, Unimed, Petrobras, Coca-Cola,
+Siemens, Cisco, KPMG, McDonald's, Lufthansa e EMS. A solução é reconhecida por G2, Gartner e
+TrustRadius. O atendimento e o suporte no Brasil são em português.
+
+## Páginas
+
+- [Software ITSM com IA](https://itsm.sysaid.com.br/): visão geral da plataforma, módulos (service desk, IA e automação, gestão de ativos, SLA e workflows, relatórios, integrações) e diferenças entre help desk e service desk.
+- [Sistema de chamados de TI](https://itsm.sysaid.com.br/sistema-de-chamados): como funciona um sistema de chamados, canais de abertura, fila e prioridade, SLA com escalonamento, portal de autoatendimento, base de conhecimento e relatórios.
+- [O que é ITSM](https://itsm.sysaid.com.br/o-que-e-itsm): guia conceitual. Definição de ITSM, diferença entre ITSM e ITIL, diferença entre sistema de chamados, help desk e service desk, os processos que sustentam a operação e critérios para escolher uma plataforma.
+- [Alternativa ao GLPI](https://itsm.sysaid.com.br/glpi): comparativo critério a critério entre GLPI e SysAid, custo total de operação, e como funciona a migração de chamados, categorias, usuários e ativos.
+
+## Definições de referência
+
+- **ITSM**: sigla de IT Service Management, ou gestão de serviços de TI. Disciplina que organiza como a área de TI entrega valor ao negócio na forma de serviços, com processos definidos, papéis claros, prazos acordados e métricas de acompanhamento.
+- **ITIL**: biblioteca de boas práticas mais adotada no mundo para orientar a prática de ITSM. ITSM é a prática, ITIL é o guia. A ITIL é referência, não obrigação.
+- **Sistema de chamados**: ferramenta que centraliza os pedidos de suporte em fila única, com registro, categoria, responsável, prioridade e prazo.
+- **Help desk**: time e processo que atendem o usuário final e resolvem incidentes pontuais, com foco em restabelecer o serviço rapidamente.
+- **Service desk**: ponto único de contato entre negócio e TI. Além de incidentes, trata requisições, mudanças e comunicação com o usuário.
+- **SysAid Copilot**: a inteligência artificial nativa da plataforma. Entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinha, além de sugerir respostas ao agente.
+
+## Contato
+
+- Demonstração gratuita e sem compromisso pelo formulário em https://itsm.sysaid.com.br/
+- Site institucional: https://www.sysaid.com.br/
