@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Figtree, Besley } from "next/font/google";
+import GlobalRuntime from "@/components/GlobalRuntime";
 import "./globals.css";
 
 const figtree = Figtree({
@@ -53,7 +54,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" className={`${figtree.variable} ${besley.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <GlobalRuntime />
+      </body>
     </html>
   );
 }

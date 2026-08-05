@@ -230,7 +230,7 @@ export default function LeadForm({ variant = "hero", submitLabel }: Props) {
         />
         {step === 1 && (
           <button type="submit" className="btn btn--primary">
-            {submitLabel || "Agende uma demonstração"}
+            {submitLabel || "Testar grátis"}
           </button>
         )}
       </div>
@@ -281,7 +281,7 @@ export default function LeadForm({ variant = "hero", submitLabel }: Props) {
         {error && <p className="leadform__error">{error}</p>}
 
         <button type="submit" className="btn btn--primary btn--block" disabled={sending}>
-          {sending ? "Enviando..." : submitLabel || "Agende uma demonstração"}
+          {sending ? "Enviando..." : submitLabel || "Testar grátis"}
         </button>
         <p className="leadform__legal">
           Ao enviar, você concorda em ser contatado pela SysAid. Sem spam.

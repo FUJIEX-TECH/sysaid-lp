@@ -1,6 +1,5 @@
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
-import Analytics from "@/components/Analytics";
 
 const CLIENTES = [
   "vale", "unimed", "petrobras", "cocacola", "siemens",
@@ -70,7 +69,6 @@ const faqSchema = {
 export default function Home() {
   return (
     <>
-      <Analytics />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
@@ -86,7 +84,7 @@ export default function Home() {
             priority
           />
           <a className="btn btn--lime btn--sm" href="#form">
-            Agende uma demonstração
+            Testar grátis
           </a>
         </div>
       </header>
@@ -348,11 +346,11 @@ export default function Home() {
             </p>
             <h2>Veja o SysAid resolver os chamados da sua TI</h2>
             <p className="form-final__sub">
-              Agende uma demonstração gratuita e sem compromisso. Mostramos a
+              Teste grátis, sem compromisso. Mostramos a
               plataforma funcionando no cenário da sua empresa.
             </p>
             <div className="form-final__box">
-              <LeadForm variant="final" submitLabel="Agende minha demonstração" />
+              <LeadForm variant="final" submitLabel="Testar grátis" />
             </div>
           </div>
         </section>

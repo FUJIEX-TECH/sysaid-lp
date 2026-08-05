@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Analytics from "@/components/Analytics";
 import ConversionPing from "@/components/ConversionPing";
 
 export const metadata: Metadata = {
@@ -11,7 +10,6 @@ export const metadata: Metadata = {
 export default function Obrigado() {
   return (
     <>
-      <Analytics />
       <ConversionPing />
 
       <header className="site-header">
@@ -25,8 +23,9 @@ export default function Obrigado() {
           <div className="ty__check" aria-hidden="true">✓</div>
           <h1>Recebemos seu contato</h1>
           <p className="ty__lead">
-            Um especialista da SysAid vai falar com você em breve para agendar
-            a demonstração. Fique de olho no seu e-mail e telefone.
+            Um especialista da SysAid vai falar com você em breve para liberar
+            seu teste e mostrar a plataforma funcionando. Fique de olho no seu
+            e-mail e telefone.
           </p>
           <p className="ty__meta">
             Enquanto isso, conheça mais sobre a plataforma no site oficial.

@@ -10,5 +10,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/sistema-de-chamados`, lastModified: now, changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE}/o-que-e-itsm`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE}/glpi`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE}/freshdesk`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
   ];
 }

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
-import Analytics from "@/components/Analytics";
 
 export const metadata: Metadata = {
   title: "Sistema de Chamados de TI com IA | Abertura, SLA e Portal — SysAid Brasil",
@@ -135,7 +134,6 @@ const faqSchema = {
 export default function SistemaDeChamadosPage() {
   return (
     <>
-      <Analytics />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
@@ -150,7 +148,7 @@ export default function SistemaDeChamadosPage() {
             priority
           />
           <a className="btn btn--lime btn--sm" href="#form">
-            Agende uma demonstração
+            Testar grátis
           </a>
         </div>
       </header>
@@ -387,12 +385,12 @@ export default function SistemaDeChamadosPage() {
             </p>
             <h2>Veja seus chamados entrando, sendo priorizados e resolvidos</h2>
             <p className="form-final__sub">
-              Agende uma demonstração gratuita e sem compromisso. Mostramos a
+              Teste grátis, sem compromisso. Mostramos a
               plataforma rodando com a fila, as prioridades e os SLAs da sua
               operação.
             </p>
             <div className="form-final__box">
-              <LeadForm variant="final" submitLabel="Agende minha demonstração" />
+              <LeadForm variant="final" submitLabel="Testar grátis" />
             </div>
           </div>
         </section>

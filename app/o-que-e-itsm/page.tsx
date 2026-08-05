@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
-import Analytics from "@/components/Analytics";
 
 export const metadata: Metadata = {
   title: "O que é ITSM? Guia de Gestão de Serviços de TI — SysAid Brasil",
@@ -127,7 +126,6 @@ const faqSchema = {
 export default function OQueEItsmPage() {
   return (
     <>
-      <Analytics />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
@@ -142,7 +140,7 @@ export default function OQueEItsmPage() {
             priority
           />
           <a className="btn btn--lime btn--sm" href="#form">
-            Agende uma demonstração
+            Testar grátis
           </a>
         </div>
       </header>
@@ -335,12 +333,12 @@ export default function OQueEItsmPage() {
             </p>
             <h2>Do conceito à operação, na sua realidade</h2>
             <p className="form-final__sub">
-              Agende uma demonstração gratuita e sem compromisso. Mostramos como
+              Teste grátis, sem compromisso. Mostramos como
               os processos descritos aqui ficam na prática, com a fila, os
               prazos e os serviços da sua TI.
             </p>
             <div className="form-final__box">
-              <LeadForm variant="final" submitLabel="Agende minha demonstração" />
+              <LeadForm variant="final" submitLabel="Testar grátis" />
             </div>
           </div>
         </section>

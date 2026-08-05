@@ -3,6 +3,17 @@
 import { useMemo, useState } from "react";
 import type { Lead } from "@/lib/db";
 
+// extrai o caminho da pagina de origem a partir da URL completa gravada no lead
+function pagePath(url: string | null): string {
+  if (!url) return "";
+  try {
+    const p = new URL(url).pathname.replace(/\/$/, "");
+    return p === "" ? "/" : p;
+  } catch {
+    return "";
+  }
+}
+
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleString("pt-BR", {
     day: "2-digit", month: "2-digit", year: "2-digit",
@@ -35,6 +46,7 @@ export default function LeadsTable({
 }) {
   const [q, setQ] = useState("");
   const [campaign, setCampaign] = useState("");
+  const [page, setPage] = useState("");
   const [completion, setCompletion] = useState<"" | "complete" | "partial">("");
   const [modalLead, setModalLead] = useState<Lead | null>(null);
   const [copied, setCopied] = useState(false);
@@ -55,17 +67,27 @@ export default function LeadsTable({
     return Array.from(set).sort();
   }, [leads]);
 
+  const pages = useMemo(() => {
+    const set = new Set<string>();
+    leads.forEach((l) => {
+      const p = pagePath(l.page_url);
+      if (p) set.add(p);
+    });
+    return Array.from(set).sort();
+  }, [leads]);
+
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
     return leads.filter((l) => {
       if (campaign && l.utm_campaign !== campaign) return false;
+      if (page && pagePath(l.page_url) !== page) return false;
       if (completion && l.completion !== completion) return false;
       if (!term) return true;
       return [l.name, l.email, l.company, l.phone]
         .filter(Boolean)
         .some((v) => String(v).toLowerCase().includes(term));
     });
-  }, [leads, q, campaign, completion]);
+  }, [leads, q, campaign, page, completion]);
 
   const completeCount = useMemo(
     () => leads.filter((l) => l.completion === "complete").length,
@@ -124,6 +146,12 @@ export default function LeadsTable({
             <option key={c} value={c}>{c}</option>
           ))}
         </select>
+        <select value={page} onChange={(e) => setPage(e.target.value)}>
+          <option value="">Todas as páginas</option>
+          {pages.map((p) => (
+            <option key={p} value={p}>{p}</option>
+          ))}
+        </select>
         <select value={completion} onChange={(e) => setCompletion(e.target.value as "" | "complete" | "partial")}>
           <option value="">Completos e parciais</option>
           <option value="complete">Só completos</option>
@@ -145,6 +173,7 @@ export default function LeadsTable({
               <th>Telefone</th>
               <th>Admins</th>
               <th>Campanha</th>
+              <th>Página</th>
               <th>Origem</th>
               <th>GCLID</th>
               <th>RD</th>
@@ -153,7 +182,7 @@ export default function LeadsTable({
           <tbody>
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={11} className="admin__empty">Nenhum lead ainda.</td>
+                <td colSpan={12} className="admin__empty">Nenhum lead ainda.</td>
               </tr>
             )}
             {filtered.map((l) => (
@@ -170,6 +199,7 @@ export default function LeadsTable({
                 <td className="nowrap">{l.phone || "—"}</td>
                 <td>{l.num_admins || "—"}</td>
                 <td>{l.utm_campaign || "—"}</td>
+                <td className="nowrap">{pagePath(l.page_url) || "—"}</td>
                 <td>{l.utm_source || "—"}</td>
                 <td className="gclid">
                   {l.gclid ? (

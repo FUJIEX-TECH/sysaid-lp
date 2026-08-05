@@ -3,14 +3,14 @@ import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 
 export const metadata: Metadata = {
-  title: "Alternativa ao GLPI | ITSM com IA que resolve o chamado — SysAid Brasil",
+  title: "Alternativa ao Freshdesk | ITSM com IA para a sua TI — SysAid Brasil",
   description:
-    "Roda GLPI e a TI segue apagando incêndio? Conheça a plataforma ITSM com IA que resolve até 90% dos chamados antes de virarem ticket, com gestão de ativos, SLA e suporte local em português.",
-  alternates: { canonical: "/glpi" },
+    "Freshdesk atende clientes. Sua TI precisa de ITSM. Conheça a plataforma com IA que resolve até 90% dos chamados antes de virarem ticket, com gestão de ativos, SLA e suporte em português.",
+  alternates: { canonical: "/freshdesk" },
   openGraph: {
-    title: "Alternativa ao GLPI: ITSM com IA — SysAid Brasil",
+    title: "Alternativa ao Freshdesk: ITSM com IA — SysAid Brasil",
     description:
-      "Do GLPI a uma plataforma ITSM com IA nativa, gestão de ativos e suporte em português. +400 empresas no Brasil.",
+      "Do help desk de atendimento a uma plataforma ITSM completa com IA nativa, gestão de ativos e suporte em português. Nota 9.4 na G2.",
     locale: "pt_BR",
     type: "website",
   },
@@ -24,48 +24,48 @@ const CLIENTES = [
 
 const TRAVAS = [
   {
-    t: "A TI mantém a ferramenta, não o serviço",
-    d: "Servidor, banco, atualização de versão e compatibilidade de plugin viram tarefa da própria equipe. É tempo de TI gasto na ferramenta em vez de no negócio.",
+    t: "Ferramenta de atendimento na função de ITSM",
+    d: "O Freshdesk nasceu para atender clientes. Chamado de TI vira ticket de suporte genérico: sem gestão de mudanças, problemas ou CMDB relacionando o incidente ao ativo.",
   },
   {
-    t: "Registra o chamado, mas não resolve",
-    d: "O fluxo continua manual do começo ao fim. Cada reset de senha, cada acesso e cada dúvida repetida ocupa um analista.",
+    t: "O preço cresce junto com o time",
+    d: "Cobrança por agente, por mês. Cada analista novo, cada plantonista e cada estagiário de TI entra na fatura, e os recursos que importam ficam nos planos de cima.",
   },
   {
-    t: "Personalização depende de plugin",
-    d: "Automação, relatório e integração saem via plugins da comunidade e customizações próprias, que precisam ser revalidados a cada upgrade.",
+    t: "IA vendida à parte",
+    d: "A IA da suíte funciona por pacotes de créditos e add-ons. O custo de automatizar de verdade aparece depois da assinatura, não na proposta.",
   },
   {
-    t: "Suporte é da comunidade",
-    d: "Quando algo para às 9h de uma segunda, o caminho é fórum, documentação e conhecimento interno. Sem SLA de quem fornece a ferramenta.",
+    t: "Ativos exigem outro produto",
+    d: "Inventário, ciclo de vida e licenças de TI vivem no Freshservice, um produto separado da mesma suíte. Duas ferramentas, dois contratos, duas curvas de adoção.",
   },
   {
-    t: "Visão de ativos sem o resto do ciclo",
-    d: "O inventário resolve o básico do hardware, mas contratos, licenças, garantias e CMDB relacional exigem mais camadas.",
+    t: "Suporte global, realidade local",
+    d: "Fuso, idioma e fila internacional. Quando a operação para numa segunda de manhã, a distância do suporte vira parte do problema.",
   },
   {
-    t: "Escala expõe o limite",
-    d: "O que funcionava com 200 chamados por mês começa a doer com 2.000: performance, governança, auditoria e relatório executivo.",
+    t: "Relatório de TI limitado",
+    d: "Métricas pensadas para CSAT e atendimento ao cliente. SLA de TI, auditoria e visão executiva da operação exigem customização ou exportação manual.",
   },
 ];
 
 const COMPARE = [
-  { crit: "Custo de licença", glpi: "Gratuito (GPL)", sysaid: "Licença paga, com implementação e suporte inclusos" },
-  { crit: "Custo total de operação", glpi: "Servidor, atualização e horas da própria equipe", sysaid: "SaaS gerenciado, sem infraestrutura sua" },
-  { crit: "IA que resolve o chamado", glpi: "Não nativo", sysaid: "SysAid Copilot: até 90% resolvidos antes de virar ticket" },
-  { crit: "Automação de fluxos", glpi: "Via regras e plugins da comunidade", sysaid: "Workflows nativos, ponta a ponta" },
-  { crit: "Gestão de ativos", glpi: "Inventário nativo via agente", sysaid: "ITAM completo: ciclo de vida, contratos, licenças e CMDB" },
-  { crit: "SLA e governança", glpi: "SLA nativo, relatórios dependem de customização", sysaid: "Matriz de prioridade, SLA e dashboards prontos" },
-  { crit: "Integrações", glpi: "Plugins conforme a comunidade mantém", sysaid: "1.000+ integrações nativas, do Teams ao Azure" },
-  { crit: "Suporte", glpi: "Comunidade, parceiro ou contrato à parte", sysaid: "Suporte local em português, com SLA contratual" },
-  { crit: "Atualização de versão", glpi: "Projeto interno a cada ciclo", sysaid: "Contínua, sem parada da sua equipe" },
+  { crit: "Nota geral (G2)", them: "8.7", sysaid: "9.4" },
+  { crit: "Foco do produto", them: "Atendimento ao cliente (CX)", sysaid: "ITSM: gestão de serviços de TI" },
+  { crit: "IA que resolve o chamado", them: "Freddy AI, com créditos e add-ons", sysaid: "SysAid Copilot incluído: até 90% resolvidos antes de virar ticket" },
+  { crit: "Gestão de ativos", them: "Em outro produto (Freshservice)", sysaid: "ITAM nativo: ciclo de vida, contratos, licenças e CMDB" },
+  { crit: "Atende aos requisitos (G2)", them: "85", sysaid: "94" },
+  { crit: "Facilidade de uso (G2)", them: "88", sysaid: "94" },
+  { crit: "Qualidade do suporte (G2)", them: "89", sysaid: "90, com atendimento em português" },
+  { crit: "ROI: retorno em meses (G2)", them: "12 meses", sysaid: "11 meses" },
+  { crit: "Workflows de TI", them: "Automação voltada a atendimento", sysaid: "Automação de TI ponta a ponta, com 1.000+ integrações" },
 ];
 
 const MIGRACAO = [
   {
     n: "01",
     t: "Diagnóstico da sua operação",
-    d: "Mapeamos volume de chamados, categorias, filas, SLAs e o inventário que você já tem no GLPI hoje.",
+    d: "Mapeamos volume de chamados, categorias, filas, SLAs e os ativos que a sua TI atende hoje pelo Freshdesk.",
   },
   {
     n: "02",
@@ -81,20 +81,20 @@ const MIGRACAO = [
 
 const FAQ = [
   {
-    q: "O GLPI é gratuito. Por que trocar por uma solução paga?",
-    a: "A licença é gratuita, a operação não. Somando servidor, atualizações de versão, compatibilidade de plugins e as horas da sua equipe mantendo a ferramenta, existe um custo real que não aparece na fatura. A conta que importa é o custo total: quanto a sua TI gasta para manter a ferramenta de pé, e quanto ela deixa de resolver enquanto faz isso.",
+    q: "Já uso o Freshdesk para a TI. Por que trocar?",
+    a: "Porque help desk de atendimento e ITSM resolvem problemas diferentes. O Freshdesk organiza conversas com clientes; uma plataforma ITSM gerencia o serviço de TI inteiro: incidentes ligados a ativos, mudanças com aprovação, problemas com causa raiz e SLA de operação. Se a sua TI usa uma ferramenta de CX, ela está preenchendo essa lacuna manualmente.",
   },
   {
-    q: "Dá para migrar o histórico de chamados e o inventário?",
+    q: "E comparado ao Freshservice, que é o ITSM da mesma suíte?",
+    a: "O Freshservice cobre ITSM, mas mantém o modelo da suíte: preço por agente, IA por créditos e recursos-chave nos planos superiores. No SysAid, Copilot, gestão de ativos e workflows fazem parte da plataforma, com implementação e suporte local em português inclusos. Nas avaliações da G2, o SysAid tem nota geral 9.4.",
+  },
+  {
+    q: "Dá para migrar o histórico de tickets?",
     a: "Sim. Chamados, categorias, usuários e ativos são importados na migração. O diagnóstico inicial define exatamente o que vem, em que formato e em qual ordem, para o go live não perder rastreabilidade.",
   },
   {
     q: "Qual é a diferença prática da IA do SysAid?",
-    a: "O SysAid Copilot não se limita a sugerir texto. Ele entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho, além de sugerir respostas ao agente no que chega ao time. O efeito é o ticket que não precisa existir deixar de existir.",
-  },
-  {
-    q: "Nossa TI já customizou muito o GLPI. Isso se perde?",
-    a: "As regras de negócio não se perdem, elas são remodeladas em recursos nativos. Boa parte do que hoje exige plugin ou script customizado já existe pronto na plataforma, o que reduz o que a sua equipe precisa manter depois.",
+    a: "O SysAid Copilot não se limita a sugerir texto. Ele entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho, além de sugerir respostas ao agente no que chega ao time. E está incluído na plataforma, sem pacote de créditos.",
   },
   {
     q: "Quanto tempo leva a implantação?",
@@ -112,7 +112,7 @@ const faqSchema = {
   })),
 };
 
-export default function GlpiPage() {
+export default function FreshdeskPage() {
   return (
     <>
       <script
@@ -142,8 +142,8 @@ export default function GlpiPage() {
             <div className="hero__ticket hero__ticket--1">
               <span className="hero__dot hero__dot--red" />
               <div>
-                <strong>Upgrade de versão parado há 2 meses</strong>
-                <span>Plugin incompatível · Infraestrutura</span>
+                <strong>Fatura subiu: 4 agentes novos no plano</strong>
+                <span>Preço por agente · Contrato</span>
               </div>
             </div>
             <div className="hero__ticket hero__ticket--2">
@@ -156,8 +156,8 @@ export default function GlpiPage() {
             <div className="hero__ticket hero__ticket--3">
               <span className="hero__dot hero__dot--amber" />
               <div>
-                <strong>Relatório de SLA para a diretoria</strong>
-                <span>Exportado na mão · Governança</span>
+                <strong>Inventário de ativos em outra ferramenta</strong>
+                <span>Sem CMDB · Governança</span>
               </div>
             </div>
             <div className="hero__ticket hero__ticket--4">
@@ -171,10 +171,10 @@ export default function GlpiPage() {
           </div>
 
           <div className="container hero__inner">
-            <p className="eyebrow">Para quem já roda GLPI</p>
+            <p className="eyebrow">Para quem usa Freshdesk ou Freshservice</p>
             <h1>
-              Seu GLPI registra o chamado. E se ele{" "}
-              <span className="hl">resolvesse sozinho</span>?
+              Freshdesk atende clientes. Sua TI precisa de{" "}
+              <span className="hl">ITSM que resolve</span>.
             </h1>
             <p className="hero__sub">
               A plataforma ITSM com IA nativa que resolve até 90% dos chamados
@@ -185,8 +185,8 @@ export default function GlpiPage() {
               <LeadForm variant="hero" />
             </div>
             <p className="hero__trust">
-              Migração do histórico incluída · Resolução até 12x mais rápida ·
-              Reconhecida por G2, Gartner e TrustRadius
+              Nota 9.4 na G2 · Migração do histórico incluída · Reconhecida por
+              G2, Gartner e TrustRadius
             </p>
           </div>
         </section>
@@ -217,11 +217,11 @@ export default function GlpiPage() {
           <div className="container">
             <div className="section-head">
               <p className="eyebrow">O ponto de virada</p>
-              <h2>O GLPI resolveu o começo. O que trava daqui pra frente</h2>
+              <h2>O Freshdesk organizou o atendimento. O que trava na TI</h2>
               <p className="section-head__sub">
-                Ele organizou o caos inicial de chamados, e isso tem mérito. A
-                pergunta é se a sua TI ainda deveria estar mantendo a
-                ferramenta em vez de evoluir o serviço.
+                Para conversar com cliente, ele cumpre o papel. A pergunta é se
+                a operação de TI da sua empresa deveria rodar numa ferramenta
+                desenhada para outro problema.
               </p>
             </div>
             <div className="grid-3">
@@ -248,8 +248,8 @@ export default function GlpiPage() {
               </h2>
               <p className="ia__lead">
                 A inteligência artificial nativa da SysAid entende o chamado,
-                responde o usuário e executa a solução sozinha. O ticket que não
-                precisa existir, não existe.
+                responde o usuário e executa a solução sozinha. Incluída na
+                plataforma, sem pacote de créditos.
               </p>
               <ul className="ia__list">
                 <li>Até 90% dos chamados resolvidos antes de virarem ticket</li>
@@ -273,30 +273,31 @@ export default function GlpiPage() {
           <div className="container">
             <div className="section-head">
               <p className="eyebrow">Lado a lado</p>
-              <h2>GLPI e SysAid, critério por critério</h2>
+              <h2>Freshdesk e SysAid, critério por critério</h2>
               <p className="section-head__sub">
-                Comparativo honesto: onde o GLPI entrega e onde uma plataforma
-                de ITSM corporativa muda o patamar da operação.
+                Comparativo com base nas avaliações públicas de usuários na
+                G2.com, a maior plataforma de análise de software de negócios.
               </p>
             </div>
-            <div className="ctable" role="table" aria-label="Comparativo GLPI e SysAid">
+            <div className="ctable" role="table" aria-label="Comparativo Freshdesk e SysAid">
               <div className="ctable__head" role="row">
                 <span role="columnheader">Critério</span>
-                <span role="columnheader">GLPI</span>
+                <span role="columnheader">Freshdesk</span>
                 <span role="columnheader" className="ctable__us">SysAid</span>
               </div>
               {COMPARE.map((row) => (
                 <div className="ctable__row" role="row" key={row.crit}>
                   <span className="ctable__crit" role="cell">{row.crit}</span>
-                  <span className="ctable__them" role="cell">{row.glpi}</span>
+                  <span className="ctable__them" role="cell">{row.them}</span>
                   <span className="ctable__mine" role="cell">{row.sysaid}</span>
                 </div>
               ))}
             </div>
             <p className="ctable__note">
-              GLPI é uma marca de seus respectivos titulares. Comparativo
-              elaborado pela SysAid Brasil com base na documentação pública das
-              soluções e em implantações reais.
+              Freshdesk, Freshservice e Freshworks são marcas de seus
+              respectivos titulares. Notas conforme avaliações de usuários
+              publicadas na G2.com; comparativo elaborado pela SysAid Brasil
+              com base em dados públicos das soluções.
             </p>
           </div>
         </section>
@@ -306,7 +307,7 @@ export default function GlpiPage() {
           <div className="container">
             <div className="section-head">
               <p className="eyebrow">Como é a troca</p>
-              <h2>Sair do GLPI sem perder o histórico da sua TI</h2>
+              <h2>Sair do Freshdesk sem perder o histórico da sua TI</h2>
             </div>
             <div className="grid-3">
               {MIGRACAO.map((m) => (
@@ -333,8 +334,8 @@ export default function GlpiPage() {
                 <div className="stat__l">dos chamados resolvidos com IA</div>
               </div>
               <div className="stat">
-                <div className="stat__n">12x</div>
-                <div className="stat__l">mais rápido na resolução</div>
+                <div className="stat__n">9.4</div>
+                <div className="stat__l">nota geral na G2</div>
               </div>
               <div className="stat">
                 <div className="stat__n">1.000+</div>
@@ -382,9 +383,9 @@ export default function GlpiPage() {
             </p>
             <h2>Veja o SysAid resolver os chamados que hoje sobram pro time</h2>
             <p className="form-final__sub">
-              Teste grátis, sem compromisso. Mostramos a
-              plataforma rodando no cenário da sua TI, inclusive como ficaria a
-              migração da sua base atual.
+              Teste grátis, sem compromisso. Mostramos a plataforma rodando no
+              cenário da sua TI, inclusive como ficaria a migração da sua base
+              atual.
             </p>
             <div className="form-final__box">
               <LeadForm variant="final" submitLabel="Testar grátis" />
