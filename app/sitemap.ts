@@ -14,5 +14,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/zendesk`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE}/jira`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE}/movidesk`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE}/topdesk`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
   ];
 }
