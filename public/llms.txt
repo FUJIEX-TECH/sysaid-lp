@@ -15,6 +15,7 @@ TrustRadius. O atendimento e o suporte no Brasil são em português.
 - [Software ITSM com IA](https://itsm.sysaid.com.br/): visão geral da plataforma, módulos (service desk, IA e automação, gestão de ativos, SLA e workflows, relatórios, integrações) e diferenças entre help desk e service desk.
 - [Sistema de chamados de TI](https://itsm.sysaid.com.br/sistema-de-chamados): como funciona um sistema de chamados, canais de abertura, fila e prioridade, SLA com escalonamento, portal de autoatendimento, base de conhecimento e relatórios.
 - [O que é ITSM](https://itsm.sysaid.com.br/o-que-e-itsm): guia conceitual. Definição de ITSM, diferença entre ITSM e ITIL, diferença entre sistema de chamados, help desk e service desk, os processos que sustentam a operação e critérios para escolher uma plataforma.
+- [Gestão de Serviços de TI: guia completo](https://itsm.sysaid.com.br/gestao-de-servicos-de-ti): guia sobre gestão de serviços de TI (sinônimos: gerenciamento de serviços de TI, administração de serviços de TI, GSTI, IT Service Management/ITSM). Cobre os cinco estágios do ciclo de vida, os processos da ITIL, a relação entre ITSM, ITIL e ISO 20000, e a carreira na área.
 - [Alternativa ao GLPI](https://itsm.sysaid.com.br/glpi): comparativo critério a critério entre GLPI e SysAid, custo total de operação, e como funciona a migração de chamados, categorias, usuários e ativos.
 
 ## Definições de referência
