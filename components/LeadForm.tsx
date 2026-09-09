@@ -1,6 +1,11 @@
 "use client";
 
 import { useRef, useState } from "react";
+import {
+  isCorporateEmail,
+  isFreeEmail,
+  CORPORATE_EMAIL_ERROR,
+} from "@/lib/email-domains";
 
 type Props = {
   variant?: "hero" | "final";
@@ -16,19 +21,12 @@ const UTM_KEYS = [
   "gclid",
 ] as const;
 
-// domínios de webmail/gratuitos: nao da pra inferir empresa a partir deles
-const FREE_EMAIL_DOMAINS = new Set([
-  "gmail.com", "hotmail.com", "outlook.com", "live.com", "yahoo.com", "yahoo.com.br",
-  "icloud.com", "uol.com.br", "bol.com.br", "terra.com.br", "globo.com", "ig.com.br",
-  "msn.com", "aol.com", "protonmail.com", "me.com",
-]);
-
 // sugestao heuristica de nome de empresa a partir do dominio do e-mail
 // corporativo. Nao é enriquecimento real (sem API paga) - so um chute
 // editavel pra poupar digitação de quem tem e-mail corporativo.
 function suggestCompanyFromEmail(email: string): string {
   const domain = email.split("@")[1]?.toLowerCase().trim();
-  if (!domain || FREE_EMAIL_DOMAINS.has(domain)) return "";
+  if (!domain || isFreeEmail(email)) return "";
   const base = domain.split(".")[0];
   if (!base) return "";
   return base
@@ -140,8 +138,14 @@ export default function LeadForm({ variant = "hero", submitLabel }: Props) {
     // passo 1 -> 2: clicar em "Agendar" so revela nome+telefone (nao finaliza nada)
     if (step === 1) {
       const email = String(fd.get("email") || "").trim();
-      if (!email.includes("@")) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         setError("Informe um e-mail válido.");
+        return;
+      }
+      // trava de qualificação: só e-mail corporativo avança. O parcial já foi
+      // gravado no blur de propósito, pra medir quanto webmail bate na porta.
+      if (!isCorporateEmail(email)) {
+        setError(CORPORATE_EMAIL_ERROR);
         return;
       }
       await saveEmailPartial(email);
