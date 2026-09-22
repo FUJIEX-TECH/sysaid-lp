@@ -174,7 +174,7 @@ export default function MovideskPage() {
           <div className="container hero__inner">
             <p className="eyebrow">Para quem usa Movidesk</p>
             <h1>
-              Sua operação cresceu. Chegou a hora do{" "}
+              Sua TI cresceu além do Movidesk. Chegou a hora do{" "}
               <span className="hl">ITSM de verdade</span>.
             </h1>
             <p className="hero__sub">
