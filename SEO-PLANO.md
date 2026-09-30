@@ -137,17 +137,18 @@ Saúde geral do site: **6/10** (técnico 8/10 · conteúdo 6/10 · autoridade 1/
 | `/o-que-e-itsm` | **65** | sem Article/Breadcrumb schema |
 | `/sistema-de-chamados` | **60** | idem |
 | 6 comparativas (glpi, freshdesk, zendesk, jira, movidesk, topdesk) | **65** | 0 linking interno entre elas, H1 muito parecidos (canibalização) |
-| `/` (home) | **55** | sem Organization schema, sem links internos pra cluster |
+| `/` (home) | **55** | ~~sem Organization schema~~ (resolvido em 30/09), sem links internos pra cluster |
 
 ## Backlog novo
 
 ### P0 (esta semana)
-- [ ] **C1** — Adicionar `Organization` schema no `app/layout.tsx` (name, url, logo, sameAs → linkedin/G2)
+- [x] **C1** — `Organization` schema no `app/layout.tsx` ✅ **30/09/2026** (commit `51fcf77`, branch `feat/rota-service-desk`, **sem deploy**). Declarado uma vez, com `@id` estável `https://itsm.sysaid.com.br/#organization`, então vale em todas as páginas sem duplicar entidade. `name`, `alternateName`, `url`, `logo` (1682×1682), `description`, `areaServed` BR, `knowsLanguage`. `sameAs` só com URL verificada: `sysaid.com`, `sysaid.com.br`, `linkedin.com/company/sysaid-technologies`. **G2 e Capterra ficaram fora**: respondem 403 a bot e não deu pra confirmar o slug — `sameAs` errado é pior que curto. Os `Article` de `/service-desk` e `/gestao-de-servicos-de-ti` agora referenciam o `@id` no `author`/`publisher`.
 - [ ] **C2** — `Article` + `BreadcrumbList` schema em `/o-que-e-itsm` e `/sistema-de-chamados`
 - [ ] **C3** — `dateModified` automático em todos os schemas FAQPage/Article
+- [ ] **C4 (pendência aberta do C1)** — confirmar as URLs de G2 e Capterra da SysAid pra entrar no `sameAs`. Ambas respondem **403 a bot**; precisa de navegador ou de o Kaique confirmar o link oficial.
 - [ ] **C4** — Adicionar links da raiz WordPress `sysaid.com.br` → subdomínio (rodapé + menu + 1 post âncora)
 - [ ] **C5** — Submeter sitemap no GSC + pedir indexação das 10 URLs (skill `gsc-fujiex`)
-- [ ] **llms.txt** — atualizar `public/llms.txt` com as 5 rotas faltantes (só lista 5 das 10)
+- [x] **llms.txt** — completo ✅ **30/09/2026** (mesmo commit). Lista as **11 rotas**, separadas em "Guias e conteúdo de referência" e "Comparativos e alternativas", com descrição tirada do conteúdo real de cada página, não do metadata. O `sitemap.ts` já estava completo com as 11.
 
 ### P1 (próximas 2 semanas)
 - [ ] Cadastrar no Bing Webmaster Tools + IndexNow
