@@ -172,8 +172,9 @@ const articleSchema = {
   description:
     "Definição de service desk, o que a função faz na prática, a diferença para help desk, os processos da ITIL envolvidos e os critérios para escolher a ferramenta.",
   inLanguage: "pt-BR",
-  author: { "@type": "Organization", name: "SysAid Brasil", url: "https://www.sysaid.com.br/" },
-  publisher: { "@type": "Organization", name: "SysAid Brasil" },
+  // Aponta pro Organization declarado no layout (@id) em vez de repetir a entidade.
+  author: { "@type": "Organization", "@id": "https://itsm.sysaid.com.br/#organization", name: "SysAid Brasil" },
+  publisher: { "@type": "Organization", "@id": "https://itsm.sysaid.com.br/#organization", name: "SysAid Brasil" },
   mainEntityOfPage: "https://itsm.sysaid.com.br/service-desk",
 };
 

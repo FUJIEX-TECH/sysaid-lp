@@ -163,8 +163,9 @@ const articleSchema = {
   description:
     "Conceito, estágios do ciclo de vida, processos da ITIL, carreira e critérios para escolher uma ferramenta de gestão de serviços de TI.",
   inLanguage: "pt-BR",
-  author: { "@type": "Organization", name: "SysAid Brasil", url: "https://www.sysaid.com.br/" },
-  publisher: { "@type": "Organization", name: "SysAid Brasil" },
+  // Aponta pro Organization declarado no layout (@id) em vez de repetir a entidade.
+  author: { "@type": "Organization", "@id": "https://itsm.sysaid.com.br/#organization", name: "SysAid Brasil" },
+  publisher: { "@type": "Organization", "@id": "https://itsm.sysaid.com.br/#organization", name: "SysAid Brasil" },
   mainEntityOfPage: "https://itsm.sysaid.com.br/gestao-de-servicos-de-ti",
 };
 
