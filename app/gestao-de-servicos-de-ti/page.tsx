@@ -279,9 +279,11 @@ export default function GestaoDeServicosDeTiPage() {
               indicador. É essa mudança, de reativo para operado como serviço,
               que o termo descreve. Quem quiser começar pelo vocabulário
               vizinho pode ler o nosso guia{" "}
-              <a href="/o-que-e-itsm">o que é ITSM</a> e a página sobre{" "}
+              <a href="/o-que-e-itsm">o que é ITSM</a>, a página sobre{" "}
               <a href="/sistema-de-chamados">sistema de chamados</a>, o alicerce
-              de qualquer operação.
+              de qualquer operação, e o guia sobre{" "}
+              <a href="/service-desk">service desk</a>, a função que faz o
+              contato com o usuário.
             </p>
           </div>
         </section>
