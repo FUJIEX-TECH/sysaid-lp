@@ -152,7 +152,7 @@ Saúde geral do site: **6/10** (técnico 8/10 · conteúdo 6/10 · autoridade 1/
 
 ### P1 (próximas 2 semanas)
 - [ ] Cadastrar no Bing Webmaster Tools + IndexNow
-- [ ] Internal linking cruzado entre as 6 comparativas (cluster semântico)
+- [x] Internal linking cruzado entre as 6 comparativas (cluster semântico) ✅ **01/10/2026** (commit `7af39be`, branch `feat/seo-links-cluster` em cima da `feat/rota-service-desk`, **sem deploy**). Componente `components/SiteFooter.tsx` nas 11 páginas de conteúdo (6 comparativas, 4 guias e home): coluna "Compare o SysAid" + coluna "Guias de ITSM", omitindo a própria página. Fica **depois do formulário final** de propósito, pra não vazar conversão das LPs de Ads. Medir 30 dias após o deploy: queda de saída pelo rodapé x formulário (GA4) e páginas comparativas descobertas pelo Google.
 - [ ] Reescrever `alt` descritivo das imagens (`/clientes/*.png`, `/badges/*.svg`)
 - [ ] Submeter pra B2B Stack, Capterra/GetApp BR, G2 (perfil de produto)
 - [ ] Aumentar densidade de dado em `/gestao-de-servicos-de-ti` (Gartner, HDI)
