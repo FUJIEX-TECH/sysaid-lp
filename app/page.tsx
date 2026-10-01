@@ -1,5 +1,6 @@
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
+import SiteFooter from "@/components/SiteFooter";
 
 const CLIENTES = [
   "vale", "unimed", "petrobras", "cocacola", "siemens",
@@ -357,12 +358,7 @@ export default function Home() {
       </main>
 
       {/* FOOTER */}
-      <footer className="site-footer">
-        <div className="container site-footer__inner">
-          <Image src="/logos/logo-white.svg" alt="SysAid" width={116} height={30} />
-          <p>SysAid Brasil · Software ITSM com Inteligência Artificial</p>
-        </div>
-      </footer>
+      <SiteFooter atual="/" />
     </>
   );
 }

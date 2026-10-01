@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
+import SiteFooter from "@/components/SiteFooter";
 
 export const metadata: Metadata = {
   title: "Alternativa ao GLPI | ITSM com IA que resolve o chamado — SysAid Brasil",
@@ -393,12 +394,7 @@ export default function GlpiPage() {
         </section>
       </main>
 
-      <footer className="site-footer">
-        <div className="container site-footer__inner">
-          <Image src="/logos/logo-white.svg" alt="SysAid" width={116} height={30} />
-          <p>SysAid Brasil · Software ITSM com Inteligência Artificial</p>
-        </div>
-      </footer>
+      <SiteFooter atual="/glpi" />
     </>
   );
 }
