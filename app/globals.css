@@ -589,3 +589,10 @@ img, svg { max-width: 100%; height: auto; display: block; }
   .chatw { right: 12px; bottom: 12px; }
   .chatw__fab { width: 54px; height: 54px; }
 }
+
+/* RODAPÉ: links do cluster (comparativas + guias) */
+.site-footer__nav { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; padding-bottom: 24px; margin-bottom: 24px; border-bottom: 1px solid rgba(159, 187, 176, 0.2); }
+.site-footer__title { color: #fff; font-weight: 600; margin: 0 0 10px; font-size: 0.85rem; letter-spacing: 0.04em; text-transform: uppercase; }
+.site-footer__col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.site-footer__col a { color: #9fbbb0; text-decoration: none; font-size: 0.9rem; }
+.site-footer__col a:hover, .site-footer__col a:focus-visible { color: #fff; text-decoration: underline; }

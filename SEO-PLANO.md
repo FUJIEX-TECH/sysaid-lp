@@ -151,8 +151,10 @@ Saúde geral do site: **6/10** (técnico 8/10 · conteúdo 6/10 · autoridade 1/
 - [x] **llms.txt** — completo ✅ **30/09/2026** (mesmo commit). Lista as **11 rotas**, separadas em "Guias e conteúdo de referência" e "Comparativos e alternativas", com descrição tirada do conteúdo real de cada página, não do metadata. O `sitemap.ts` já estava completo com as 11.
 
 ### P1 (próximas 2 semanas)
-- [ ] Cadastrar no Bing Webmaster Tools + IndexNow
-- [ ] Internal linking cruzado entre as 6 comparativas (cluster semântico)
+- [ ] Cadastrar no Bing Webmaster Tools (precisa do login do Fernando; dá pra importar do Search Console)
+- [x] IndexNow pronto em branch (01/10/2026 20h, `feat/seo-indexnow`): chave `public/df788ab4e8e335bc73c8ac2a84941392.txt` + `npm run indexnow` (lê o sitemap de produção e pinga `api.indexnow.org`; `--dry-run` e rotas avulsas). **Rodar logo depois do deploy** e a cada página nova. Recusa enviar se a chave não estiver no ar.
+- [ ] `sitemap.ts` usa `lastModified: now` em todas as URLs: cada build diz que tudo mudou. Bing/IndexNow desconfiam de lastmod que sempre muda; trocar por data real por página (junto com o C3 `dateModified`).
+- [x] Internal linking cruzado entre as 6 comparativas (cluster semântico) ✅ **01/10/2026** (commit `7af39be`, branch `feat/seo-links-cluster` em cima da `feat/rota-service-desk`, **sem deploy**). Componente `components/SiteFooter.tsx` nas 11 páginas de conteúdo (6 comparativas, 4 guias e home): coluna "Compare o SysAid" + coluna "Guias de ITSM", omitindo a própria página. Fica **depois do formulário final** de propósito, pra não vazar conversão das LPs de Ads. Medir 30 dias após o deploy: queda de saída pelo rodapé x formulário (GA4) e páginas comparativas descobertas pelo Google.
 - [ ] Reescrever `alt` descritivo das imagens (`/clientes/*.png`, `/badges/*.svg`)
 - [ ] Submeter pra B2B Stack, Capterra/GetApp BR, G2 (perfil de produto)
 - [ ] Aumentar densidade de dado em `/gestao-de-servicos-de-ti` (Gartner, HDI)
