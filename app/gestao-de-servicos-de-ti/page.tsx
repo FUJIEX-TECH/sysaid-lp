@@ -284,7 +284,8 @@ export default function GestaoDeServicosDeTiPage() {
               <a href="/sistema-de-chamados">sistema de chamados</a>, o alicerce
               de qualquer operação, e o guia sobre{" "}
               <a href="/service-desk">service desk</a>, a função que faz o
-              contato com o usuário.
+              contato com o usuário. Quando esse modelo é estendido às outras
+              áreas da empresa, o nome é <a href="/esm">ESM</a>.
             </p>
           </div>
         </section>

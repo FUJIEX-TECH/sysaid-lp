@@ -11,6 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/o-que-e-itsm`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE}/service-desk`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE}/gestao-de-servicos-de-ti`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE}/esm`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE}/glpi`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE}/freshdesk`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE}/zendesk`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
