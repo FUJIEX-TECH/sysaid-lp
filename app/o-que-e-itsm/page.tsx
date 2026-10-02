@@ -182,7 +182,10 @@ export default function OQueEItsmPage() {
                 mas descrevem camadas diferentes. Entender a diferença evita
                 comprar a ferramenta errada para o problema que se tem. Quem
                 quiser a camada do meio em detalhe pode ler o guia sobre{" "}
-                <a href="/service-desk">service desk</a>.
+                <a href="/service-desk">service desk</a>. E quando o mesmo
+                modelo sai da TI e vai para RH, Facilities e Financeiro, o
+                nome muda para <a href="/esm">ESM</a>, a gestão de serviços
+                corporativos.
               </p>
             </div>
             <div className="grid-3">

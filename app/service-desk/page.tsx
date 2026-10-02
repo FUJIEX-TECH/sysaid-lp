@@ -266,6 +266,9 @@ export default function ServiceDeskPage() {
               <a href="/sistema-de-chamados">sistema de chamados</a>, e a
               disciplina maior que a organiza é a{" "}
               <a href="/gestao-de-servicos-de-ti">gestão de serviços de TI</a>.
+              Quando o mesmo modelo de atendimento é levado além da TI, para
+              RH, Facilities e Financeiro, ele passa a se chamar{" "}
+              <a href="/esm">ESM</a>.
             </p>
           </div>
         </section>
