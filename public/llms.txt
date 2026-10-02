@@ -12,11 +12,25 @@ TrustRadius. O atendimento e o suporte no Brasil são em português.
 
 ## Páginas
 
+### Guias e conteúdo de referência
+
 - [Software ITSM com IA](https://itsm.sysaid.com.br/): visão geral da plataforma, módulos (service desk, IA e automação, gestão de ativos, SLA e workflows, relatórios, integrações) e diferenças entre help desk e service desk.
 - [Sistema de chamados de TI](https://itsm.sysaid.com.br/sistema-de-chamados): como funciona um sistema de chamados, canais de abertura, fila e prioridade, SLA com escalonamento, portal de autoatendimento, base de conhecimento e relatórios.
 - [O que é ITSM](https://itsm.sysaid.com.br/o-que-e-itsm): guia conceitual. Definição de ITSM, diferença entre ITSM e ITIL, diferença entre sistema de chamados, help desk e service desk, os processos que sustentam a operação e critérios para escolher uma plataforma.
+- [Service Desk: o que é, o que faz e como escolher](https://itsm.sysaid.com.br/service-desk): guia sobre a função de service desk. Definição, as seis responsabilidades na prática (receber, classificar, resolver, cumprir SLA, comunicar, gerar indicador), a diferença entre help desk e service desk, os processos da ITIL envolvidos (incidente, requisição, problema, mudança, ativos, nível de serviço) e os critérios para escolher a ferramenta.
 - [Gestão de Serviços de TI: guia completo](https://itsm.sysaid.com.br/gestao-de-servicos-de-ti): guia sobre gestão de serviços de TI (sinônimos: gerenciamento de serviços de TI, administração de serviços de TI, GSTI, IT Service Management/ITSM). Cobre os cinco estágios do ciclo de vida, os processos da ITIL, a relação entre ITSM, ITIL e ISO 20000, e a carreira na área.
-- [Alternativa ao GLPI](https://itsm.sysaid.com.br/glpi): comparativo critério a critério entre GLPI e SysAid, custo total de operação, e como funciona a migração de chamados, categorias, usuários e ativos.
+
+### Comparativos e alternativas
+
+Todas seguem a mesma estrutura: onde a ferramenta atual trava, comparação critério por critério
+com o SysAid, como migrar sem perder histórico, e as perguntas que a equipe de TI faz antes de trocar.
+
+- [Alternativa ao GLPI](https://itsm.sysaid.com.br/glpi): GLPI é open source e sem custo de licença, mas o custo total aparece em infraestrutura, plugins e horas de time. Comparativo critério a critério, custo total de operação e migração de chamados, categorias, usuários e ativos.
+- [Alternativa ao Movidesk](https://itsm.sysaid.com.br/movidesk): para operações que cresceram além do Movidesk. O que trava quando o volume aumenta, comparativo com o SysAid, e migração preservando o histórico da TI.
+- [Alternativa ao TopDesk](https://itsm.sysaid.com.br/topdesk): TopDesk é forte em CMDB e gestão de ativos, mas a resolução do chamado continua dependendo do analista. Comparativo e migração preservando o CMDB já modelado.
+- [Alternativa ao Zendesk](https://itsm.sysaid.com.br/zendesk): Zendesk é feito para atendimento ao cliente, não para ITSM. O que falta para a TI (gestão de ativos, processos da ITIL, SLA interno), comparativo e migração.
+- [Alternativa ao Jira Service Management](https://itsm.sysaid.com.br/jira): o SysAid entrega ITSM completo sem a complexidade e os add-ons pagos do Jira, com gestão de ativos inclusa. Comparativo critério a critério e migração.
+- [Alternativa ao Freshdesk](https://itsm.sysaid.com.br/freshdesk): Freshdesk atende cliente externo; a TI precisa de ITSM. O que falta para a operação interna, comparativo e migração.
 
 ## Definições de referência
 

@@ -163,8 +163,9 @@ const articleSchema = {
   description:
     "Conceito, estágios do ciclo de vida, processos da ITIL, carreira e critérios para escolher uma ferramenta de gestão de serviços de TI.",
   inLanguage: "pt-BR",
-  author: { "@type": "Organization", name: "SysAid Brasil", url: "https://www.sysaid.com.br/" },
-  publisher: { "@type": "Organization", name: "SysAid Brasil" },
+  // Aponta pro Organization declarado no layout (@id) em vez de repetir a entidade.
+  author: { "@type": "Organization", "@id": "https://itsm.sysaid.com.br/#organization", name: "SysAid Brasil" },
+  publisher: { "@type": "Organization", "@id": "https://itsm.sysaid.com.br/#organization", name: "SysAid Brasil" },
   mainEntityOfPage: "https://itsm.sysaid.com.br/gestao-de-servicos-de-ti",
 };
 
@@ -279,9 +280,11 @@ export default function GestaoDeServicosDeTiPage() {
               indicador. É essa mudança, de reativo para operado como serviço,
               que o termo descreve. Quem quiser começar pelo vocabulário
               vizinho pode ler o nosso guia{" "}
-              <a href="/o-que-e-itsm">o que é ITSM</a> e a página sobre{" "}
+              <a href="/o-que-e-itsm">o que é ITSM</a>, a página sobre{" "}
               <a href="/sistema-de-chamados">sistema de chamados</a>, o alicerce
-              de qualquer operação.
+              de qualquer operação, e o guia sobre{" "}
+              <a href="/service-desk">service desk</a>, a função que faz o
+              contato com o usuário.
             </p>
           </div>
         </section>

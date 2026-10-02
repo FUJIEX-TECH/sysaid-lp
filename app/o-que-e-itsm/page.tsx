@@ -180,7 +180,9 @@ export default function OQueEItsmPage() {
               <p className="section-head__sub">
                 Os quatro termos aparecem juntos e são tratados como sinônimos,
                 mas descrevem camadas diferentes. Entender a diferença evita
-                comprar a ferramenta errada para o problema que se tem.
+                comprar a ferramenta errada para o problema que se tem. Quem
+                quiser a camada do meio em detalhe pode ler o guia sobre{" "}
+                <a href="/service-desk">service desk</a>.
               </p>
             </div>
             <div className="grid-3">
