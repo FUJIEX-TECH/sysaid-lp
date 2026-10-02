@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Alternativa ao TopDesk: ITSM com IA — SysAid Brasil",
     description:
-      "Do CMDB tradicional a uma plataforma ITSM com IA nativa que resolve o chamado, não só registra. Nota 4,5/5 no G2, com 733 avaliações.",
+      "Do CMDB tradicional a uma plataforma ITSM com IA nativa que resolve o chamado, não só registra. Nota 4,5/5 no G2, com mais de 750 avaliações.",
     locale: "pt_BR",
     type: "website",
   },
@@ -51,7 +51,7 @@ const TRAVAS = [
 ];
 
 const COMPARE = [
-  { crit: "Nota geral (G2)", them: "4,1/5 (30 avaliações)", sysaid: "4,5/5 (733 avaliações)" },
+  { crit: "Nota geral (G2)", them: "4,1/5 (30 avaliações)", sysaid: "4,5/5 (750+ avaliações)" },
   { crit: "Foco do produto", them: "ITSM tradicional, forte em CMDB e Asset Management", sysaid: "ITSM com IA nativa (SysAid Copilot) integrada à plataforma" },
   { crit: "Atende aos requisitos (G2)", them: "85", sysaid: "89" },
   { crit: "Fácil de usar (G2)", them: "80", sysaid: "90" },
@@ -163,16 +163,16 @@ export default function TopDeskPage() {
               <span className="hl">resolve o chamado</span>.
             </h1>
             <p className="hero__sub">
-              Mantenha o CMDB e ganhe a IA que fecha o chamado: até 90%
-              resolvidos antes de virarem ticket, migração do seu CMDB incluída e
-              suporte local em português. Mais de 400 empresas no Brasil.
+              A plataforma ITSM com IA nativa que resolve até 90% dos chamados
+              antes de virarem ticket, com CMDB, gestão de ativos e suporte
+              local em português. Mais de 400 empresas no Brasil.
             </p>
             <div className="hero__form">
               <LeadForm variant="hero" />
             </div>
             <p className="hero__trust">
-              Nota 4,5/5 no G2 (733 avaliações) · Reconhecida por G2, Gartner e
-              TrustRadius
+              Nota 4,5/5 no G2 (750+ avaliações) · Migração do CMDB incluída ·
+              Reconhecida por G2, Gartner e TrustRadius
             </p>
           </div>
         </section>
@@ -322,7 +322,7 @@ export default function TopDeskPage() {
               </div>
               <div className="stat">
                 <div className="stat__n">4,5/5</div>
-                <div className="stat__l">nota geral no G2 (733 avaliações)</div>
+                <div className="stat__l">nota no G2 (750+ avaliações)</div>
               </div>
               <div className="stat">
                 <div className="stat__n">1.000+</div>

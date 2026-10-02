@@ -67,6 +67,7 @@ const organizationSchema = {
     "https://www.sysaid.com",
     "https://www.sysaid.com.br",
     "https://www.linkedin.com/company/sysaid-technologies/",
+    "https://www.g2.com/products/sysaid/reviews",
   ],
 };
 

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Alternativa ao Movidesk: ITSM com IA — SysAid Brasil",
     description:
-      "Do help desk de atendimento a uma plataforma ITSM completa com IA nativa. Nota 9.4 vs 6.7 na G2.",
+      "Do help desk de atendimento a uma plataforma ITSM completa com IA nativa. Nota 4,5/5 no G2, com mais de 750 avaliações.",
     locale: "pt_BR",
     type: "website",
   },
@@ -51,7 +51,6 @@ const TRAVAS = [
 ];
 
 const COMPARE = [
-  { crit: "Nota geral (G2)", them: "6.7", sysaid: "9.4" },
   { crit: "Foco do produto", them: "Atendimento ao cliente (PME)", sysaid: "ITSM: gestão de serviços de TI" },
   { crit: "Fácil de usar (G2)", them: "61", sysaid: "94" },
   { crit: "Atende aos requisitos (G2)", them: "62", sysaid: "94" },
@@ -84,7 +83,7 @@ const MIGRACAO = [
 const FAQ = [
   {
     q: "O Movidesk atende bem o nosso suporte. Por que trocar?",
-    a: "Se a operação é de atendimento ao cliente e o volume é estável, talvez não precise. A troca faz sentido quando a TI vira o usuário principal: aí entram gestão de mudanças, CMDB, vínculo de incidente com ativo, SLA de operação e auditoria, que são o território de uma plataforma ITSM. Nas avaliações públicas da G2, essa diferença aparece: 9.4 contra 6.7 na nota geral.",
+    a: "Se a operação é de atendimento ao cliente e o volume é estável, talvez não precise. A troca faz sentido quando a TI vira o usuário principal: aí entram gestão de mudanças, CMDB, vínculo de incidente com ativo, SLA de operação e auditoria, que são o território de uma plataforma ITSM. Nas avaliações públicas da G2, essa diferença aparece: 94 contra 61 em facilidade de uso e 90 contra 63 em gestão de mudanças.",
   },
   {
     q: "Dá para migrar o histórico de tickets?",
@@ -165,16 +164,16 @@ export default function MovideskPage() {
               <span className="hl">ITSM de verdade</span>.
             </h1>
             <p className="hero__sub">
-              Chamado de TI não é ticket de SAC. ITSM com IA nativa que resolve
-              até 90% dos chamados antes de virarem ticket, com mudanças, ativos
-              e SLA, e a migração do seu histórico do Movidesk incluída. Suporte
-              local em português.
+              A plataforma ITSM com IA nativa que resolve até 90% dos chamados
+              antes de virarem ticket, com gestão de ativos, SLA e suporte local
+              em português. Mais de 400 empresas no Brasil.
             </p>
             <div className="hero__form">
               <LeadForm variant="hero" />
             </div>
             <p className="hero__trust">
-              Nota 9.4 na G2 · Reconhecida por G2, Gartner e TrustRadius
+              Nota 4,5/5 no G2 (750+ avaliações) · Migração do histórico incluída · Reconhecida por
+              G2, Gartner e TrustRadius
             </p>
           </div>
         </section>
@@ -321,8 +320,8 @@ export default function MovideskPage() {
                 <div className="stat__l">dos chamados resolvidos com IA</div>
               </div>
               <div className="stat">
-                <div className="stat__n">9.4</div>
-                <div className="stat__l">nota geral na G2</div>
+                <div className="stat__n">4,5/5</div>
+                <div className="stat__l">no G2 (750+ avaliações)</div>
               </div>
               <div className="stat">
                 <div className="stat__n">1.000+</div>
