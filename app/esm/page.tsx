@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
+import SiteFooter from "@/components/SiteFooter";
 
 export const metadata: Metadata = {
   title: "ESM: o que é Enterprise Service Management | SysAid",
@@ -489,9 +490,10 @@ export default function EsmPage() {
                 plataforma da TI
               </h2>
               <p className="section-head__sub">
-                O SysAid ESM leva para RH, Facilities, Financeiro e Jurídico a
-                plataforma de ITSM com IA que a TI já usa, com dados segregados
-                por área e agentes de IA que resolvem o pedido sozinhos.
+                O SysAid ESM, disponível no Brasil pela SysAid Brasil, leva
+                para RH, Facilities, Financeiro e Jurídico a plataforma de ITSM
+                com IA que a TI já usa, com dados segregados por área e agentes
+                de IA que resolvem o pedido sozinhos.
               </p>
             </div>
             <div className="grid-3">
@@ -503,12 +505,13 @@ export default function EsmPage() {
               ))}
             </div>
             <p className="section-head__sub" style={{ marginTop: 24 }}>
-              Disponibilidade, idioma e modelo de licença do ESM no Brasil são
-              confirmados com a SysAid Brasil na demonstração.{" "}
+              O SysAid ESM é comercializado no Brasil pela SysAid Brasil, com
+              implantação e suporte em português.{" "}
               <a href="#demo" style={{ color: "var(--lime)" }}>
                 Agende uma demonstração
-              </a>
-              .
+              </a>{" "}
+              para ver um espaço de RH ou Facilities rodando na mesma
+              plataforma da TI.
             </p>
           </div>
         </section>
@@ -644,12 +647,7 @@ export default function EsmPage() {
         </section>
       </main>
 
-      <footer className="site-footer">
-        <div className="container site-footer__inner">
-          <Image src="/logos/logo-white.svg" alt="SysAid" width={116} height={30} />
-          <p>SysAid Brasil · Software ITSM com Inteligência Artificial</p>
-        </div>
-      </footer>
+      <SiteFooter atual="/esm" />
     </>
   );
 }
