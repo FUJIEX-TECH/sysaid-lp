@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Alternativa ao Movidesk: ITSM com IA — SysAid Brasil",
     description:
-      "Do help desk de atendimento a uma plataforma ITSM completa com IA nativa. Nota 9.4 vs 6.7 na G2.",
+      "Do help desk de atendimento a uma plataforma ITSM completa com IA nativa. Nota 4,5/5 no G2, com mais de 750 avaliações.",
     locale: "pt_BR",
     type: "website",
   },
@@ -51,7 +51,6 @@ const TRAVAS = [
 ];
 
 const COMPARE = [
-  { crit: "Nota geral (G2)", them: "6.7", sysaid: "9.4" },
   { crit: "Foco do produto", them: "Atendimento ao cliente (PME)", sysaid: "ITSM: gestão de serviços de TI" },
   { crit: "Fácil de usar (G2)", them: "61", sysaid: "94" },
   { crit: "Atende aos requisitos (G2)", them: "62", sysaid: "94" },
@@ -84,7 +83,7 @@ const MIGRACAO = [
 const FAQ = [
   {
     q: "O Movidesk atende bem o nosso suporte. Por que trocar?",
-    a: "Se a operação é de atendimento ao cliente e o volume é estável, talvez não precise. A troca faz sentido quando a TI vira o usuário principal: aí entram gestão de mudanças, CMDB, vínculo de incidente com ativo, SLA de operação e auditoria, que são o território de uma plataforma ITSM. Nas avaliações públicas da G2, essa diferença aparece: 9.4 contra 6.7 na nota geral.",
+    a: "Se a operação é de atendimento ao cliente e o volume é estável, talvez não precise. A troca faz sentido quando a TI vira o usuário principal: aí entram gestão de mudanças, CMDB, vínculo de incidente com ativo, SLA de operação e auditoria, que são o território de uma plataforma ITSM. Nas avaliações públicas da G2, essa diferença aparece: 94 contra 61 em facilidade de uso e 90 contra 63 em gestão de mudanças.",
   },
   {
     q: "Dá para migrar o histórico de tickets?",
@@ -148,25 +147,11 @@ export default function MovideskPage() {
                 <span>Manual · Governança</span>
               </div>
             </div>
-            <div className="hero__ticket hero__ticket--2">
-              <span className="hero__dot hero__dot--amber" />
-              <div>
-                <strong>31 usuários: reset de senha</strong>
-                <span>Repetitivo · Acessos</span>
-              </div>
-            </div>
             <div className="hero__ticket hero__ticket--3">
               <span className="hero__dot hero__dot--amber" />
               <div>
                 <strong>Mudança aprovada por e-mail</strong>
                 <span>Sem workflow · Auditoria</span>
-              </div>
-            </div>
-            <div className="hero__ticket hero__ticket--4">
-              <span className="hero__dot hero__dot--green" />
-              <div>
-                <strong>Onboarding: acesso + VPN</strong>
-                <span>Novo colaborador · RH</span>
               </div>
             </div>
             <div className="hero__resolved">✓ Resolvido pela IA</div>
@@ -187,7 +172,7 @@ export default function MovideskPage() {
               <LeadForm variant="hero" />
             </div>
             <p className="hero__trust">
-              Nota 9.4 na G2 · Migração do histórico incluída · Reconhecida por
+              Nota 4,5/5 no G2 (750+ avaliações) · Migração do histórico incluída · Reconhecida por
               G2, Gartner e TrustRadius
             </p>
           </div>
@@ -335,8 +320,8 @@ export default function MovideskPage() {
                 <div className="stat__l">dos chamados resolvidos com IA</div>
               </div>
               <div className="stat">
-                <div className="stat__n">9.4</div>
-                <div className="stat__l">nota geral na G2</div>
+                <div className="stat__n">4,5/5</div>
+                <div className="stat__l">no G2 (750+ avaliações)</div>
               </div>
               <div className="stat">
                 <div className="stat__n">1.000+</div>

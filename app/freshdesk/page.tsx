@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Alternativa ao Freshdesk: ITSM com IA — SysAid Brasil",
     description:
-      "Do help desk de atendimento a uma plataforma ITSM completa com IA nativa, gestão de ativos e suporte em português. Nota 9.4 na G2.",
+      "Do help desk de atendimento a uma plataforma ITSM completa com IA nativa, gestão de ativos e suporte em português. Nota 4,5/5 no G2, com mais de 750 avaliações.",
     locale: "pt_BR",
     type: "website",
   },
@@ -51,7 +51,6 @@ const TRAVAS = [
 ];
 
 const COMPARE = [
-  { crit: "Nota geral (G2)", them: "8.7", sysaid: "9.4" },
   { crit: "Foco do produto", them: "Atendimento ao cliente (CX)", sysaid: "ITSM: gestão de serviços de TI" },
   { crit: "IA que resolve o chamado", them: "Freddy AI, com créditos e add-ons", sysaid: "SysAid Copilot incluído: até 90% resolvidos antes de virar ticket" },
   { crit: "Gestão de ativos", them: "Em outro produto (Freshservice)", sysaid: "ITAM nativo: ciclo de vida, contratos, licenças e CMDB" },
@@ -87,7 +86,7 @@ const FAQ = [
   },
   {
     q: "E comparado ao Freshservice, que é o ITSM da mesma suíte?",
-    a: "O Freshservice cobre ITSM, mas mantém o modelo da suíte: preço por agente, IA por créditos e recursos-chave nos planos superiores. No SysAid, Copilot, gestão de ativos e workflows fazem parte da plataforma, com implementação e suporte local em português inclusos. Nas avaliações da G2, o SysAid tem nota geral 9.4.",
+    a: "O Freshservice cobre ITSM, mas mantém o modelo da suíte: preço por agente, IA por créditos e recursos-chave nos planos superiores. No SysAid, Copilot, gestão de ativos e workflows fazem parte da plataforma, com implementação e suporte local em português inclusos. No G2, o SysAid tem nota 4,5/5, com mais de 750 avaliações.",
   },
   {
     q: "Dá para migrar o histórico de tickets?",
@@ -147,25 +146,11 @@ export default function FreshdeskPage() {
                 <span>Preço por agente · Contrato</span>
               </div>
             </div>
-            <div className="hero__ticket hero__ticket--2">
-              <span className="hero__dot hero__dot--amber" />
-              <div>
-                <strong>31 usuários: reset de senha</strong>
-                <span>Repetitivo · Acessos</span>
-              </div>
-            </div>
             <div className="hero__ticket hero__ticket--3">
               <span className="hero__dot hero__dot--amber" />
               <div>
                 <strong>Inventário de ativos em outra ferramenta</strong>
                 <span>Sem CMDB · Governança</span>
-              </div>
-            </div>
-            <div className="hero__ticket hero__ticket--4">
-              <span className="hero__dot hero__dot--green" />
-              <div>
-                <strong>Onboarding: acesso + VPN</strong>
-                <span>Novo colaborador · RH</span>
               </div>
             </div>
             <div className="hero__resolved">✓ Resolvido pela IA</div>
@@ -186,7 +171,7 @@ export default function FreshdeskPage() {
               <LeadForm variant="hero" />
             </div>
             <p className="hero__trust">
-              Nota 9.4 na G2 · Migração do histórico incluída · Reconhecida por
+              Nota 4,5/5 no G2 (750+ avaliações) · Migração do histórico incluída · Reconhecida por
               G2, Gartner e TrustRadius
             </p>
           </div>
@@ -335,8 +320,8 @@ export default function FreshdeskPage() {
                 <div className="stat__l">dos chamados resolvidos com IA</div>
               </div>
               <div className="stat">
-                <div className="stat__n">9.4</div>
-                <div className="stat__l">nota geral na G2</div>
+                <div className="stat__n">4,5/5</div>
+                <div className="stat__l">no G2 (750+ avaliações)</div>
               </div>
               <div className="stat">
                 <div className="stat__n">1.000+</div>

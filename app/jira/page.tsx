@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Alternativa ao Jira Service Management: ITSM com IA — SysAid Brasil",
     description:
-      "ITSM completo sem marketplace de add-ons: IA nativa, gestão de ativos inclusa e suporte em português. Nota 9.4 na G2.",
+      "ITSM completo sem marketplace de add-ons: IA nativa, gestão de ativos inclusa e suporte em português. Nota 4,5/5 no G2, com mais de 750 avaliações.",
     locale: "pt_BR",
     type: "website",
   },
@@ -51,7 +51,7 @@ const TRAVAS = [
 ];
 
 const COMPARE = [
-  { crit: "Nota geral (G2)", them: "Referência dev-first", sysaid: "9.4, plataforma ITSM tudo em um" },
+  { crit: "Nota geral (G2)", them: "Referência dev-first", sysaid: "4,5/5 (750+ avaliações), plataforma ITSM tudo em um" },
   { crit: "Implantação", them: "Configuração complexa, plugins e consultoria", sysaid: "Rápida, low-code/no-code, pronta desde o dia 1" },
   { crit: "Gestão de ativos", them: "Add-on pago no Marketplace", sysaid: "ITAM incluso: ciclo de vida, contratos, licenças e CMDB" },
   { crit: "IA", them: "Varia por plano, com créditos", sysaid: "SysAid Copilot incluído + 100 agentes de IA prontos e AI Builder no-code" },
@@ -146,25 +146,11 @@ export default function JiraPage() {
                 <span>Marketplace · Custo extra</span>
               </div>
             </div>
-            <div className="hero__ticket hero__ticket--2">
-              <span className="hero__dot hero__dot--amber" />
-              <div>
-                <strong>31 usuários: reset de senha</strong>
-                <span>Repetitivo · Acessos</span>
-              </div>
-            </div>
             <div className="hero__ticket hero__ticket--3">
               <span className="hero__dot hero__dot--amber" />
               <div>
                 <strong>Workflow novo: chamar consultoria</strong>
                 <span>Complexidade · Administração</span>
-              </div>
-            </div>
-            <div className="hero__ticket hero__ticket--4">
-              <span className="hero__dot hero__dot--green" />
-              <div>
-                <strong>Onboarding: acesso + VPN</strong>
-                <span>Novo colaborador · RH</span>
               </div>
             </div>
             <div className="hero__resolved">✓ Resolvido pela IA</div>
@@ -186,7 +172,7 @@ export default function JiraPage() {
               <LeadForm variant="hero" />
             </div>
             <p className="hero__trust">
-              Nota 9.4 na G2 · Migração do histórico incluída · Líder Emergente
+              Nota 4,5/5 no G2 (750+ avaliações) · Migração do histórico incluída · Líder Emergente
               no Gartner® Innovation Guide de IA Generativa 2025
             </p>
           </div>

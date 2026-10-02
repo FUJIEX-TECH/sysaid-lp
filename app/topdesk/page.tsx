@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Alternativa ao TopDesk: ITSM com IA — SysAid Brasil",
     description:
-      "Do CMDB tradicional a uma plataforma ITSM com IA nativa que resolve o chamado, não só registra. Nota 4,5/5 no G2, com 733 avaliações.",
+      "Do CMDB tradicional a uma plataforma ITSM com IA nativa que resolve o chamado, não só registra. Nota 4,5/5 no G2, com mais de 750 avaliações.",
     locale: "pt_BR",
     type: "website",
   },
@@ -51,7 +51,7 @@ const TRAVAS = [
 ];
 
 const COMPARE = [
-  { crit: "Nota geral (G2)", them: "4,1/5 (30 avaliações)", sysaid: "4,5/5 (733 avaliações)" },
+  { crit: "Nota geral (G2)", them: "4,1/5 (30 avaliações)", sysaid: "4,5/5 (750+ avaliações)" },
   { crit: "Foco do produto", them: "ITSM tradicional, forte em CMDB e Asset Management", sysaid: "ITSM com IA nativa (SysAid Copilot) integrada à plataforma" },
   { crit: "Atende aos requisitos (G2)", them: "85", sysaid: "89" },
   { crit: "Fácil de usar (G2)", them: "80", sysaid: "90" },
@@ -146,25 +146,11 @@ export default function TopDeskPage() {
                 <span>CMDB · Sem IA</span>
               </div>
             </div>
-            <div className="hero__ticket hero__ticket--2">
-              <span className="hero__dot hero__dot--amber" />
-              <div>
-                <strong>31 usuários: reset de senha</strong>
-                <span>Repetitivo · Acessos</span>
-              </div>
-            </div>
             <div className="hero__ticket hero__ticket--3">
               <span className="hero__dot hero__dot--amber" />
               <div>
                 <strong>Setup do módulo de ativos</strong>
                 <span>Em andamento · TI dedicada</span>
-              </div>
-            </div>
-            <div className="hero__ticket hero__ticket--4">
-              <span className="hero__dot hero__dot--green" />
-              <div>
-                <strong>Onboarding: acesso + VPN</strong>
-                <span>Novo colaborador · RH</span>
               </div>
             </div>
             <div className="hero__resolved">✓ Resolvido pela IA</div>
@@ -185,7 +171,7 @@ export default function TopDeskPage() {
               <LeadForm variant="hero" />
             </div>
             <p className="hero__trust">
-              Nota 4,5/5 no G2 (733 avaliações) · Migração do CMDB incluída ·
+              Nota 4,5/5 no G2 (750+ avaliações) · Migração do CMDB incluída ·
               Reconhecida por G2, Gartner e TrustRadius
             </p>
           </div>
@@ -336,7 +322,7 @@ export default function TopDeskPage() {
               </div>
               <div className="stat">
                 <div className="stat__n">4,5/5</div>
-                <div className="stat__l">nota geral no G2 (733 avaliações)</div>
+                <div className="stat__l">nota no G2 (750+ avaliações)</div>
               </div>
               <div className="stat">
                 <div className="stat__n">1.000+</div>

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Alternativa ao Zendesk: ITSM com IA — SysAid Brasil",
     description:
-      "Da ferramenta de CX a uma plataforma ITSM completa com IA nativa, gestão de ativos e suporte em português. Nota 9.4 na G2.",
+      "Da ferramenta de CX a uma plataforma ITSM completa com IA nativa, gestão de ativos e suporte em português. Nota 4,5/5 no G2, com mais de 750 avaliações.",
     locale: "pt_BR",
     type: "website",
   },
@@ -51,7 +51,6 @@ const TRAVAS = [
 ];
 
 const COMPARE = [
-  { crit: "Nota geral (G2)", them: "8.7", sysaid: "9.4" },
   { crit: "Foco do produto", them: "Atendimento ao cliente (CX)", sysaid: "ITSM: gestão de serviços de TI" },
   { crit: "O produto está na direção certa? (G2)", them: "78", sysaid: "92" },
   { crit: "Fácil de usar (G2)", them: "86", sysaid: "94" },
@@ -147,25 +146,11 @@ export default function ZendeskPage() {
                 <span>Marketplace · Custo extra</span>
               </div>
             </div>
-            <div className="hero__ticket hero__ticket--2">
-              <span className="hero__dot hero__dot--amber" />
-              <div>
-                <strong>31 usuários: reset de senha</strong>
-                <span>Repetitivo · Acessos</span>
-              </div>
-            </div>
             <div className="hero__ticket hero__ticket--3">
               <span className="hero__dot hero__dot--amber" />
               <div>
                 <strong>Chamado de TI na fila de CX</strong>
                 <span>Sem CMDB · Governança</span>
-              </div>
-            </div>
-            <div className="hero__ticket hero__ticket--4">
-              <span className="hero__dot hero__dot--green" />
-              <div>
-                <strong>Onboarding: acesso + VPN</strong>
-                <span>Novo colaborador · RH</span>
               </div>
             </div>
             <div className="hero__resolved">✓ Resolvido pela IA</div>
@@ -186,7 +171,7 @@ export default function ZendeskPage() {
               <LeadForm variant="hero" />
             </div>
             <p className="hero__trust">
-              Nota 9.4 na G2 · Migração do histórico incluída · Reconhecida por
+              Nota 4,5/5 no G2 (750+ avaliações) · Migração do histórico incluída · Reconhecida por
               G2, Gartner e TrustRadius
             </p>
           </div>
@@ -335,8 +320,8 @@ export default function ZendeskPage() {
                 <div className="stat__l">dos chamados resolvidos com IA</div>
               </div>
               <div className="stat">
-                <div className="stat__n">9.4</div>
-                <div className="stat__l">nota geral na G2</div>
+                <div className="stat__n">4,5/5</div>
+                <div className="stat__l">no G2 (750+ avaliações)</div>
               </div>
               <div className="stat">
                 <div className="stat__n">1.000+</div>
