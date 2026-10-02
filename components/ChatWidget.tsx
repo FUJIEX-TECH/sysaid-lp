@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { measureLeadCreated } from "@/lib/oaiq";
 
 // Widget flutuante com cara de chat online, mas que na pratica e o mesmo
 // formulario progressivo de leads (mesmos endpoints /api/lead e
@@ -177,6 +178,7 @@ export default function ChatWidget() {
         return;
       }
       fireConversion();
+      measureLeadCreated(json.id); // ChatGPT Ads (no-op sem pixel)
       setStep("done");
       setMsgs((m) => [
         ...m,

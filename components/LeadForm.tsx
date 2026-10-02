@@ -200,6 +200,7 @@ export default function LeadForm({ variant = "hero", submitLabel }: Props) {
       }
       // marca o envio para a /obrigado disparar a conversao, e redireciona
       sessionStorage.setItem("sysaid_lead", "1");
+      if (data.id) sessionStorage.setItem("sysaid_lead_id", String(data.id));
       window.location.href = "/obrigado";
     } catch {
       setError("Erro de conexão. Tente novamente em instantes.");

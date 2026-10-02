@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { measureLeadCreated } from "@/lib/oaiq";
 
 // Dispara a conversao do Google Ads uma unica vez, apenas quando o usuario
 // chega na /obrigado vindo de um envio real (flag na sessionStorage).
@@ -8,6 +9,11 @@ export default function ConversionPing() {
   useEffect(() => {
     if (sessionStorage.getItem("sysaid_lead") !== "1") return;
     sessionStorage.removeItem("sysaid_lead");
+    const leadId = sessionStorage.getItem("sysaid_lead_id");
+    sessionStorage.removeItem("sysaid_lead_id");
+
+    // ChatGPT Ads: lead_created (no-op sem NEXT_PUBLIC_OAIQ_PIXEL_ID)
+    measureLeadCreated(leadId);
 
     const id = process.env.NEXT_PUBLIC_GADS_CONVERSION_ID;
     const label = process.env.NEXT_PUBLIC_GADS_CONVERSION_LABEL;
