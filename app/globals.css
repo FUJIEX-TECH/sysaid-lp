@@ -168,6 +168,10 @@ img, svg { max-width: 100%; height: auto; display: block; }
 .hero__form { max-width: 520px; margin: 0 auto; }
 .hero .leadform { margin-inline: auto; }
 .hero__trust { margin-top: 20px; font-size: 0.9rem; color: #86a498; }
+/* CRO 02/10/2026: CTA do hero em lima (era verde sobre verde) e eyebrow legivel */
+.hero .eyebrow { color: var(--green-400); }
+.hero .leadform .btn--primary { background: var(--lime); color: var(--ink); white-space: nowrap; flex: none; }
+.hero .leadform .btn--primary:hover { background: var(--lime-600); }
 
 /* fundo ambiente: brilho + cards de chamados flutuando */
 .hero__bg { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
