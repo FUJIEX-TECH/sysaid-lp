@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
+import { datasDaPagina } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Service Desk: o que é, o que faz e como escolher | SysAid Brasil",
@@ -159,6 +160,7 @@ const FAQ = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  ...datasDaPagina("/service-desk"),
   mainEntity: FAQ.map((item) => ({
     "@type": "Question",
     name: item.q,

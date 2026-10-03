@@ -143,8 +143,8 @@ Saúde geral do site: **6/10** (técnico 8/10 · conteúdo 6/10 · autoridade 1/
 
 ### P0 (esta semana)
 - [x] **C1** — `Organization` schema no `app/layout.tsx` ✅ **30/09/2026** (commit `51fcf77`, branch `feat/rota-service-desk`, **sem deploy**). Declarado uma vez, com `@id` estável `https://itsm.sysaid.com.br/#organization`, então vale em todas as páginas sem duplicar entidade. `name`, `alternateName`, `url`, `logo` (1682×1682), `description`, `areaServed` BR, `knowsLanguage`. `sameAs` só com URL verificada: `sysaid.com`, `sysaid.com.br`, `linkedin.com/company/sysaid-technologies`. **G2 e Capterra ficaram fora**: respondem 403 a bot e não deu pra confirmar o slug — `sameAs` errado é pior que curto. Os `Article` de `/service-desk` e `/gestao-de-servicos-de-ti` agora referenciam o `@id` no `author`/`publisher`.
-- [ ] **C2** — `Article` + `BreadcrumbList` schema em `/o-que-e-itsm` e `/sistema-de-chamados`
-- [ ] **C3** — `dateModified` automático em todos os schemas FAQPage/Article
+- [x] **C2** — `Article` + `BreadcrumbList` schema em `/o-que-e-itsm` e `/sistema-de-chamados` (03/10/2026, branch `seo/schema-article-breadcrumb`; na `/sistema-de-chamados` é `WebPage`, não `Article`, porque é página de produto)
+- [x] **C3** — `dateModified` em todos os schemas FAQPage/Article (03/10/2026, mesmo branch; datas em `lib/seo.ts`, atualizar à mão no commit que muda conteúdo)
 - [ ] **C4 (pendência aberta do C1)** — confirmar as URLs de G2 e Capterra da SysAid pra entrar no `sameAs`. Ambas respondem **403 a bot**; precisa de navegador ou de o Kaique confirmar o link oficial.
 - [ ] **C4** — Adicionar links da raiz WordPress `sysaid.com.br` → subdomínio (rodapé + menu + 1 post âncora)
 - [ ] **C5** — Submeter sitemap no GSC + pedir indexação das 10 URLs (skill `gsc-fujiex`)
@@ -153,7 +153,7 @@ Saúde geral do site: **6/10** (técnico 8/10 · conteúdo 6/10 · autoridade 1/
 ### P1 (próximas 2 semanas)
 - [ ] Cadastrar no Bing Webmaster Tools (precisa do login do Fernando; dá pra importar do Search Console)
 - [x] IndexNow pronto em branch (01/10/2026 20h, `feat/seo-indexnow`): chave `public/df788ab4e8e335bc73c8ac2a84941392.txt` + `npm run indexnow` (lê o sitemap de produção e pinga `api.indexnow.org`; `--dry-run` e rotas avulsas). **Rodar logo depois do deploy** e a cada página nova. Recusa enviar se a chave não estiver no ar.
-- [ ] `sitemap.ts` usa `lastModified: now` em todas as URLs: cada build diz que tudo mudou. Bing/IndexNow desconfiam de lastmod que sempre muda; trocar por data real por página (junto com o C3 `dateModified`).
+- [x] (03/10/2026, mesmo branch: lastmod vem de `lib/seo.ts`) `sitemap.ts` usa `lastModified: now` em todas as URLs: cada build diz que tudo mudou. Bing/IndexNow desconfiam de lastmod que sempre muda; trocar por data real por página (junto com o C3 `dateModified`).
 - [x] Internal linking cruzado entre as 6 comparativas (cluster semântico) ✅ **01/10/2026** (commit `7af39be`, branch `feat/seo-links-cluster` em cima da `feat/rota-service-desk`, **sem deploy**). Componente `components/SiteFooter.tsx` nas 11 páginas de conteúdo (6 comparativas, 4 guias e home): coluna "Compare o SysAid" + coluna "Guias de ITSM", omitindo a própria página. Fica **depois do formulário final** de propósito, pra não vazar conversão das LPs de Ads. Medir 30 dias após o deploy: queda de saída pelo rodapé x formulário (GA4) e páginas comparativas descobertas pelo Google.
 - [ ] Reescrever `alt` descritivo das imagens (`/clientes/*.png`, `/badges/*.svg`)
 - [ ] Submeter pra B2B Stack, Capterra/GetApp BR, G2 (perfil de produto)

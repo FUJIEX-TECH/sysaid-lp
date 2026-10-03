@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
+import { datasDaPagina } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "ESM: o que é Enterprise Service Management | SysAid",
@@ -235,6 +236,7 @@ const FAQ = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  ...datasDaPagina("/esm"),
   mainEntity: FAQ.map((item) => ({
     "@type": "Question",
     name: item.q,

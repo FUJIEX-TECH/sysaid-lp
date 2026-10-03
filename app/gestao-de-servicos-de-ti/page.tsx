@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
+import { datasDaPagina } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Gestão de Serviços de TI (ITSM): Guia Completo | SysAid Brasil",
@@ -150,6 +151,7 @@ const FAQ = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  ...datasDaPagina("/gestao-de-servicos-de-ti"),
   mainEntity: FAQ.map((item) => ({
     "@type": "Question",
     name: item.q,

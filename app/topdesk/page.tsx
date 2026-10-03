@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
+import { datasDaPagina } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Alternativa ao TopDesk | ITSM com IA para a sua TI — SysAid Brasil",
@@ -105,6 +106,7 @@ const FAQ = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  ...datasDaPagina("/topdesk"),
   mainEntity: FAQ.map((item) => ({
     "@type": "Question",
     name: item.q,

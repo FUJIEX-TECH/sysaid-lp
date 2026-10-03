@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
+import { breadcrumbSchema, datasDaPagina, ORG_ID } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "O que é ITSM? Guia de Gestão de Serviços de TI — SysAid Brasil",
@@ -117,6 +118,7 @@ const FAQ = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  ...datasDaPagina("/o-que-e-itsm"),
   mainEntity: FAQ.map((item) => ({
     "@type": "Question",
     name: item.q,
@@ -124,12 +126,35 @@ const faqSchema = {
   })),
 };
 
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  ...datasDaPagina("/o-que-e-itsm"),
+  mainEntityOfPage: "https://itsm.sysaid.com.br/o-que-e-itsm",
+  headline: "O que é ITSM? Guia de Gestão de Serviços de TI",
+  description: metadata.description,
+  inLanguage: "pt-BR",
+  image: "https://itsm.sysaid.com.br/logos/logo.png",
+  author: { "@id": ORG_ID },
+  publisher: { "@id": ORG_ID },
+};
+
+const breadcrumb = breadcrumbSchema("/o-que-e-itsm");
+
 export default function OQueEItsmPage() {
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
       />
       <header className="site-header">
         <div className="container site-header__inner">

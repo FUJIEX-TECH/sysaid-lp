@@ -1,6 +1,7 @@
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
+import { datasDaPagina } from "@/lib/seo";
 
 const CLIENTES = [
   "vale", "unimed", "petrobras", "cocacola", "siemens",
@@ -60,6 +61,7 @@ const FAQ = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  ...datasDaPagina("/"),
   mainEntity: FAQ.map((item) => ({
     "@type": "Question",
     name: item.q,
