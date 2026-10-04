@@ -26,28 +26,28 @@ const CLIENTES = [
 
 const TRAVAS = [
   {
-    t: "Help desk de atendimento, não ITSM",
-    d: "O Movidesk nasceu para organizar o atendimento ao cliente de PMEs. Gestão de mudanças, problemas, CMDB e governança de TI não são o centro do produto.",
+    t: "Feito para quem atende cliente",
+    d: "O Movidesk, hoje parte da Zenvia, foi desenhado para times de suporte e CX de PMEs: canais, chat, pesquisa de satisfação. Mudança, problema e CMDB ficam fora do centro do produto.",
   },
   {
-    t: "A operação cresceu, a ferramenta não",
-    d: "O que funcionava com uma fila e poucos agentes começa a doer com múltiplas equipes, SLAs distintos e auditoria. Escala expõe o limite.",
+    t: "A árvore de serviços virou remendo",
+    d: "Quando cada área da TI pede uma categoria, um formulário e um SLA próprios, a árvore de serviços cresce em subníveis e ninguém mais sabe onde abrir o chamado certo.",
   },
   {
-    t: "Automação rasa para TI",
-    d: "Gatilhos e macros resolvem o atendimento, mas o fluxo de TI segue manual: aprovação de mudança, provisionamento de acesso e tarefas repetidas ocupam analista.",
+    t: "Gatilho não é fluxo de TI",
+    d: "Os gatilhos movem o ticket de status e avisam pessoas. Pedir acesso, aprovar com o gestor, criar a conta e fechar com registro continua dependendo de alguém fazendo cada passo.",
   },
   {
-    t: "Sem IA que resolve",
-    d: "O chamado continua esperando um humano. Reset de senha, dúvida repetida e solicitação padrão entram na fila como tudo o mais.",
+    t: "Toda pergunta vira ticket",
+    d: "A dúvida de VPN que se repete vinte vezes por semana entra na fila do analista do mesmo jeito que o incidente do servidor.",
   },
   {
-    t: "Visão de ativos limitada",
-    d: "Inventário, ciclo de vida, contratos, licenças e o vínculo do incidente com o ativo exigem mais do que o produto entrega.",
+    t: "O equipamento não aparece no chamado",
+    d: "Sem inventário ligado ao atendimento, o analista pergunta ao usuário qual é a máquina, a licença e a garantia, e o incidente não fica amarrado ao ativo.",
   },
   {
-    t: "Relatório executivo na mão",
-    d: "SLA de TI, visão de custo e relatório pra diretoria acabam saindo em planilha, montados manualmente todo mês.",
+    t: "Indicadores de CX, não de TI",
+    d: "Os painéis medem satisfação e tempo de resposta ao cliente. Disponibilidade, reincidência por ativo e custo por serviço da TI saem em planilha no fim do mês.",
   },
 ];
 
@@ -66,18 +66,18 @@ const COMPARE = [
 const MIGRACAO = [
   {
     n: "01",
-    t: "Diagnóstico da sua operação",
-    d: "Mapeamos volume de chamados, categorias, filas, SLAs e os ativos que a sua TI atende hoje pelo Movidesk.",
+    t: "Retrato do que existe no Movidesk",
+    d: "Levantamos a árvore de serviços, as equipes, os gatilhos, as regras de SLA, os campos adicionais e as pessoas e empresas cadastradas, e decidimos o que vale manter.",
   },
   {
     n: "02",
-    t: "Migração da base e do histórico",
-    d: "Chamados, categorias, usuários e ativos são importados. O histórico da sua TI não fica para trás.",
+    t: "Tickets e base de conhecimento",
+    d: "Os tickets saem pela API pública do Movidesk com ações, anexos e responsáveis; os artigos da base de conhecimento viram fonte do Copilot. A árvore de serviços vira um catálogo enxuto.",
   },
   {
     n: "03",
-    t: "Go live com a equipe treinada",
-    d: "Configuração do portal, automações e Copilot, com treinamento e acompanhamento em português.",
+    t: "Ativos e virada",
+    d: "A descoberta do SysAid inventaria os equipamentos e liga cada um ao chamado. Na virada, o time já opera com o portal, as regras e o Copilot configurados, com treinamento em português.",
   },
 ];
 
@@ -88,7 +88,7 @@ const FAQ = [
   },
   {
     q: "Dá para migrar o histórico de tickets?",
-    a: "Sim. Chamados, categorias, usuários e ativos são importados na migração. O diagnóstico inicial define exatamente o que vem, em que formato e em qual ordem, para o go live não perder rastreabilidade.",
+    a: "Sim. Os tickets do Movidesk saem pela API pública com as ações, os anexos e quem atendeu, e entram no SysAid ligados ao solicitante e à categoria nova. O que é histórico de atendimento ao cliente e não interessa à TI pode ficar arquivado fora da migração.",
   },
   {
     q: "Qual é a diferença prática da IA do SysAid?",
@@ -100,7 +100,7 @@ const FAQ = [
   },
   {
     q: "Quanto tempo leva a implantação?",
-    a: "A implantação típica é rápida e acompanhada por suporte local em português. O prazo exato depende do volume de dados a migrar e da maturidade da operação, e é definido no diagnóstico.",
+    a: "Depende de quantos serviços a árvore tem hoje, do volume de tickets que vale trazer e de quantas equipes entram na primeira onda. O diagnóstico fecha esse desenho e a data da virada.",
   },
 ];
 
