@@ -287,6 +287,9 @@ export default function ZendeskPage() {
               elaborado pela SysAid Brasil com base em dados públicos das
               soluções.
             </p>
+            <p className="section-head__sub" style={{ marginTop: 32 }}>
+              O Zendesk é referência em suporte ao cliente externo; usado pela TI interna, ele costuma esbarrar em ativos, CMDB e mudanças. O guia de <a href="/gestao-de-servicos-de-ti">gestão de serviços de TI e ITIL 4</a> lista esses processos, e o de <a href="/sistema-de-chamados">sistema de chamados</a> mostra o mínimo que um chamado de TI precisa ter. Também comparamos: <a href="/freshdesk">SysAid x Freshdesk e Freshservice</a> e <a href="/jira">SysAid x Jira Service Management</a>.
+            </p>
           </div>
         </section>
 

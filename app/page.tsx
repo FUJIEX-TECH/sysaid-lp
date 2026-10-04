@@ -1,7 +1,12 @@
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
+import type { Metadata } from "next";
 import { datasDaPagina } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 const CLIENTES = [
   "vale", "unimed", "petrobras", "cocacola", "siemens",
@@ -240,6 +245,13 @@ export default function Home() {
                 </div>
               ))}
             </div>
+            <p className="section-head__sub" style={{ marginTop: 32, textAlign: "center" }}>
+              Quer entender o conceito antes de escolher a ferramenta? Veja{" "}
+              <a href="/o-que-e-itsm">o que é ITSM</a>, os{" "}
+              <a href="/gestao-de-servicos-de-ti">processos de gestão de serviços de TI e o ITIL 4</a>, como montar um{" "}
+              <a href="/service-desk">service desk</a> e como a mesma plataforma atende RH, facilities e financeiro com{" "}
+              <a href="/esm">ESM (gestão de serviços corporativos)</a>.
+            </p>
           </div>
         </section>
 
@@ -306,6 +318,15 @@ export default function Home() {
                 </ul>
               </div>
             </div>
+            <p className="section-head__sub" style={{ marginTop: 32, textAlign: "center" }}>
+              Comparativos lado a lado com as ferramentas que mais aparecem nas
+              cotações: <a href="/glpi">SysAid x GLPI</a>,{" "}
+              <a href="/movidesk">SysAid x Movidesk</a>,{" "}
+              <a href="/topdesk">SysAid x TOPdesk</a>,{" "}
+              <a href="/freshdesk">SysAid x Freshdesk e Freshservice</a>,{" "}
+              <a href="/zendesk">SysAid x Zendesk</a> e{" "}
+              <a href="/jira">SysAid x Jira Service Management</a>.
+            </p>
           </div>
         </section>
 

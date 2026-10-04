@@ -287,6 +287,9 @@ export default function MovideskPage() {
               elaborado pela SysAid Brasil com base em dados públicos das
               soluções.
             </p>
+            <p className="section-head__sub" style={{ marginTop: 32 }}>
+              O Movidesk é forte em atendimento ao cliente; quem compara com o SysAid quase sempre está decidindo entre help desk e service desk de TI. O guia de <a href="/service-desk">service desk</a> explica a diferença na prática, e o de <a href="/sistema-de-chamados">sistema de chamados</a> mostra o que pedir de SLA e automação. Outras ferramentas que costumam disputar a mesma cotação: <a href="/glpi">SysAid x GLPI</a> e <a href="/zendesk">SysAid x Zendesk</a>.
+            </p>
           </div>
         </section>
 

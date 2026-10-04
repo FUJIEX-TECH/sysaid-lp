@@ -131,7 +131,7 @@ const articleSchema = {
   "@type": "Article",
   ...datasDaPagina("/o-que-e-itsm"),
   mainEntityOfPage: "https://itsm.sysaid.com.br/o-que-e-itsm",
-  headline: "O que é ITSM? Guia de Gestão de Serviços de TI",
+  headline: "O que é ITSM? Conceito, ITIL e Como Escolher uma Plataforma",
   description: metadata.description,
   inLanguage: "pt-BR",
   image: "https://itsm.sysaid.com.br/logos/logo.png",

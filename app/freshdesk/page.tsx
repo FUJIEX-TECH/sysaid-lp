@@ -287,6 +287,9 @@ export default function FreshdeskPage() {
               publicadas na G2.com; comparativo elaborado pela SysAid Brasil
               com base em dados públicos das soluções.
             </p>
+            <p className="section-head__sub" style={{ marginTop: 32 }}>
+              Freshdesk e Freshservice são produtos diferentes da Freshworks: o primeiro é atendimento ao cliente, o segundo é a aposta deles em ITSM. Se a dúvida é qual dos dois mundos a sua TI precisa, comece pelo guia <a href="/o-que-e-itsm">o que é ITSM</a> e pelo de <a href="/service-desk">service desk</a>. Ferramentas com perfil parecido: <a href="/zendesk">SysAid x Zendesk</a> e <a href="/movidesk">SysAid x Movidesk</a>.
+            </p>
           </div>
         </section>
 

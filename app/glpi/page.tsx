@@ -287,6 +287,9 @@ export default function GlpiPage() {
               elaborado pela SysAid Brasil com base na documentação pública das
               soluções e em implantações reais.
             </p>
+            <p className="section-head__sub" style={{ marginTop: 32 }}>
+              O GLPI nasceu como inventário e virou help desk; a pergunta de fundo é se a sua TI precisa de um sistema de chamados ou de uma plataforma de ITSM. O guia <a href="/o-que-e-itsm">o que é ITSM</a> separa as duas coisas, e o de <a href="/gestao-de-servicos-de-ti">processos de gestão de serviços de TI</a> mostra o que muda na operação. Se a cotação também tem ferramenta paga, veja <a href="/movidesk">SysAid x Movidesk</a> e <a href="/topdesk">SysAid x TOPdesk</a>.
+            </p>
           </div>
         </section>
 

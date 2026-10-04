@@ -288,6 +288,9 @@ export default function JiraPage() {
               com base na documentação pública das soluções e em avaliações de
               usuários na G2.com.
             </p>
+            <p className="section-head__sub" style={{ marginTop: 32 }}>
+              O Jira Service Management faz sentido quando o time de desenvolvimento já vive no Jira; para a TI de infraestrutura e suporte, o peso está em ativos, SLA e autoatendimento. O guia de <a href="/service-desk">service desk</a> detalha esses pontos, e a página de <a href="/esm">ESM</a> mostra como estender o atendimento para outras áreas. Outras comparações: <a href="/topdesk">SysAid x TOPdesk</a> e <a href="/zendesk">SysAid x Zendesk</a>.
+            </p>
           </div>
         </section>
 
