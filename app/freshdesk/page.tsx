@@ -5,12 +5,12 @@ import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Alternativa ao Freshdesk | ITSM com IA para a sua TI — SysAid Brasil",
+  title: "Alternativa ao Freshdesk e Freshservice | ITSM com IA — SysAid",
   description:
-    "Freshdesk atende clientes. Sua TI precisa de ITSM. Conheça a plataforma com IA que resolve até 90% dos chamados antes de virarem ticket, com gestão de ativos, SLA e suporte em português.",
+    "Freshdesk atende clientes; o Freshservice cobra IA por créditos. Conheça o ITSM com IA que resolve até 90% dos chamados, com ativos, SLA e suporte em português.",
   alternates: { canonical: "/freshdesk" },
   openGraph: {
-    title: "Alternativa ao Freshdesk: ITSM com IA — SysAid Brasil",
+    title: "Alternativa ao Freshdesk e ao Freshservice: ITSM com IA — SysAid Brasil",
     description:
       "Do help desk de atendimento a uma plataforma ITSM completa com IA nativa, gestão de ativos e suporte em português. Nota 4,5/5 no G2, com mais de 750 avaliações.",
     locale: "pt_BR",
@@ -295,7 +295,7 @@ export default function FreshdeskPage() {
           <div className="container">
             <div className="section-head">
               <p className="eyebrow">Como é a troca</p>
-              <h2>Sair do Freshdesk sem perder o histórico da sua TI</h2>
+              <h2>Sair do Freshdesk ou do Freshservice sem perder o histórico da sua TI</h2>
             </div>
             <div className="grid-3">
               {MIGRACAO.map((m) => (
