@@ -30,8 +30,8 @@ const TRAVAS = [
     d: "O Zendesk é referência em atendimento ao cliente, e é para isso que ele foi feito. Chamado de TI vira ticket genérico: sem CMDB, sem gestão de mudanças, sem visão de ativos.",
   },
   {
-    t: "O preço cresce junto com o time",
-    d: "Cobrança por agente, por mês, e os recursos que a TI precisa moram nos planos mais caros. Cada analista novo entra na fatura.",
+    t: "Licença por agente, plano por recurso",
+    d: "No Zendesk Suite, cada analista é uma licença e o que a TI mais usa (múltiplos horários de SLA, sandbox, relatórios avançados) sobe junto com o plano. Crescer o time de TI vira renegociação de contrato.",
   },
   {
     t: "Recursos de TI via marketplace",
@@ -42,12 +42,12 @@ const TRAVAS = [
     d: "Os recursos de IA avançada são add-on sobre a assinatura. O custo de automatizar de verdade aparece depois da proposta.",
   },
   {
-    t: "Suporte global, realidade local",
-    d: "Fuso, idioma e fila internacional. Quando a operação para numa segunda de manhã, a distância do suporte vira parte do problema.",
+    t: "Macros e gatilhos no lugar de processo",
+    d: "O Zendesk tem o tipo “problema” para agrupar incidentes, mas não tem mudança com aprovação, causa raiz nem CMDB. A TI que roda nele acaba simulando processo com macros, gatilhos, campos personalizados e visualizações. Funciona até alguém precisar auditar quem aprovou o quê.",
   },
   {
-    t: "Relatório de TI limitado",
-    d: "Métricas pensadas para CSAT e experiência do cliente. SLA de TI, auditoria e visão executiva da operação exigem customização.",
+    t: "Relatório pensado para CX",
+    d: "Os painéis nascem em torno de CSAT, tempo de primeira resposta e volume por canal. Indicador de TI, como incidente por ativo, mudança que gerou incidente ou disponibilidade por serviço, exige montar à mão.",
   },
 ];
 
@@ -66,17 +66,17 @@ const MIGRACAO = [
   {
     n: "01",
     t: "Diagnóstico da sua operação",
-    d: "Mapeamos volume de chamados, categorias, filas, SLAs e os ativos que a sua TI atende hoje pelo Zendesk.",
+    d: "Levantamos o que a sua TI construiu no Zendesk: visualizações, gatilhos, automações, macros, campos personalizados, organizações e políticas de SLA. Cada um ganha um destino no SysAid antes de começar.",
   },
   {
     n: "02",
-    t: "Migração da base e do histórico",
-    d: "Chamados, categorias, usuários e ativos são importados. O histórico da sua TI não fica para trás.",
+    t: "Tickets, usuários e base de conhecimento",
+    d: "Os tickets saem pela API de exportação do Zendesk com comentários e campos; usuários e organizações viram solicitantes e departamentos; os artigos do Help Center viram a base de conhecimento que o Copilot usa para responder.",
   },
   {
     n: "03",
-    t: "Go live com a equipe treinada",
-    d: "Configuração do portal, automações e Copilot, com treinamento e acompanhamento em português.",
+    t: "Macros viram modelos, gatilhos viram regras",
+    d: "O que hoje é contorno vira processo: macros passam a modelos de chamado, gatilhos a regras de automação, e entram mudança com aprovação e problema com causa raiz, ligados aos ativos. Treinamento e acompanhamento em português.",
   },
 ];
 
@@ -87,7 +87,7 @@ const FAQ = [
   },
   {
     q: "Dá para migrar o histórico de tickets?",
-    a: "Sim. Chamados, categorias, usuários e ativos são importados na migração. O diagnóstico inicial define exatamente o que vem, em que formato e em qual ordem, para o go live não perder rastreabilidade.",
+    a: "Sim. Os tickets do Zendesk são exportados com comentários, tags e campos personalizados e importados no SysAid; o número original pode ir num campo de referência, para quem buscar um chamado antigo achar. O diagnóstico define o recorte (todo o histórico ou só os últimos anos) e o que acontece com tickets ainda abertos no dia da virada.",
   },
   {
     q: "Qual é a diferença prática da IA do SysAid?",
