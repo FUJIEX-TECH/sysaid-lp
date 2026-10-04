@@ -5,14 +5,14 @@ import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Gestão de Serviços de TI (ITSM): Guia Completo | SysAid Brasil",
+  title: "Gestão de Serviços de TI: Processos, ITIL 4 e Como Implantar | SysAid Brasil",
   description:
-    "Gestão de serviços de TI, também chamada de gerenciamento de serviços de TI ou ITSM: conceito, estágios do ciclo de vida, processos da ITIL, carreira e o que uma ferramenta precisa ter.",
+    "Gestão de serviços de TI na prática: a cadeia de valor e as quatro dimensões da ITIL 4, as práticas que toda operação precisa, o que mudou desde a ITIL v3 e um roteiro de implantação em cinco passos.",
   alternates: { canonical: "/gestao-de-servicos-de-ti" },
   openGraph: {
-    title: "Gestão de Serviços de TI (ITSM): Guia Completo",
+    title: "Gestão de Serviços de TI: Processos, ITIL 4 e Como Implantar",
     description:
-      "Conceito, estágios do ciclo de vida, processos da ITIL, carreira e critérios para escolher uma ferramenta de gestão de serviços de TI.",
+      "Cadeia de valor e dimensões da ITIL 4, práticas essenciais, ITIL v3 × ITIL 4 e um roteiro de implantação em cinco passos.",
     locale: "pt_BR",
     type: "article",
   },
@@ -71,30 +71,110 @@ const ESTAGIOS = [
   },
 ];
 
-const PROCESSOS = [
+const CADEIA = [
   {
-    t: "Gestão de incidentes",
-    d: "Restabelecer o serviço no menor tempo possível quando algo quebra. É o processo mais visível e onde a maioria das operações começa.",
+    n: "01",
+    t: "Planejar",
+    d: "Dar direção comum a tudo o que vem depois: quais serviços manter, onde investir, que nível de risco a TI aceita e como isso se liga aos objetivos da empresa.",
   },
   {
-    t: "Gestão de requisições",
-    d: "Atender pedidos padronizados, como acesso, equipamento e licença, por um catálogo com fluxo e aprovação definidos.",
+    n: "02",
+    t: "Melhorar",
+    d: "Atravessa todas as outras atividades. Cada número da operação (SLA estourado, chamado reaberto, mudança que falhou) vira uma ação de melhoria com dono e prazo.",
   },
   {
-    t: "Gestão de problemas",
-    d: "Procurar a causa raiz do incidente que se repete, para que ele pare de acontecer em vez de ser resolvido toda semana.",
+    n: "03",
+    t: "Engajar",
+    d: "Entender o que usuários, áreas de negócio e fornecedores precisam e manter a conversa aberta com eles. É aqui que entram o portal, a pesquisa de satisfação e as reuniões de serviço.",
   },
   {
-    t: "Gestão de mudanças",
-    d: "Avaliar risco, aprovar e registrar alterações no ambiente, para que a correção de hoje não vire a indisponibilidade de amanhã.",
+    n: "04",
+    t: "Desenhar e fazer a transição",
+    d: "Garantir que um serviço novo ou alterado chegue à operação atendendo à expectativa de prazo, custo e qualidade, sem quebrar o que já funciona.",
   },
   {
-    t: "Gestão de ativos e configuração",
-    d: "Saber o que a empresa tem, onde está, com quem, sob qual contrato e como cada item se relaciona com os demais.",
+    n: "05",
+    t: "Obter ou construir",
+    d: "Conseguir os componentes do serviço, seja comprando, contratando ou desenvolvendo: licenças, equipamentos, integrações, configurações.",
   },
   {
-    t: "Gestão de nível de serviço",
-    d: "Acordar prazos e metas com o negócio, medir o cumprimento e usar o resultado para decidir onde investir.",
+    n: "06",
+    t: "Entregar e dar suporte",
+    d: "A operação do dia: o serviço funcionando de acordo com o combinado, com incidentes e requisições atendidos dentro do prazo.",
+  },
+];
+
+const DIMENSOES = [
+  {
+    t: "Organizações e pessoas",
+    d: "Estrutura, papéis, competências e cultura. Uma fila bem desenhada não sobrevive a um time que não sabe quem decide o quê.",
+  },
+  {
+    t: "Informação e tecnologia",
+    d: "Os dados que o serviço gera e consome e as ferramentas que sustentam o trabalho: plataforma de chamados, base de conhecimento, inventário, automação.",
+  },
+  {
+    t: "Parceiros e fornecedores",
+    d: "Quem está fora da TI e mesmo assim faz parte da entrega: operadora, fabricante, prestador de suporte. Contrato sem SLA espelhado vira gargalo invisível.",
+  },
+  {
+    t: "Fluxos de valor e processos",
+    d: "Como o trabalho anda de ponta a ponta, do pedido do usuário ao resultado entregue, e onde ele para esperando alguém.",
+  },
+];
+
+const PRATICAS = [
+  {
+    t: "Central de serviço (service desk)",
+    d: "O ponto único de contato com o usuário. Registra tudo, dá número e prazo a cada pedido e é a origem dos dados que alimentam as outras práticas.",
+  },
+  {
+    t: "Gerenciamento de incidentes",
+    d: "Volta o serviço ao normal quando algo para. O indicador que importa é o tempo até o usuário voltar a trabalhar, não o tempo até o chamado ser fechado.",
+  },
+  {
+    t: "Gerenciamento de requisições",
+    d: "Trata o pedido previsível (acesso, equipamento, software) por um catálogo com fluxo de aprovação. É a prática que mais se beneficia de automação.",
+  },
+  {
+    t: "Gerenciamento de problemas",
+    d: "Olha para os incidentes em conjunto, encontra o padrão e elimina a causa. Sem ela, o service desk resolve o mesmo defeito toda segunda-feira.",
+  },
+  {
+    t: "Habilitação de mudanças",
+    d: "O nome da ITIL 4 para a gestão de mudanças. Classifica cada alteração pelo risco: mudança padrão já nasce aprovada, mudança normal passa por avaliação.",
+  },
+  {
+    t: "Gerenciamento de ativos e de configuração",
+    d: "O inventário que responde o que existe, onde está, quanto custa e do que depende. É o que permite avaliar o impacto real de um incidente ou de uma mudança.",
+  },
+];
+
+const IMPLANTAR = [
+  {
+    n: "01",
+    t: "Fotografe o ponto de partida",
+    d: "Antes de desenhar processo, meça: quantos chamados por mês, por qual canal, quanto tempo levam, quais tipos se repetem. É o primeiro princípio da ITIL 4, começar de onde você está.",
+  },
+  {
+    n: "02",
+    t: "Feche os canais paralelos",
+    d: "Um canal oficial de abertura, com registro obrigatório. WhatsApp, e-mail direto e pedido de corredor continuam existindo, mas passam a virar chamado.",
+  },
+  {
+    n: "03",
+    t: "Defina prioridade e prazo",
+    d: "Uma matriz simples de impacto × urgência e um SLA por categoria. Comece com poucas categorias: dá para refinar depois com dado real.",
+  },
+  {
+    n: "04",
+    t: "Monte o catálogo dos pedidos repetidos",
+    d: "Os dez tipos de requisição mais frequentes viram itens de catálogo com formulário e fluxo próprio. Só isso costuma tirar boa parte do vaivém de e-mail.",
+  },
+  {
+    n: "05",
+    t: "Revise todo mês e amplie",
+    d: "Com três a seis meses de dado, o próprio número indica a próxima prática: problemas, se o mesmo incidente volta; mudanças, se a correção de ontem derruba o serviço de hoje.",
   },
 ];
 
@@ -131,16 +211,24 @@ const FAQ = [
     a: "No ciclo de vida descrito pela ITIL, são cinco estágios: estratégia de serviço (decidir o que oferecer e a que custo), desenho de serviço (projetar níveis de serviço, capacidade e continuidade), transição de serviço (levar o serviço à operação com gestão de mudanças e testes), operação de serviço (o dia a dia de incidentes, requisições e service desk) e melhoria contínua (medir e ajustar). A ITIL 4 reorganizou esses estágios em uma cadeia de valor de serviço, mas a lógica do ciclo permanece.",
   },
   {
-    q: "Qual a diferença entre gestão de serviços de TI e ITIL?",
-    a: "Gestão de serviços de TI é a prática; ITIL é o guia. A ITIL é a biblioteca de boas práticas mais adotada no mundo para orientar como fazer a gestão de serviços, com recomendações de processos, papéis e fluxos. Uma empresa pode praticar a gestão de serviços sem seguir a ITIL à risca, e pode adotar a ITIL sem implementar tudo que está descrito nela. Há ainda a ISO/IEC 20000, que é a norma certificável baseada nos mesmos princípios.",
+    q: "O que mudou da ITIL v3 para a ITIL 4?",
+    a: "A ITIL v3 organizava a gestão de serviços em um ciclo de vida de cinco estágios e 26 processos. A ITIL 4, publicada em 2019, troca o ciclo por um sistema de valor de serviço, com uma cadeia de seis atividades (planejar, melhorar, engajar, desenhar e fazer a transição, obter ou construir, entregar e dar suporte), quatro dimensões e sete princípios orientadores. Os processos viraram 34 práticas, e a ênfase saiu do controle de etapas para o valor entregue, com espaço para métodos ágeis, DevOps e automação.",
+  },
+  {
+    q: "Quais são as quatro dimensões da ITIL 4?",
+    a: "Organizações e pessoas; informação e tecnologia; parceiros e fornecedores; e fluxos de valor e processos. A ideia é que nenhum serviço funciona olhando só para uma delas: uma ferramenta excelente com papéis mal definidos, ou um processo bem desenhado com um fornecedor sem SLA, entrega menos do que promete.",
+  },
+  {
+    q: "Quais são os princípios orientadores da ITIL 4?",
+    a: "São sete: foco no valor; começar de onde você está; progredir de forma iterativa com feedback; colaborar e promover visibilidade; pensar e trabalhar de forma holística; manter a simplicidade e a praticidade; otimizar e automatizar. Funcionam como critério de decisão quando o manual não cobre o caso, o que, na operação real, é quase sempre.",
   },
   {
     q: "O que faz um analista de gestão de serviços de TI?",
     a: "O analista de gestão de serviços de TI desenha, opera e melhora os processos da área: define categorias e matriz de prioridade, mantém o catálogo de serviços, acompanha SLA e indicadores, e configura a plataforma de ITSM que sustenta a operação. As certificações mais pedidas são a ITIL Foundation e o domínio de alguma ferramenta de mercado. É uma evolução comum para quem começa no service desk.",
   },
   {
-    q: "Por onde começar a implantar a gestão de serviços de TI?",
-    a: "Pelo básico que gera dado: um canal único de abertura de chamados, categorias que façam sentido para a sua realidade, uma matriz simples de prioridade e SLA por tipo de chamado. Com isso rodando por alguns meses, os números mostram onde a operação dói, e a escolha dos próximos processos deixa de ser opinião. O erro comum não é começar pequeno, é escolher uma ferramenta que não acompanhe o amadurecimento.",
+    q: "Como implantar a gestão de serviços de TI?",
+    a: "Em cinco passos: medir o ponto de partida (volume, canais, tempo de atendimento); fechar os canais paralelos num canal oficial de abertura; definir uma matriz de prioridade e um SLA por categoria; transformar os pedidos mais repetidos em itens de catálogo; e revisar os números todo mês para decidir a próxima prática a implantar. Começar pequeno não é o erro; o erro é desenhar dezenas de processos antes de ter o dado que mostra quais deles fazem falta.",
   },
   {
     q: "Qual ferramenta usar para a gestão de serviços de TI?",
@@ -162,9 +250,9 @@ const faqSchema = {
 const articleSchema = {
   "@context": "https://schema.org",
   "@type": "Article",
-  headline: "Gestão de Serviços de TI (ITSM): o guia completo",
+  headline: "Gestão de Serviços de TI: processos, ITIL 4 e como implantar",
   description:
-    "Conceito, estágios do ciclo de vida, processos da ITIL, carreira e critérios para escolher uma ferramenta de gestão de serviços de TI.",
+    "Cadeia de valor e dimensões da ITIL 4, práticas essenciais, ITIL v3 × ITIL 4 e um roteiro de implantação em cinco passos.",
   inLanguage: "pt-BR",
   // Aponta pro Organization declarado no layout (@id) em vez de repetir a entidade.
   author: { "@type": "Organization", "@id": "https://itsm.sysaid.com.br/#organization", name: "SysAid Brasil" },
@@ -219,23 +307,20 @@ export default function GestaoDeServicosDeTiPage() {
             <span className="hero__glow" />
           </div>
           <div className="container container--narrow hero__inner">
-            <p className="eyebrow">Guia · ITSM</p>
+            <p className="eyebrow">Guia · Processos e ITIL 4</p>
             <h1>
-              Gestão de Serviços de TI: o{" "}
-              <span className="hl">guia completo</span>
+              Gestão de Serviços de TI:{" "}
+              <span className="hl">processos, ITIL 4</span> e como implantar
             </h1>
             <p className="hero__sub">
-              Gestão de serviços de TI, gerenciamento de serviços de TI, GSTI,
-              ITSM: nomes diferentes para a mesma disciplina, a que organiza
-              como a área de tecnologia entrega valor ao negócio na forma de
-              serviços. Neste guia: o conceito, os cinco estágios do ciclo de
-              vida, os processos da ITIL, a carreira na área e o que uma
-              ferramenta precisa ter.
+              Saber o que é gestão de serviços de TI é a parte fácil. Este guia
+              é sobre fazer: como a ITIL 4 organiza o trabalho em uma cadeia de
+              valor e quatro dimensões, quais práticas sustentam uma operação
+              de verdade, o que mudou desde a ITIL v3 e um roteiro de
+              implantação em cinco passos para sair do atendimento por
+              demanda.
             </p>
-            <p className="hero__trust">
-              Guia escrito pela SysAid Brasil · Mais de 400 empresas no país
-              usam a plataforma
-            </p>
+            <p className="hero__trust">Guia escrito pela SysAid Brasil</p>
           </div>
         </section>
 
@@ -281,9 +366,10 @@ export default function GestaoDeServicosDeTiPage() {
               canal único, o pedido entra numa fila com prioridade definida por
               critério, o prazo é acompanhado por SLA e o resultado vira
               indicador. É essa mudança, de reativo para operado como serviço,
-              que o termo descreve. Quem quiser começar pelo vocabulário
-              vizinho pode ler o nosso guia{" "}
-              <a href="/o-que-e-itsm">o que é ITSM</a>, a página sobre{" "}
+              que o termo descreve. Se você ainda está no conceito, comece pelo
+              guia <a href="/o-que-e-itsm">o que é ITSM</a>, que explica a
+              disciplina do zero e a diferença entre ITSM e ITIL. Vale também a
+              página sobre{" "}
               <a href="/sistema-de-chamados">sistema de chamados</a>, o alicerce
               de qualquer operação, e o guia sobre{" "}
               <a href="/service-desk">service desk</a>, a função que faz o
@@ -293,17 +379,137 @@ export default function GestaoDeServicosDeTiPage() {
           </div>
         </section>
 
-        {/* ESTAGIOS DO CICLO DE VIDA */}
+        {/* ITIL v3 x ITIL 4 */}
+        <section className="section">
+          <div className="container container--narrow">
+            <div className="section-head">
+              <p className="eyebrow">O guia de referência</p>
+              <h2>Da ITIL v3 à ITIL 4: de processos em sequência a valor entregue</h2>
+            </div>
+            <p className="section-head__sub">
+              A ITIL é a biblioteca de boas práticas que a maior parte das
+              operações usa como referência. A versão 3 descrevia a gestão de
+              serviços como um ciclo de vida em cinco estágios, com 26
+              processos encaixados em cada um. Funcionava, mas convidava a
+              tratar o manual como checklist. A ITIL 4, publicada em 2019,
+              trocou o ciclo por um sistema de valor: uma cadeia de seis
+              atividades que se combinam conforme a demanda, quatro dimensões
+              que precisam andar juntas e sete princípios orientadores. Os
+              processos viraram 34 práticas, e a pergunta deixou de ser
+              &ldquo;qual etapa vem agora&rdquo; para ser &ldquo;o que isso
+              entrega de valor para quem usa o serviço&rdquo;. Para uma visão
+              geral da relação entre ITSM, ITIL e a norma ISO/IEC 20000, veja o
+              guia <a href="/o-que-e-itsm">o que é ITSM</a>.
+            </p>
+          </div>
+        </section>
+
+        {/* CADEIA DE VALOR */}
+        <section className="section section--soft">
+          <div className="container">
+            <div className="section-head">
+              <p className="eyebrow">ITIL 4 · Cadeia de valor de serviço</p>
+              <h2>As seis atividades da cadeia de valor</h2>
+              <p className="section-head__sub">
+                Não é uma sequência fixa. Um chamado simples passa por engajar
+                e entregar; um serviço novo atravessa quase todas. O que a
+                cadeia garante é que nenhuma atividade fique sem dono.
+              </p>
+            </div>
+            <div className="grid-3">
+              {CADEIA.map((e) => (
+                <div className="step" key={e.n}>
+                  <span className="step__n">{e.n}</span>
+                  <h3>{e.t}</h3>
+                  <p>{e.d}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* DIMENSOES */}
         <section className="section">
           <div className="container">
             <div className="section-head">
-              <p className="eyebrow">O ciclo de vida</p>
-              <h2>Os cinco estágios da gestão de serviços de TI</h2>
+              <p className="eyebrow">ITIL 4 · Quatro dimensões</p>
+              <h2>As quatro dimensões que todo serviço precisa equilibrar</h2>
               <p className="section-head__sub">
-                A ITIL descreve a gestão de serviços como um ciclo de vida em
-                cinco estágios. A ITIL 4 reorganizou o modelo em uma cadeia de
-                valor, mas a lógica do ciclo segue sendo a melhor forma de
-                entender a disciplina inteira.
+                A causa mais comum de projeto de ITSM que não decola é cuidar
+                de uma dimensão só, quase sempre a ferramenta.
+              </p>
+            </div>
+            <div className="grid-2">
+              {DIMENSOES.map((c) => (
+                <div className="card" key={c.t}>
+                  <h3>{c.t}</h3>
+                  <p>{c.d}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* PRATICAS */}
+        <section className="section section--soft">
+          <div className="container">
+            <div className="section-head">
+              <p className="eyebrow">Na prática</p>
+              <h2>As seis práticas que sustentam uma operação de serviços de TI</h2>
+              <p className="section-head__sub">
+                Das 34 práticas da ITIL 4, estas são as que quase toda
+                operação implanta primeiro. O{" "}
+                <a href="/sistema-de-chamados">sistema de chamados</a> é a base
+                das três primeiras; a{" "}
+                <a href="/service-desk">central de serviço</a> é onde todas se
+                encontram com o usuário.
+              </p>
+            </div>
+            <div className="grid-3">
+              {PRATICAS.map((p) => (
+                <div className="card" key={p.t}>
+                  <h3>{p.t}</h3>
+                  <p>{p.d}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* COMO IMPLANTAR */}
+        <section className="section">
+          <div className="container">
+            <div className="section-head">
+              <p className="eyebrow">Roteiro</p>
+              <h2>Como implantar a gestão de serviços de TI em cinco passos</h2>
+              <p className="section-head__sub">
+                Vale para uma TI de cinco pessoas ou de cinquenta. O que muda é
+                o volume, não a ordem.
+              </p>
+            </div>
+            <div className="grid-3">
+              {IMPLANTAR.map((e) => (
+                <div className="step" key={e.n}>
+                  <span className="step__n">{e.n}</span>
+                  <h3>{e.t}</h3>
+                  <p>{e.d}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ESTAGIOS ITIL v3 */}
+        <section className="section section--soft">
+          <div className="container">
+            <div className="section-head">
+              <p className="eyebrow">Ainda cai em prova</p>
+              <h2>Os cinco estágios do ciclo de vida da ITIL v3</h2>
+              <p className="section-head__sub">
+                Muita apostila, concurso e ementa de graduação ainda usa o
+                modelo da v3. Ele continua útil para entender a disciplina
+                inteira, e cada estágio tem correspondência na cadeia de valor
+                da ITIL 4.
               </p>
             </div>
             <div className="grid-3">
@@ -318,53 +524,8 @@ export default function GestaoDeServicosDeTiPage() {
           </div>
         </section>
 
-        {/* ITIL x ISO */}
-        <section className="section section--soft">
-          <div className="container container--narrow">
-            <div className="section-head">
-              <p className="eyebrow">A confusão mais comum</p>
-              <h2>ITSM é a prática. ITIL é o guia. ISO 20000 é a norma</h2>
-            </div>
-            <p className="section-head__sub">
-              Gestão de serviços de TI é o que a empresa faz. ITIL é a
-              biblioteca de boas práticas mais adotada no mundo para orientar
-              como fazer, com recomendações de processos, papéis e fluxos. E a
-              ISO/IEC 20000 é a norma internacional certificável construída
-              sobre os mesmos princípios, usada quando a empresa precisa provar
-              a maturidade da operação para clientes ou órgãos reguladores. Uma
-              empresa pode praticar a gestão de serviços sem seguir a ITIL à
-              risca, e pode adotar a ITIL sem buscar a certificação. Tratar o
-              guia como obrigação é o motivo de muitos projetos travarem antes
-              de entregar valor.
-            </p>
-          </div>
-        </section>
-
-        {/* PROCESSOS */}
-        <section className="section">
-          <div className="container">
-            <div className="section-head">
-              <p className="eyebrow">Na prática</p>
-              <h2>Os processos que sustentam a gestão de serviços de TI</h2>
-              <p className="section-head__sub">
-                Ninguém implanta todos de uma vez. A maioria das operações
-                começa pelos dois primeiros e agrega os demais conforme o volume
-                e a maturidade crescem.
-              </p>
-            </div>
-            <div className="grid-3">
-              {PROCESSOS.map((p) => (
-                <div className="card" key={p.t}>
-                  <h3>{p.t}</h3>
-                  <p>{p.d}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* CARREIRA */}
-        <section className="section section--soft">
+        <section className="section">
           <div className="container">
             <div className="section-head">
               <p className="eyebrow">Quem trabalha com isso</p>

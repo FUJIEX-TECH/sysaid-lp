@@ -219,6 +219,7 @@ img, svg { max-width: 100%; height: auto; display: block; }
 
 /* GRIDS / CARDS */
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; max-width: 900px; margin: 0 auto; }
 .pain h3 { color: var(--green-700); }
 .pain { padding: 8px 4px; }
 .card {
@@ -353,6 +354,7 @@ img, svg { max-width: 100%; height: auto; display: block; }
 
 @media (max-width: 620px) {
   .grid-3 { grid-template-columns: 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
   .compare { grid-template-columns: 1fr; }
   .leadform__row { flex-direction: column; }
   .proof__logos { gap: 26px; }

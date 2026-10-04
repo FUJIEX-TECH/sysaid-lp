@@ -5,12 +5,12 @@ import SiteFooter from "@/components/SiteFooter";
 import { breadcrumbSchema, datasDaPagina, ORG_ID } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "O que é ITSM? Guia de Gestão de Serviços de TI — SysAid Brasil",
+  title: "O que é ITSM? Conceito, ITIL e Como Escolher uma Plataforma | SysAid Brasil",
   description:
     "ITSM é a gestão de serviços de TI: processos, papéis e ferramentas para entregar TI como serviço. Entenda o conceito, a relação com ITIL, os processos principais e como escolher uma plataforma.",
   alternates: { canonical: "/o-que-e-itsm" },
   openGraph: {
-    title: "O que é ITSM? Guia de Gestão de Serviços de TI",
+    title: "O que é ITSM? Conceito, ITIL e Como Escolher uma Plataforma",
     description:
       "Conceito, relação com ITIL, processos principais e critérios para escolher uma plataforma de ITSM.",
     locale: "pt_BR",
@@ -253,7 +253,12 @@ export default function OQueEItsmPage() {
               <p className="section-head__sub">
                 Ninguém implanta todos de uma vez. A maioria das operações
                 começa pelos dois primeiros e agrega os demais conforme o volume
-                e a maturidade crescem.
+                e a maturidade crescem. Como cada um aparece na ITIL 4 e um
+                roteiro de implantação passo a passo estão no guia de{" "}
+                <a href="/gestao-de-servicos-de-ti">
+                  gestão de serviços de TI: processos e ITIL 4
+                </a>
+                .
               </p>
             </div>
             <div className="grid-3">
