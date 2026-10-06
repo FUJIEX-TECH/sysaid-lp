@@ -274,7 +274,7 @@ export default function MovideskPage() {
               {COMPARE.map((row) => (
                 <div className="ctable__row" role="row" key={row.crit}>
                   <span className="ctable__crit" role="cell">{row.crit}</span>
-                  <span className="ctable__them" role="cell">{row.them}</span>
+                  <span className="ctable__them" role="cell" data-label="Movidesk">{row.them}</span>
                   <span className="ctable__mine" role="cell">{row.sysaid}</span>
                 </div>
               ))}
