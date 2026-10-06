@@ -28,6 +28,7 @@ export const PAGINAS: Record<string, Pagina> = {
   "/movidesk": { nome: "SysAid x Movidesk", publicado: "2026-08-05", modificado: "2026-10-04", prioridade: 0.8, frequencia: "monthly" },
   "/topdesk": { nome: "SysAid x TOPdesk", publicado: "2026-08-07", modificado: "2026-10-04", prioridade: 0.8, frequencia: "monthly" },
   "/servicenow": { nome: "SysAid x ServiceNow", publicado: "2026-10-06", modificado: "2026-10-06", prioridade: 0.8, frequencia: "monthly" },
+  "/cmdb": { nome: "CMDB", publicado: "2026-10-06", modificado: "2026-10-06", prioridade: 0.8, frequencia: "monthly" },
 };
 
 const url = (path: string) => (path === "/" ? `${BASE}/` : `${BASE}${path}`);

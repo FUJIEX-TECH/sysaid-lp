@@ -19,6 +19,7 @@ const GUIAS = [
   { href: "/sistema-de-chamados", label: "Sistema de chamados" },
   { href: "/gestao-de-servicos-de-ti", label: "Gestão de serviços de TI" },
   { href: "/esm", label: "ESM: gestão de serviços corporativos" },
+  { href: "/cmdb", label: "CMDB: o que é e como implantar" },
 ];
 
 function Coluna({
