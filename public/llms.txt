@@ -28,6 +28,7 @@ com o SysAid, como migrar sem perder histórico, e as perguntas que a equipe de 
 
 - [Alternativa ao GLPI](https://itsm.sysaid.com.br/glpi): GLPI é open source e sem custo de licença, mas o custo total aparece em infraestrutura, plugins e horas de time. Comparativo critério a critério, custo total de operação e migração de chamados, categorias, usuários e ativos.
 - [Alternativa ao Movidesk](https://itsm.sysaid.com.br/movidesk): para operações que cresceram além do Movidesk. O que trava quando o volume aumenta, comparativo com o SysAid, e migração preservando o histórico da TI.
+- [Alternativa ao ServiceNow](https://itsm.sysaid.com.br/servicenow): o que é o ServiceNow, como ele cobra (preço não publicado, licença por usuário e por pacote) e quando faz sentido. Comparativo de ITSM com a SysAid: ITIL 4, CMDB, IA nativa e ESM sem projeto de plataforma, com suporte em português.
 - [Alternativa ao TopDesk](https://itsm.sysaid.com.br/topdesk): TopDesk é forte em CMDB e gestão de ativos, mas a resolução do chamado continua dependendo do analista. Comparativo e migração preservando o CMDB já modelado.
 - [Alternativa ao Zendesk](https://itsm.sysaid.com.br/zendesk): Zendesk é feito para atendimento ao cliente, não para ITSM. O que falta para a TI (gestão de ativos, processos da ITIL, SLA interno), comparativo e migração.
 - [Alternativa ao Jira Service Management](https://itsm.sysaid.com.br/jira): o SysAid entrega ITSM completo sem a complexidade e os add-ons pagos do Jira, com gestão de ativos inclusa. Comparativo critério a critério e migração.

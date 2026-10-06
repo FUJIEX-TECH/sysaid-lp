@@ -319,6 +319,13 @@ export default function OQueEItsmPage() {
                 </div>
               ))}
             </div>
+            <p className="section-head__sub" style={{ marginTop: 32 }}>
+              Se a comparação já tem nome, veja lado a lado com as três
+              perguntas acima: <a href="/servicenow">SysAid x ServiceNow</a>,{" "}
+              <a href="/topdesk">SysAid x TOPdesk</a>,{" "}
+              <a href="/jira">SysAid x Jira Service Management</a> e{" "}
+              <a href="/glpi">SysAid x GLPI</a>.
+            </p>
           </div>
         </section>
 
