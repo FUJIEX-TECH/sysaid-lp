@@ -380,7 +380,7 @@ export default function EsmPage() {
               {ESM_X_ITSM.map((r) => (
                 <div className="ctable__row" role="row" key={r.crit}>
                   <span className="ctable__crit" role="cell">{r.crit}</span>
-                  <span className="ctable__them" role="cell">{r.itsm}</span>
+                  <span className="ctable__them" role="cell" data-label="ITSM">{r.itsm}</span>
                   <span className="ctable__mine" role="cell">{r.esm}</span>
                 </div>
               ))}
