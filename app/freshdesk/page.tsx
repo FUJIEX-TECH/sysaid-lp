@@ -7,7 +7,7 @@ import { datasDaPagina } from "@/lib/seo";
 export const metadata: Metadata = {
   title: "Alternativa ao Freshdesk e Freshservice | ITSM com IA — SysAid",
   description:
-    "Freshdesk atende clientes; o Freshservice cobra IA por créditos. Conheça o ITSM com IA que resolve até 90% dos chamados, com ativos, SLA e suporte em português.",
+    "Freshdesk atende clientes; no Freshservice a IA é adicional por agente. Conheça o ITSM com IA que resolve até 90% dos chamados, com ativos, SLA e suporte em português.",
   alternates: { canonical: "/freshdesk" },
   openGraph: {
     title: "Alternativa ao Freshdesk e ao Freshservice: ITSM com IA — SysAid Brasil",
@@ -87,7 +87,7 @@ const FAQ = [
   },
   {
     q: "E comparado ao Freshservice, que é o ITSM da mesma suíte?",
-    a: "O Freshservice cobre ITSM, mas mantém o modelo da suíte: preço por agente, IA por créditos e recursos-chave nos planos superiores. No SysAid, Copilot, gestão de ativos e workflows fazem parte da plataforma, com implementação e suporte local em português inclusos. No G2, o SysAid tem nota 4,5/5, com mais de 750 avaliações.",
+    a: "O Freshservice cobre ITSM, mas mantém o modelo da suíte: preço por agente, IA como adicional de US$ 29 por agente ao mês (Freddy AI Copilot, no plano Pro) e gestão de mudanças e problemas só a partir do Pro. No SysAid, Copilot, gestão de ativos e workflows fazem parte da plataforma, com implementação e suporte local em português inclusos. No G2, o SysAid tem nota 4,5/5, com mais de 750 avaliações.",
   },
   {
     q: "Dá para migrar o histórico de tickets?",
