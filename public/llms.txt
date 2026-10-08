@@ -33,6 +33,7 @@ com o SysAid, como migrar sem perder histórico, e as perguntas que a equipe de 
 - [Alternativa ao TopDesk](https://itsm.sysaid.com.br/topdesk): TopDesk é forte em CMDB e gestão de ativos, mas a resolução do chamado continua dependendo do analista. Comparativo e migração preservando o CMDB já modelado.
 - [Alternativa ao Zendesk](https://itsm.sysaid.com.br/zendesk): Zendesk é feito para atendimento ao cliente, não para ITSM. O que falta para a TI (gestão de ativos, processos da ITIL, SLA interno), comparativo e migração.
 - [Alternativa ao Jira Service Management](https://itsm.sysaid.com.br/jira): o SysAid entrega ITSM completo sem a complexidade e os add-ons pagos do Jira, com gestão de ativos inclusa. Comparativo critério a critério e migração.
+- [Alternativa ao Freshservice](https://itsm.sysaid.com.br/freshservice): o que é o Freshservice (o ITSM da Freshworks, diferente do Freshdesk), quanto custa (planos de US$ 19 a US$ 99 por agente/mês em outubro de 2026, com gestão de mudança e problema só no Pro e Copilot como adicional de US$ 29) e quando faz sentido. Comparativo com a SysAid: ITIL 4, CMDB e IA no mesmo pacote, com suporte em português.
 - [Alternativa ao Freshdesk](https://itsm.sysaid.com.br/freshdesk): Freshdesk atende cliente externo; a TI precisa de ITSM. O que falta para a operação interna, comparativo e migração.
 
 ## Definições de referência

@@ -22,12 +22,13 @@ export const PAGINAS: Record<string, Pagina> = {
   "/gestao-de-servicos-de-ti": { nome: "Gestão de serviços de TI", publicado: "2026-08-13", modificado: "2026-10-04", prioridade: 0.8, frequencia: "monthly" },
   "/esm": { nome: "ESM", publicado: "2026-10-01", modificado: "2026-10-01", prioridade: 0.8, frequencia: "monthly" },
   "/glpi": { nome: "SysAid x GLPI", publicado: "2026-07-28", modificado: "2026-10-04", prioridade: 0.8, frequencia: "monthly" },
-  "/freshdesk": { nome: "SysAid x Freshdesk", publicado: "2026-08-05", modificado: "2026-10-04", prioridade: 0.8, frequencia: "monthly" },
+  "/freshdesk": { nome: "SysAid x Freshdesk", publicado: "2026-08-05", modificado: "2026-10-08", prioridade: 0.8, frequencia: "monthly" },
   "/zendesk": { nome: "SysAid x Zendesk", publicado: "2026-08-05", modificado: "2026-10-04", prioridade: 0.8, frequencia: "monthly" },
   "/jira": { nome: "SysAid x Jira", publicado: "2026-08-05", modificado: "2026-10-04", prioridade: 0.8, frequencia: "monthly" },
   "/movidesk": { nome: "SysAid x Movidesk", publicado: "2026-08-05", modificado: "2026-10-04", prioridade: 0.8, frequencia: "monthly" },
   "/topdesk": { nome: "SysAid x TOPdesk", publicado: "2026-08-07", modificado: "2026-10-04", prioridade: 0.8, frequencia: "monthly" },
   "/servicenow": { nome: "SysAid x ServiceNow", publicado: "2026-10-06", modificado: "2026-10-06", prioridade: 0.8, frequencia: "monthly" },
+  "/freshservice": { nome: "SysAid x Freshservice", publicado: "2026-10-08", modificado: "2026-10-08", prioridade: 0.8, frequencia: "monthly" },
   "/cmdb": { nome: "CMDB", publicado: "2026-10-06", modificado: "2026-10-06", prioridade: 0.8, frequencia: "monthly" },
 };
 

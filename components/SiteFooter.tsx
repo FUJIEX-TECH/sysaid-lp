@@ -8,6 +8,7 @@ const COMPARATIVAS = [
   { href: "/movidesk", label: "SysAid vs Movidesk" },
   { href: "/topdesk", label: "SysAid vs TopDesk" },
   { href: "/freshdesk", label: "SysAid vs Freshdesk" },
+  { href: "/freshservice", label: "SysAid vs Freshservice" },
   { href: "/zendesk", label: "SysAid vs Zendesk" },
   { href: "/jira", label: "SysAid vs Jira Service Management" },
   { href: "/servicenow", label: "SysAid vs ServiceNow" },
