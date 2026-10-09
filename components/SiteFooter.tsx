@@ -21,6 +21,7 @@ const GUIAS = [
   { href: "/gestao-de-servicos-de-ti", label: "Gestão de serviços de TI" },
   { href: "/esm", label: "ESM: gestão de serviços corporativos" },
   { href: "/cmdb", label: "CMDB: o que é e como implantar" },
+  { href: "/itil-5", label: "ITIL 5: o que muda em relação ao ITIL 4" },
 ];
 
 function Coluna({

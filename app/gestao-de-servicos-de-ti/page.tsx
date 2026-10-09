@@ -399,7 +399,10 @@ export default function GestaoDeServicosDeTiPage() {
               &ldquo;qual etapa vem agora&rdquo; para ser &ldquo;o que isso
               entrega de valor para quem usa o serviço&rdquo;. Para uma visão
               geral da relação entre ITSM, ITIL e a norma ISO/IEC 20000, veja o
-              guia <a href="/o-que-e-itsm">o que é ITSM</a>.
+              guia <a href="/o-que-e-itsm">o que é ITSM</a>. Em 2026 saiu
+              a versão 5, que mantém os princípios e as práticas e troca a
+              cadeia de valor por um ciclo de vida de produto e serviço: o que
+              muda está no guia do <a href="/itil-5">ITIL 5</a>.
             </p>
           </div>
         </section>

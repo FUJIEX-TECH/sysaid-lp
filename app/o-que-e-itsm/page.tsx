@@ -239,7 +239,8 @@ export default function OQueEItsmPage() {
               Uma empresa pode praticar ITSM sem seguir a ITIL à risca, e pode
               adotar a ITIL sem implementar tudo que está descrito nela. A ITIL
               é referência, não obrigação, e tratá-la como obrigação é o motivo
-              de muitos projetos de ITSM travarem antes de entregar valor.
+              de muitos projetos de ITSM travarem antes de entregar valor. A
+              versão mais recente é o <a href="/itil-5">ITIL 5</a>, de 2026.
             </p>
           </div>
         </section>

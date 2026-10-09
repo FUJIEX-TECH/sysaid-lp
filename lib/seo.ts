@@ -17,9 +17,9 @@ type Pagina = {
 export const PAGINAS: Record<string, Pagina> = {
   "/": { nome: "SysAid Brasil", publicado: "2026-07-24", modificado: "2026-10-04", prioridade: 1, frequencia: "weekly" },
   "/sistema-de-chamados": { nome: "Sistema de chamados", publicado: "2026-08-04", modificado: "2026-10-02", prioridade: 0.9, frequencia: "monthly" },
-  "/o-que-e-itsm": { nome: "O que é ITSM", publicado: "2026-08-04", modificado: "2026-10-06", prioridade: 0.8, frequencia: "monthly" },
+  "/o-que-e-itsm": { nome: "O que é ITSM", publicado: "2026-08-04", modificado: "2026-10-09", prioridade: 0.8, frequencia: "monthly" },
   "/service-desk": { nome: "Service desk", publicado: "2026-09-30", modificado: "2026-10-01", prioridade: 0.8, frequencia: "monthly" },
-  "/gestao-de-servicos-de-ti": { nome: "Gestão de serviços de TI", publicado: "2026-08-13", modificado: "2026-10-04", prioridade: 0.8, frequencia: "monthly" },
+  "/gestao-de-servicos-de-ti": { nome: "Gestão de serviços de TI", publicado: "2026-08-13", modificado: "2026-10-09", prioridade: 0.8, frequencia: "monthly" },
   "/esm": { nome: "ESM", publicado: "2026-10-01", modificado: "2026-10-01", prioridade: 0.8, frequencia: "monthly" },
   "/glpi": { nome: "SysAid x GLPI", publicado: "2026-07-28", modificado: "2026-10-04", prioridade: 0.8, frequencia: "monthly" },
   "/freshdesk": { nome: "SysAid x Freshdesk", publicado: "2026-08-05", modificado: "2026-10-08", prioridade: 0.8, frequencia: "monthly" },
@@ -30,6 +30,7 @@ export const PAGINAS: Record<string, Pagina> = {
   "/servicenow": { nome: "SysAid x ServiceNow", publicado: "2026-10-06", modificado: "2026-10-06", prioridade: 0.8, frequencia: "monthly" },
   "/freshservice": { nome: "SysAid x Freshservice", publicado: "2026-10-08", modificado: "2026-10-08", prioridade: 0.8, frequencia: "monthly" },
   "/cmdb": { nome: "CMDB", publicado: "2026-10-06", modificado: "2026-10-06", prioridade: 0.8, frequencia: "monthly" },
+  "/itil-5": { nome: "ITIL 5", publicado: "2026-10-09", modificado: "2026-10-09", prioridade: 0.7, frequencia: "monthly" },
 };
 
 const url = (path: string) => (path === "/" ? `${BASE}/` : `${BASE}${path}`);
