@@ -4,6 +4,8 @@ import { useRef, useState } from "react";
 import {
   isCorporateEmail,
   isFreeEmail,
+  isDisposableEmail,
+  getEmailDomain,
   CORPORATE_EMAIL_ERROR,
 } from "@/lib/email-domains";
 
@@ -88,6 +90,43 @@ export default function LeadForm({ variant = "hero", submitLabel }: Props) {
     }
   }
 
+  // trava de e-mail: registra o clique recusado (dominio + contador no banco,
+  // evento no GA4). Sem dedupe: cada clique recusado conta. So o dominio do
+  // webmail/descartavel sai pro GA4, nunca o e-mail.
+  async function reportBlocked(email: string) {
+    const dominio = getEmailDomain(email);
+    try {
+      const w = window as unknown as { gtag?: (...a: unknown[]) => void };
+      if (typeof w.gtag === "function") {
+        w.gtag("event", "trava_email", {
+          email_tipo: isDisposableEmail(email) ? "descartavel" : isFreeEmail(email) ? "webmail" : "outro",
+          email_dominio: isFreeEmail(email) || isDisposableEmail(email) ? dominio : "(outro)",
+        });
+      }
+    } catch {
+      // medicao nunca quebra o formulario
+    }
+    savedEmail.current = email;
+    try {
+      const res = await fetch("/api/lead/partial", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: leadId.current ?? undefined,
+          email,
+          blocked: true,
+          page_url: window.location.href,
+          referrer: document.referrer,
+          ...ensureUtm(),
+        }),
+      });
+      const data = await res.json();
+      if (data?.id) leadId.current = Number(data.id);
+    } catch {
+      // idem
+    }
+  }
+
   // etapa 2: grava nome+telefone, silenciosamente, quando os dois estiverem preenchidos
   async function saveNamePhonePartial(name: string, phone: string) {
     const key = `${name}|${phone}`;
@@ -146,6 +185,7 @@ export default function LeadForm({ variant = "hero", submitLabel }: Props) {
       // gravado no blur de propósito, pra medir quanto webmail bate na porta.
       if (!isCorporateEmail(email)) {
         setError(CORPORATE_EMAIL_ERROR);
+        void reportBlocked(email);
         return;
       }
       await saveEmailPartial(email);

@@ -25,6 +25,7 @@ const CSV_COLS: (keyof Lead)[] = [
   "created_at", "completion", "name", "email", "company", "phone", "num_admins",
   "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term",
   "gclid", "rdstation_status", "status", "page_url",
+  "blocked_domain", "blocked_count",
 ];
 
 function toCsv(rows: Lead[]): string {
@@ -192,6 +193,11 @@ export default function LeadsTable({
                   <span className={`pill pill--${l.completion === "complete" ? "sent" : "pending"}`}>
                     {l.completion === "complete" ? "Completo" : "Parcial"}
                   </span>
+                  {l.blocked_count > 0 && (
+                    <span className="pill pill--failed" title={`Trava recusou ${l.blocked_count}x (${l.blocked_domain ?? "?"})`}>
+                      Barrado{l.blocked_count > 1 ? ` ${l.blocked_count}x` : ""}
+                    </span>
+                  )}
                 </td>
                 <td>{l.name || "—"}</td>
                 <td>{l.email}</td>

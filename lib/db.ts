@@ -37,6 +37,9 @@ export type Lead = {
   status: string;
   notes: string | null;
   completion: string;
+  blocked_domain: string | null;
+  blocked_count: number;
+  blocked_at: string | null;
 };
 
 export type NewLead = Pick<
@@ -63,6 +66,8 @@ export type PartialLeadFields = {
   referrer?: string | null;
   user_agent?: string | null;
   ip?: string | null;
+  // trava de e-mail: dominio recusado neste clique (null = nao foi recusado)
+  blocked_domain?: string | null;
 };
 
 export async function insertLead(lead: NewLead): Promise<number> {
@@ -86,17 +91,20 @@ export async function insertLead(lead: NewLead): Promise<number> {
 // RD Station nem notificacao - so grava, pra nao perder o lead se ele sumir.
 export async function insertPartialLead(fields: PartialLeadFields): Promise<number> {
   const sql = getSql();
+  const blockedDomain = fields.blocked_domain ?? null;
   const rows = await sql`
     INSERT INTO leads (
       email, name, phone, company,
       utm_source, utm_medium, utm_campaign, utm_content, utm_term,
-      gclid, page_url, referrer, user_agent, ip, completion
+      gclid, page_url, referrer, user_agent, ip, completion,
+      blocked_domain, blocked_count, blocked_at
     ) VALUES (
       ${fields.email ?? null}, ${fields.name ?? null}, ${fields.phone ?? null}, ${fields.company ?? null},
       ${fields.utm_source ?? null}, ${fields.utm_medium ?? null}, ${fields.utm_campaign ?? null},
       ${fields.utm_content ?? null}, ${fields.utm_term ?? null},
       ${fields.gclid ?? null}, ${fields.page_url ?? null}, ${fields.referrer ?? null},
-      ${fields.user_agent ?? null}, ${fields.ip ?? null}, 'partial'
+      ${fields.user_agent ?? null}, ${fields.ip ?? null}, 'partial',
+      ${blockedDomain}, ${blockedDomain ? 1 : 0}, ${blockedDomain ? new Date().toISOString() : null}
     )
     RETURNING id
   `;
@@ -107,12 +115,18 @@ export async function insertPartialLead(fields: PartialLeadFields): Promise<numb
 // linhas com completion='partial' - nunca sobrescreve um lead ja finalizado.
 export async function updatePartialLead(id: number, fields: PartialLeadFields): Promise<boolean> {
   const sql = getSql();
+  const blockedDomain = fields.blocked_domain ?? null;
+  const blockedInc = blockedDomain ? 1 : 0;
   const rows = await sql`
     UPDATE leads SET
       email   = COALESCE(${fields.email ?? null}, email),
       name    = COALESCE(${fields.name ?? null}, name),
       phone   = COALESCE(${fields.phone ?? null}, phone),
-      company = COALESCE(${fields.company ?? null}, company)
+      company = COALESCE(${fields.company ?? null}, company),
+      -- trava: guarda o PRIMEIRO dominio recusado e conta os cliques recusados
+      blocked_domain = COALESCE(blocked_domain, ${blockedDomain}),
+      blocked_count  = blocked_count + ${blockedInc},
+      blocked_at     = COALESCE(blocked_at, CASE WHEN ${blockedInc} > 0 THEN now() END)
     WHERE id = ${id} AND completion = 'partial'
     RETURNING id
   `;

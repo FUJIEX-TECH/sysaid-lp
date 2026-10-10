@@ -57,6 +57,10 @@ export const partialLeadSchema = z.object({
   referrer: z.string().max(1000).optional().or(z.literal("")),
 
   website: z.string().max(512).optional(), // honeypot
+
+  // true quando o clique em "Agendar" foi recusado pela trava de e-mail
+  // corporativo (o server confere o dominio de novo antes de contar)
+  blocked: z.boolean().optional(),
 });
 
 export type PartialLeadInput = z.infer<typeof partialLeadSchema>;

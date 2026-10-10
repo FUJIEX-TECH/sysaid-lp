@@ -54,3 +54,12 @@ DO $$ BEGIN
   ALTER TABLE leads ADD CONSTRAINT leads_completion_check CHECK (completion IN ('partial', 'complete'));
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+
+-- trava de e-mail corporativo (10/10/2026): o que ela barra, sem PII nova.
+-- blocked_domain = primeiro dominio nao corporativo (webmail/descartavel) que
+-- bateu na trava nesta linha; fica gravado mesmo se a pessoa trocar pra um
+-- e-mail corporativo depois (o campo email e sobrescrito, este nao).
+-- blocked_count = quantos cliques em "Agendar" a trava recusou nesta linha.
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS blocked_domain TEXT;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS blocked_count  INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS blocked_at     TIMESTAMPTZ;

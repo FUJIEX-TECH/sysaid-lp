@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { partialLeadSchema, nullify } from "@/lib/validation";
 import { insertPartialLead, updatePartialLead } from "@/lib/db";
+import { getEmailDomain, isCorporateEmail } from "@/lib/email-domains";
 
 export const runtime = "nodejs";
 
@@ -36,8 +37,15 @@ export async function POST(req: NextRequest) {
     null;
   const userAgent = req.headers.get("user-agent") || null;
 
+  // trava de e-mail: so conta se o client avisou E o dominio de fato nao e
+  // corporativo (nao confia no flag sozinho). Grava so o dominio, nunca mais
+  // que isso: o e-mail inteiro ja estava na linha parcial.
+  const email = nullify(d.email);
+  const blocked_domain =
+    d.blocked === true && email && !isCorporateEmail(email) ? getEmailDomain(email) || null : null;
+
   const fields = {
-    email: nullify(d.email),
+    email,
     name: nullify(d.name),
     phone: nullify(d.phone),
     company: nullify(d.company),
@@ -51,6 +59,7 @@ export async function POST(req: NextRequest) {
     referrer: nullify(d.referrer),
     user_agent: userAgent,
     ip,
+    blocked_domain,
   };
 
   try {
