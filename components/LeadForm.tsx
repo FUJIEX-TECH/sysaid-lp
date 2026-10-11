@@ -58,6 +58,8 @@ export default function LeadForm({ variant = "hero", submitLabel }: Props) {
   const leadId = useRef<number | null>(null);
   const savedEmail = useRef<string>("");
   const savedNamePhone = useRef<string>("");
+  // gravacao do e-mail em andamento (blur): quem precisa do id espera por ela
+  const pendingEmailSave = useRef<Promise<void> | null>(null);
   const utm = useRef<Record<string, string>>({});
 
   function ensureUtm() {
@@ -66,9 +68,17 @@ export default function LeadForm({ variant = "hero", submitLabel }: Props) {
   }
 
   // etapa 1: grava o e-mail sozinho, silenciosamente, ao sair do campo
-  async function saveEmailPartial(email: string) {
-    if (!email || !email.includes("@") || email === savedEmail.current) return;
+  function saveEmailPartial(email: string): Promise<void> {
+    if (!email || !email.includes("@") || email === savedEmail.current) {
+      return pendingEmailSave.current ?? Promise.resolve();
+    }
     savedEmail.current = email;
+    const p = doSaveEmailPartial(email);
+    pendingEmailSave.current = p;
+    return p;
+  }
+
+  async function doSaveEmailPartial(email: string) {
     try {
       const res = await fetch("/api/lead/partial", {
         method: "POST",
@@ -106,6 +116,9 @@ export default function LeadForm({ variant = "hero", submitLabel }: Props) {
     } catch {
       // medicao nunca quebra o formulario
     }
+    // o clique no botao dispara o blur do e-mail junto: espera essa gravacao
+    // terminar pra usar o mesmo id (senao nasce uma 2a linha parcial)
+    if (pendingEmailSave.current) await pendingEmailSave.current;
     savedEmail.current = email;
     try {
       const res = await fetch("/api/lead/partial", {
