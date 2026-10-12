@@ -5,9 +5,9 @@ import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Alternativa ao Freshdesk e Freshservice | ITSM com IA — SysAid",
+  title: "Alternativa ao Freshdesk e Freshservice com IA | SysAid",
   description:
-    "Freshdesk atende clientes; no Freshservice a IA é adicional por agente. Conheça o ITSM com IA que resolve até 90% dos chamados, com ativos, SLA e suporte em português.",
+    "Freshdesk atende clientes; no Freshservice a IA é adicional por agente. ITSM com IA que resolve até 90% dos chamados, com ativos e suporte em português.",
   alternates: { canonical: "/freshdesk" },
   openGraph: {
     title: "Alternativa ao Freshdesk e ao Freshservice: ITSM com IA — SysAid Brasil",

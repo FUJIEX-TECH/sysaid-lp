@@ -5,9 +5,9 @@ import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Alternativa ao TopDesk | ITSM com IA para a sua TI — SysAid Brasil",
+  title: "Alternativa ao TopDesk: ITSM com IA para a TI | SysAid",
   description:
-    "TopDesk é forte em CMDB e Asset Management, mas a resolução ainda depende do analista. Conheça a plataforma ITSM com IA que resolve até 90% dos chamados antes de virarem ticket, com suporte em português.",
+    "TopDesk é forte em CMDB e ativos, mas a resolução ainda depende do analista. ITSM com IA que resolve até 90% dos chamados, com suporte em português.",
   alternates: { canonical: "/topdesk" },
   openGraph: {
     title: "Alternativa ao TopDesk: ITSM com IA — SysAid Brasil",

@@ -5,9 +5,9 @@ import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Alternativa ao Movidesk | ITSM com IA para a sua TI — SysAid Brasil",
+  title: "Alternativa ao Movidesk: ITSM com IA para a TI | SysAid",
   description:
-    "Sua operação cresceu além do Movidesk? Conheça a plataforma ITSM com IA que resolve até 90% dos chamados antes de virarem ticket, com gestão de ativos, SLA e suporte em português.",
+    "Sua operação cresceu além do Movidesk? ITSM com IA que resolve até 90% dos chamados antes de virarem ticket, com ativos, SLA e suporte em português.",
   alternates: { canonical: "/movidesk" },
   openGraph: {
     title: "Alternativa ao Movidesk: ITSM com IA — SysAid Brasil",

@@ -5,9 +5,9 @@ import SiteFooter from "@/components/SiteFooter";
 import { breadcrumbSchema, datasDaPagina, ORG_ID } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "O que é ITSM? Conceito, ITIL e Como Escolher uma Plataforma | SysAid Brasil",
+  title: "O que é ITSM? Conceito, ITIL e como escolher | SysAid",
   description:
-    "ITSM é a gestão de serviços de TI: processos, papéis e ferramentas para entregar TI como serviço. Entenda o conceito, a relação com ITIL, os processos principais e como escolher uma plataforma.",
+    "ITSM é a gestão de serviços de TI: processos, papéis e ferramentas para entregar TI como serviço. Conceito, relação com ITIL e como escolher a plataforma.",
   alternates: { canonical: "/o-que-e-itsm" },
   openGraph: {
     title: "O que é ITSM? Conceito, ITIL e Como Escolher uma Plataforma",

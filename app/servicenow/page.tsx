@@ -10,7 +10,7 @@ import { datasDaPagina } from "@/lib/seo";
 export const metadata: Metadata = {
   title: "ServiceNow ITSM: o que é, preço e alternativa | SysAid",
   description:
-    "O que é o ServiceNow, como ele cobra e quando faz sentido. Compare com a SysAid: ITSM com ITIL 4, CMDB e IA, sem projeto de plataforma e com suporte em português.",
+    "O que é o ServiceNow, como ele cobra e quando faz sentido. Compare com a SysAid: ITSM com ITIL 4, CMDB e IA, sem projeto de plataforma e em português.",
   alternates: { canonical: "/servicenow" },
   openGraph: {
     title: "Alternativa ao ServiceNow para ITSM — SysAid Brasil",

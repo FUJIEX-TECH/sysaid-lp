@@ -5,9 +5,9 @@ import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Alternativa ao Jira Service Management | ITSM com IA — SysAid Brasil",
+  title: "Alternativa ao Jira Service Management com IA | SysAid",
   description:
-    "IA de nível empresarial numa plataforma tudo em um: o SysAid entrega ITSM completo sem a complexidade e os add-ons do Jira. Gestão de ativos inclusa e suporte em português.",
+    "ITSM completo com IA nativa, sem a complexidade e os add-ons do Jira Service Management. Gestão de ativos inclusa e suporte em português.",
   alternates: { canonical: "/jira" },
   openGraph: {
     title: "Alternativa ao Jira Service Management: ITSM com IA — SysAid Brasil",

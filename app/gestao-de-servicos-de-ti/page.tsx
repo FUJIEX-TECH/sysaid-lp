@@ -5,9 +5,9 @@ import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Gestão de Serviços de TI: Processos, ITIL 4 e Como Implantar | SysAid Brasil",
+  title: "Gestão de Serviços de TI: ITIL 4 e como implantar | SysAid",
   description:
-    "Gestão de serviços de TI na prática: a cadeia de valor e as quatro dimensões da ITIL 4, as práticas que toda operação precisa, o que mudou desde a ITIL v3 e um roteiro de implantação em cinco passos.",
+    "Gestão de serviços de TI na prática: cadeia de valor e dimensões da ITIL 4, práticas essenciais, o que mudou desde a v3 e um roteiro de implantação.",
   alternates: { canonical: "/gestao-de-servicos-de-ti" },
   openGraph: {
     title: "Gestão de Serviços de TI: Processos, ITIL 4 e Como Implantar",

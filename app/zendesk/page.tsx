@@ -5,9 +5,9 @@ import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Alternativa ao Zendesk | ITSM com IA para a sua TI — SysAid Brasil",
+  title: "Alternativa ao Zendesk: ITSM com IA para a TI | SysAid",
   description:
-    "Zendesk é atendimento ao cliente. Sua TI precisa de ITSM. Conheça a plataforma com IA que resolve até 90% dos chamados antes de virarem ticket, com gestão de ativos, SLA e suporte em português.",
+    "Zendesk é atendimento ao cliente; sua TI precisa de ITSM. Plataforma com IA que resolve até 90% dos chamados, com ativos, SLA e suporte em português.",
   alternates: { canonical: "/zendesk" },
   openGraph: {
     title: "Alternativa ao Zendesk: ITSM com IA — SysAid Brasil",

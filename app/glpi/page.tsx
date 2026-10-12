@@ -5,9 +5,9 @@ import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Alternativa ao GLPI | ITSM com IA que resolve o chamado — SysAid Brasil",
+  title: "Alternativa ao GLPI: ITSM com IA e suporte local | SysAid",
   description:
-    "Roda GLPI e a TI segue apagando incêndio? Conheça a plataforma ITSM com IA que resolve até 90% dos chamados antes de virarem ticket, com gestão de ativos, SLA e suporte local em português.",
+    "Roda GLPI e a TI segue apagando incêndio? ITSM com IA que resolve até 90% dos chamados antes de virarem ticket, com ativos, SLA e suporte em português.",
   alternates: { canonical: "/glpi" },
   openGraph: {
     title: "Alternativa ao GLPI: ITSM com IA — SysAid Brasil",

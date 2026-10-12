@@ -19,9 +19,9 @@ const besley = Besley({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://itsm.sysaid.com.br"),
-  title: "Software ITSM com IA | Service Desk e Gestão de TI — SysAid Brasil",
+  title: "Software ITSM com IA para Service Desk | SysAid Brasil",
   description:
-    "Plataforma de ITSM com IA que resolve até 90% dos chamados antes de virarem ticket. Service desk, gestão de ativos e automação de TI em uma só solução. +400 empresas no Brasil.",
+    "Plataforma ITSM com IA que resolve até 90% dos chamados antes de virarem ticket: service desk, gestão de ativos e automação de TI numa só solução.",
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },

@@ -5,9 +5,9 @@ import SiteFooter from "@/components/SiteFooter";
 import { breadcrumbSchema, datasDaPagina, ORG_ID } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Sistema de Chamados de TI com IA | Abertura, SLA e Portal — SysAid Brasil",
+  title: "Sistema de Chamados de TI com IA, SLA e Portal | SysAid",
   description:
-    "Sistema de chamados que centraliza abertura, priorização e resolução do suporte de TI, com portal de autoatendimento, SLA e IA que resolve até 90% dos chamados antes de virarem ticket.",
+    "Sistema de chamados que centraliza abertura, priorização e resolução do suporte de TI, com portal, SLA e IA que resolve até 90% dos chamados.",
   alternates: { canonical: "/sistema-de-chamados" },
   openGraph: {
     title: "Sistema de Chamados de TI com IA — SysAid Brasil",

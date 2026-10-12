@@ -5,9 +5,9 @@ import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Service Desk: o que é, o que faz e como escolher | SysAid Brasil",
+  title: "Service Desk: o que é, o que faz e como escolher | SysAid",
   description:
-    "Service desk é o ponto único de contato entre os usuários e a TI. O que é, o que faz na prática, a diferença para help desk, os processos da ITIL e como escolher a ferramenta.",
+    "Service desk é o ponto único de contato entre usuários e TI: o que faz, a diferença para help desk, os processos da ITIL e como escolher a ferramenta.",
   alternates: { canonical: "/service-desk" },
   openGraph: {
     title: "Service Desk: o que é, o que faz e como escolher",
