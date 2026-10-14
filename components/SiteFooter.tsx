@@ -17,6 +17,7 @@ const COMPARATIVAS = [
 const GUIAS = [
   { href: "/o-que-e-itsm", label: "O que é ITSM" },
   { href: "/service-desk", label: "Service desk" },
+  { href: "/help-desk", label: "Help desk" },
   { href: "/sistema-de-chamados", label: "Sistema de chamados" },
   { href: "/gestao-de-servicos-de-ti", label: "Gestão de serviços de TI" },
   { href: "/esm", label: "ESM: gestão de serviços corporativos" },

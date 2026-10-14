@@ -281,7 +281,7 @@ export default function ServiceDeskPage() {
           <div className="container">
             <div className="section-head">
               <p className="eyebrow">Na prática</p>
-              <h2>O que um service desk faz</h2>
+              <h2>O que faz um service desk</h2>
               <p className="section-head__sub">
                 A função não se resume a atender telefone. São seis
                 responsabilidades encadeadas, e é a última delas que costuma
@@ -310,7 +310,9 @@ export default function ServiceDeskPage() {
                 Os dois termos aparecem trocados o tempo todo, inclusive em
                 material de fornecedor. A diferença é de escopo, e ela importa
                 na hora de escolher ferramenta: quem compra pensando em help
-                desk costuma trocar de sistema dois anos depois.
+                desk costuma trocar de sistema dois anos depois. O lado do
+                help desk está no guia{" "}
+                <a href="/help-desk">o que é help desk</a>.
               </p>
             </div>
             <div className="grid-3">
