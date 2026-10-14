@@ -27,9 +27,18 @@ export async function POST(req: NextRequest) {
   }
   const d = parsed.data;
 
-  // honeypot: se preenchido, finge sucesso e descarta (bot)
+  // honeypot: se preenchido, finge sucesso e descarta (bot ou autofill).
+  // "hp: true" avisa o formulario pra NAO disparar a conversao do Google Ads:
+  // antes a /obrigado contava como lead um envio que nunca entrou no banco
+  // (14/10/2026: conversao na TopDesk sem linha no banco). Log sem dado pessoal.
   if (d.website && d.website.length > 0) {
-    return NextResponse.json({ ok: true, id: null });
+    console.warn("honeypot (final) descartou envio:", {
+      dominio: d.email.split("@")[1] ?? null,
+      utm_campaign: d.utm_campaign ?? null,
+      gclid: d.gclid ? "sim" : "nao",
+      website_len: d.website.length,
+    });
+    return NextResponse.json({ ok: true, id: null, hp: true });
   }
 
   const ip =

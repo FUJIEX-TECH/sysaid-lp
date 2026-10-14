@@ -25,9 +25,10 @@ export async function POST(req: NextRequest) {
   }
   const d = parsed.data;
 
-  // honeypot: finge sucesso e descarta, sem gravar nada
+  // honeypot: finge sucesso e descarta, sem gravar nada (log sem dado pessoal)
   if (d.website && d.website.length > 0) {
-    return NextResponse.json({ ok: true, id: null });
+    console.warn("honeypot (parcial) descartou envio:", { website_len: d.website.length });
+    return NextResponse.json({ ok: true, id: null, hp: true });
   }
 
   const ip =
