@@ -14,6 +14,14 @@ type NotifyLead = {
   utm_source: string | null;
   gclid: string | null;
   page_url: string | null;
+  form?: string | null;
+};
+
+const FORM_LABEL: Record<string, string> = {
+  lp: "LP ITSM",
+  demo: "site sysaid.com.br · Agende uma demonstração",
+  trial: "site sysaid.com.br · Testar grátis",
+  contato: "site sysaid.com.br · Contato",
 };
 
 export async function notifyNewLead(lead: NotifyLead): Promise<{ ok: boolean; detail: string }> {
@@ -26,13 +34,14 @@ export async function notifyNewLead(lead: NotifyLead): Promise<{ ok: boolean; de
   }
 
   const resend = new Resend(apiKey);
+  const origem = FORM_LABEL[lead.form || "lp"] || FORM_LABEL.lp;
   const row = (label: string, value: string | null) =>
     value ? `<tr><td style="padding:4px 12px 4px 0;color:#626262">${label}</td><td style="padding:4px 0;font-weight:600">${value}</td></tr>` : "";
 
   const html = `
     <div style="font-family:Arial,sans-serif;max-width:520px">
-      <h2 style="color:#175d4a;margin:0 0 4px">Novo lead — LP ITSM</h2>
-      <p style="color:#626262;margin:0 0 16px">Lead #${lead.id} capturado na landing page.</p>
+      <h2 style="color:#175d4a;margin:0 0 4px">Novo lead — ${origem}</h2>
+      <p style="color:#626262;margin:0 0 16px">Lead #${lead.id} capturado pelo formulário.</p>
       <table style="border-collapse:collapse;font-size:15px">
         ${row("Nome", lead.name)}
         ${row("E-mail", lead.email)}
@@ -50,7 +59,7 @@ export async function notifyNewLead(lead: NotifyLead): Promise<{ ok: boolean; de
     const { error } = await resend.emails.send({
       from,
       to: to.split(",").map((s) => s.trim()),
-      subject: `Novo lead ITSM: ${lead.name || lead.email}${lead.company ? " — " + lead.company : ""}`,
+      subject: `Novo lead ${lead.form && lead.form !== "lp" ? "site" : "ITSM"}: ${lead.name || lead.email}${lead.company ? " — " + lead.company : ""}`,
       html,
     });
     if (error) return { ok: false, detail: JSON.stringify(error).slice(0, 300) };

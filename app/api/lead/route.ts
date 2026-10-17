@@ -1,26 +1,37 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { finalizeLeadSchema, nullify } from "@/lib/validation";
 import { finalizeLead, markRdStation } from "@/lib/db";
 import { sendToRdStation } from "@/lib/rdstation";
 import { notifyNewLead } from "@/lib/email";
+import { jsonWithCors, preflight } from "@/lib/cors";
+import { detectTestEnvironment } from "@/lib/ambiente";
 
 export const runtime = "nodejs";
+
+// Preflight CORS: o site novo sysaid.com.br (estatico, outro dominio) usa este
+// mesmo funil. Origens permitidas em lib/cors.ts.
+export async function OPTIONS(req: NextRequest) {
+  return preflight(req.headers.get("origin"));
+}
 
 // Finalizacao do formulario (passo 3): so aqui o lead vira completion='complete'
 // e dispara RD Station + notificacao interna. As etapas parciais (email,
 // nome+telefone) vivem em app/api/lead/partial/route.ts e nunca chegam aqui
 // sozinhas - so gravam no banco.
 export async function POST(req: NextRequest) {
+  const origin = req.headers.get("origin");
+
   let body: unknown;
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ ok: false, error: "JSON inválido" }, { status: 400 });
+    return jsonWithCors(origin, { ok: false, error: "JSON inválido" }, { status: 400 });
   }
 
   const parsed = finalizeLeadSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json(
+    return jsonWithCors(
+      origin,
       { ok: false, error: "Dados inválidos", issues: parsed.error.flatten().fieldErrors },
       { status: 422 }
     );
@@ -36,9 +47,10 @@ export async function POST(req: NextRequest) {
       dominio: d.email.split("@")[1] ?? null,
       utm_campaign: d.utm_campaign ?? null,
       gclid: d.gclid ? "sim" : "nao",
+      form: d.form || "lp",
       website_len: d.website.length,
     });
-    return NextResponse.json({ ok: true, id: null, hp: true });
+    return jsonWithCors(origin, { ok: true, id: null, hp: true });
   }
 
   const ip =
@@ -46,6 +58,7 @@ export async function POST(req: NextRequest) {
     req.headers.get("x-real-ip") ||
     null;
   const userAgent = req.headers.get("user-agent") || null;
+  const form = d.form || "lp";
 
   const lead = {
     email: d.email.toLowerCase(),
@@ -72,7 +85,7 @@ export async function POST(req: NextRequest) {
     id = await finalizeLead(d.id ?? null, lead);
   } catch (err) {
     console.error("finalizeLead falhou:", err);
-    return NextResponse.json({ ok: false, error: "Erro ao gravar" }, { status: 500 });
+    return jsonWithCors(origin, { ok: false, error: "Erro ao gravar" }, { status: 500 });
   }
 
   // 2. integracoes best-effort: nao derrubam o lead se falharem.
@@ -82,10 +95,19 @@ export async function POST(req: NextRequest) {
   if (process.env.DISABLE_INTEGRATIONS === "true") {
     console.log(`[DISABLE_INTEGRATIONS] lead ${id} finalizado - RD Station e e-mail pulados`, lead);
     await markRdStation(id, "failed", "pulado (DISABLE_INTEGRATIONS=true, teste local)").catch(() => {});
-    return NextResponse.json({ ok: true, id });
+    return jsonWithCors(origin, { ok: true, id });
   }
 
-  const rd = await sendToRdStation(lead);
+  // Envio de teste (stg.sysaid.com.br, preview, localhost): grava no banco com o
+  // page_url do ambiente, mas nao manda pro RD Station nem avisa por e-mail.
+  const hostDeTeste = detectTestEnvironment(origin, lead.page_url);
+  if (hostDeTeste) {
+    console.log(`[ambiente de teste: ${hostDeTeste}] lead ${id} finalizado - RD Station e e-mail pulados`);
+    await markRdStation(id, "failed", `pulado (ambiente de teste: ${hostDeTeste})`).catch(() => {});
+    return jsonWithCors(origin, { ok: true, id, teste: hostDeTeste });
+  }
+
+  const rd = await sendToRdStation({ ...lead, form });
   await markRdStation(id, rd.ok ? "sent" : "failed", rd.detail).catch(() => {});
 
   notifyNewLead({
@@ -99,7 +121,8 @@ export async function POST(req: NextRequest) {
     utm_source: lead.utm_source,
     gclid: lead.gclid,
     page_url: lead.page_url,
+    form,
   }).catch((err) => console.error("notifyNewLead falhou:", err));
 
-  return NextResponse.json({ ok: true, id });
+  return jsonWithCors(origin, { ok: true, id });
 }
