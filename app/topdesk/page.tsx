@@ -165,16 +165,16 @@ export default function TopDeskPage() {
               <span className="hl">resolve o chamado</span>.
             </h1>
             <p className="hero__sub">
-              A plataforma ITSM com IA nativa que resolve até 90% dos chamados
-              antes de virarem ticket, com CMDB, gestão de ativos e suporte
-              local em português. Mais de 400 empresas no Brasil.
+              Mantenha o CMDB e ganhe a IA que fecha o chamado: até 90%
+              resolvidos antes de virarem ticket, migração do seu CMDB incluída e
+              suporte local em português. Mais de 400 empresas no Brasil.
             </p>
             <div className="hero__form">
               <LeadForm variant="hero" />
             </div>
             <p className="hero__trust">
-              Nota 4,5/5 no G2 (750+ avaliações) · Migração do CMDB incluída ·
-              Reconhecida por G2, Gartner e TrustRadius
+              Nota 4,5/5 no G2 (750+ avaliações) · Reconhecida por G2, Gartner e
+              TrustRadius
             </p>
           </div>
         </section>

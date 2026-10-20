@@ -166,16 +166,17 @@ export default function MovideskPage() {
               <span className="hl">ITSM de verdade</span>.
             </h1>
             <p className="hero__sub">
-              A plataforma ITSM com IA nativa que resolve até 90% dos chamados
-              antes de virarem ticket, com gestão de ativos, SLA e suporte local
-              em português. Mais de 400 empresas no Brasil.
+              Chamado de TI não é ticket de SAC. ITSM com IA nativa que resolve
+              até 90% dos chamados antes de virarem ticket, com mudanças, ativos
+              e SLA, e a migração do seu histórico do Movidesk incluída. Suporte
+              local em português.
             </p>
             <div className="hero__form">
               <LeadForm variant="hero" />
             </div>
             <p className="hero__trust">
-              Nota 4,5/5 no G2 (750+ avaliações) · Migração do histórico incluída · Reconhecida por
-              G2, Gartner e TrustRadius
+              Nota 4,5/5 no G2 (750+ avaliações) · Reconhecida por G2, Gartner e
+              TrustRadius
             </p>
           </div>
         </section>
