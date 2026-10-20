@@ -2,14 +2,15 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
+import { datasDaPagina } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Alternativa ao Freshdesk | ITSM com IA para a sua TI — SysAid Brasil",
+  title: "Alternativa ao Freshdesk e Freshservice | ITSM com IA — SysAid",
   description:
-    "Freshdesk atende clientes. Sua TI precisa de ITSM. Conheça a plataforma com IA que resolve até 90% dos chamados antes de virarem ticket, com gestão de ativos, SLA e suporte em português.",
+    "Freshdesk atende clientes; no Freshservice a IA é adicional por agente. Conheça o ITSM com IA que resolve até 90% dos chamados, com ativos, SLA e suporte em português.",
   alternates: { canonical: "/freshdesk" },
   openGraph: {
-    title: "Alternativa ao Freshdesk: ITSM com IA — SysAid Brasil",
+    title: "Alternativa ao Freshdesk e ao Freshservice: ITSM com IA — SysAid Brasil",
     description:
       "Do help desk de atendimento a uma plataforma ITSM completa com IA nativa, gestão de ativos e suporte em português. Nota 4,5/5 no G2, com mais de 750 avaliações.",
     locale: "pt_BR",
@@ -29,8 +30,8 @@ const TRAVAS = [
     d: "O Freshdesk nasceu para atender clientes. Chamado de TI vira ticket de suporte genérico: sem gestão de mudanças, problemas ou CMDB relacionando o incidente ao ativo.",
   },
   {
-    t: "O preço cresce junto com o time",
-    d: "Cobrança por agente, por mês. Cada analista novo, cada plantonista e cada estagiário de TI entra na fatura, e os recursos que importam ficam nos planos de cima.",
+    t: "Agente fixo, agente ocasional, plano de cima",
+    d: "Cada analista é uma licença mensal; quem só entra no plantão vira agente ocasional, com passe diário cobrado à parte. E recursos que a TI usa no dia a dia, como tickets pai e filho e mais de um horário de atendimento, moram nos planos Pro e Enterprise.",
   },
   {
     t: "IA vendida à parte",
@@ -41,12 +42,12 @@ const TRAVAS = [
     d: "Inventário, ciclo de vida e licenças de TI vivem no Freshservice, um produto separado da mesma suíte. Duas ferramentas, dois contratos, duas curvas de adoção.",
   },
   {
-    t: "Suporte global, realidade local",
-    d: "Fuso, idioma e fila internacional. Quando a operação para numa segunda de manhã, a distância do suporte vira parte do problema.",
+    t: "Aprovação costurada em regra de automação",
+    d: "As automações do Freshdesk se dividem entre criação de ticket, atualização de ticket e regras por tempo. Para aprovar uma mudança, a TI costura as três com respostas prontas e campos extras, e ainda fica sem comitê de mudança, janela de manutenção e plano de retorno.",
   },
   {
-    t: "Relatório de TI limitado",
-    d: "Métricas pensadas para CSAT e atendimento ao cliente. SLA de TI, auditoria e visão executiva da operação exigem customização ou exportação manual.",
+    t: "Analytics de atendimento, não de operação",
+    d: "Os relatórios giram em torno de satisfação, primeira resposta e produtividade do agente. Chamado por equipamento, licença vencendo ou taxa de mudança que deu errado viram planilha exportada no fim do mês.",
   },
 ];
 
@@ -64,18 +65,18 @@ const COMPARE = [
 const MIGRACAO = [
   {
     n: "01",
-    t: "Diagnóstico da sua operação",
-    d: "Mapeamos volume de chamados, categorias, filas, SLAs e os ativos que a sua TI atende hoje pelo Freshdesk.",
+    t: "Inventário do que você configurou",
+    d: "Levantamos grupos, tipos de ticket, campos personalizados, regras de automação, respostas prontas, políticas de SLA e horários de atendimento. Cada item ganha um destino no SysAid antes da virada.",
   },
   {
     n: "02",
-    t: "Migração da base e do histórico",
-    d: "Chamados, categorias, usuários e ativos são importados. O histórico da sua TI não fica para trás.",
+    t: "Tickets, contatos e a base de Soluções",
+    d: "Os tickets saem pela API do Freshdesk com conversas, notas privadas e anexos; contatos e empresas viram solicitantes e departamentos; os artigos de Soluções viram a base de conhecimento que o Copilot usa para responder.",
   },
   {
     n: "03",
-    t: "Go live com a equipe treinada",
-    d: "Configuração do portal, automações e Copilot, com treinamento e acompanhamento em português.",
+    t: "Ativos entram junto, sem segundo produto",
+    d: "O inventário vem da descoberta do SysAid (agente e varredura de rede) ou de planilha, e cada chamado passa a apontar para o equipamento. Treinamento e acompanhamento em português.",
   },
 ];
 
@@ -86,11 +87,11 @@ const FAQ = [
   },
   {
     q: "E comparado ao Freshservice, que é o ITSM da mesma suíte?",
-    a: "O Freshservice cobre ITSM, mas mantém o modelo da suíte: preço por agente, IA por créditos e recursos-chave nos planos superiores. No SysAid, Copilot, gestão de ativos e workflows fazem parte da plataforma, com implementação e suporte local em português inclusos. No G2, o SysAid tem nota 4,5/5, com mais de 750 avaliações.",
+    a: "O Freshservice cobre ITSM, mas mantém o modelo da suíte: preço por agente, IA como adicional de US$ 29 por agente ao mês (Freddy AI Copilot, no plano Pro) e gestão de mudanças e problemas só a partir do Pro. No SysAid, Copilot, gestão de ativos e workflows fazem parte da plataforma, com implementação e suporte local em português inclusos. No G2, o SysAid tem nota 4,5/5, com mais de 750 avaliações.",
   },
   {
     q: "Dá para migrar o histórico de tickets?",
-    a: "Sim. Chamados, categorias, usuários e ativos são importados na migração. O diagnóstico inicial define exatamente o que vem, em que formato e em qual ordem, para o go live não perder rastreabilidade.",
+    a: "Sim. Os tickets saem do Freshdesk pela API, com conversas, notas privadas, tags e campos personalizados, e entram no SysAid com o número original num campo de referência. Se parte da TI já usa o Freshservice, os ativos de lá vêm na mesma carga. O diagnóstico define o recorte do histórico e o que acontece com o que estiver aberto no dia da virada.",
   },
   {
     q: "Qual é a diferença prática da IA do SysAid?",
@@ -98,13 +99,14 @@ const FAQ = [
   },
   {
     q: "Quanto tempo leva a implantação?",
-    a: "A implantação típica é rápida e acompanhada por suporte local em português. O prazo exato depende do volume de dados a migrar e da maturidade da operação, e é definido no diagnóstico.",
+    a: "Depende de três coisas que o diagnóstico mede: quantos anos de tickets vêm, quantas regras de automação viram processo e se os ativos já têm inventário. Com isso medido, o cronograma sai na proposta, com implantação e suporte local em português.",
   },
 ];
 
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  ...datasDaPagina("/freshdesk"),
   mainEntity: FAQ.map((item) => ({
     "@type": "Question",
     name: item.q,
@@ -274,7 +276,7 @@ export default function FreshdeskPage() {
               {COMPARE.map((row) => (
                 <div className="ctable__row" role="row" key={row.crit}>
                   <span className="ctable__crit" role="cell">{row.crit}</span>
-                  <span className="ctable__them" role="cell">{row.them}</span>
+                  <span className="ctable__them" role="cell" data-label="Freshdesk">{row.them}</span>
                   <span className="ctable__mine" role="cell">{row.sysaid}</span>
                 </div>
               ))}
@@ -285,6 +287,9 @@ export default function FreshdeskPage() {
               publicadas na G2.com; comparativo elaborado pela SysAid Brasil
               com base em dados públicos das soluções.
             </p>
+            <p className="section-head__sub" style={{ marginTop: 32 }}>
+              Freshdesk e Freshservice são produtos diferentes da Freshworks: o primeiro é atendimento ao cliente, o segundo é a aposta deles em ITSM. Procurando o ITSM da Freshworks? Veja <a href="/freshservice">SysAid x Freshservice</a>, com planos, preço e o que entra em cada um. Se a dúvida é qual dos dois mundos a sua TI precisa, comece pelo guia <a href="/o-que-e-itsm">o que é ITSM</a> e pelo de <a href="/service-desk">service desk</a>. Ferramentas com perfil parecido: <a href="/zendesk">SysAid x Zendesk</a> e <a href="/movidesk">SysAid x Movidesk</a>.
+            </p>
           </div>
         </section>
 
@@ -293,7 +298,7 @@ export default function FreshdeskPage() {
           <div className="container">
             <div className="section-head">
               <p className="eyebrow">Como é a troca</p>
-              <h2>Sair do Freshdesk sem perder o histórico da sua TI</h2>
+              <h2>Sair do Freshdesk ou do Freshservice sem perder o histórico da sua TI</h2>
             </div>
             <div className="grid-3">
               {MIGRACAO.map((m) => (

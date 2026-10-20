@@ -8,8 +8,10 @@ const COMPARATIVAS = [
   { href: "/movidesk", label: "SysAid vs Movidesk" },
   { href: "/topdesk", label: "SysAid vs TopDesk" },
   { href: "/freshdesk", label: "SysAid vs Freshdesk" },
+  { href: "/freshservice", label: "SysAid vs Freshservice" },
   { href: "/zendesk", label: "SysAid vs Zendesk" },
   { href: "/jira", label: "SysAid vs Jira Service Management" },
+  { href: "/servicenow", label: "SysAid vs ServiceNow" },
 ];
 
 const GUIAS = [
@@ -18,6 +20,7 @@ const GUIAS = [
   { href: "/sistema-de-chamados", label: "Sistema de chamados" },
   { href: "/gestao-de-servicos-de-ti", label: "Gestão de serviços de TI" },
   { href: "/esm", label: "ESM: gestão de serviços corporativos" },
+  { href: "/cmdb", label: "CMDB: o que é e como implantar" },
 ];
 
 function Coluna({

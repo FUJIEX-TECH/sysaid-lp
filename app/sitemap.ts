@@ -1,22 +1,12 @@
 import type { MetadataRoute } from "next";
+import { BASE, PAGINAS } from "@/lib/seo";
 
-const BASE = "https://itsm.sysaid.com.br";
-
+// lastmod vem da data real de cada página (lib/seo.ts), não da hora do build.
 export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date();
-
-  return [
-    { url: `${BASE}/`, lastModified: now, changeFrequency: "weekly", priority: 1 },
-    { url: `${BASE}/sistema-de-chamados`, lastModified: now, changeFrequency: "monthly", priority: 0.9 },
-    { url: `${BASE}/o-que-e-itsm`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE}/service-desk`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE}/gestao-de-servicos-de-ti`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE}/esm`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE}/glpi`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE}/freshdesk`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE}/zendesk`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE}/jira`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE}/movidesk`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${BASE}/topdesk`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-  ];
+  return Object.entries(PAGINAS).map(([path, p]) => ({
+    url: path === "/" ? `${BASE}/` : `${BASE}${path}`,
+    lastModified: p.modificado,
+    changeFrequency: p.frequencia,
+    priority: p.prioridade,
+  }));
 }

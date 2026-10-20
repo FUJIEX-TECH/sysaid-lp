@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
+import { datasDaPagina } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Alternativa ao TopDesk | ITSM com IA para a sua TI — SysAid Brasil",
@@ -105,6 +106,7 @@ const FAQ = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  ...datasDaPagina("/topdesk"),
   mainEntity: FAQ.map((item) => ({
     "@type": "Question",
     name: item.q,
@@ -275,7 +277,7 @@ export default function TopDeskPage() {
               {COMPARE.map((row) => (
                 <div className="ctable__row" role="row" key={row.crit}>
                   <span className="ctable__crit" role="cell">{row.crit}</span>
-                  <span className="ctable__them" role="cell">{row.them}</span>
+                  <span className="ctable__them" role="cell" data-label="TopDesk">{row.them}</span>
                   <span className="ctable__mine" role="cell">{row.sysaid}</span>
                 </div>
               ))}
@@ -285,6 +287,9 @@ export default function TopDeskPage() {
               conforme avaliações de usuários publicadas na G2.com e preços
               públicos do fornecedor; comparativo elaborado pela SysAid Brasil
               com base em dados públicos das soluções.
+            </p>
+            <p className="section-head__sub" style={{ marginTop: 32 }}>
+              O TOPdesk vende ITSM e ESM na mesma plataforma, então a comparação justa é de processo e de IA, não de lista de módulos. Veja como o SysAid leva o atendimento a RH, facilities e financeiro na página de <a href="/esm">ESM (gestão de serviços corporativos)</a> e como os processos do ITIL 4 entram na rotina no guia de <a href="/gestao-de-servicos-de-ti">gestão de serviços de TI</a>. Na mesma faixa de mercado: <a href="/jira">SysAid x Jira Service Management</a> e <a href="/glpi">SysAid x GLPI</a>.
             </p>
           </div>
         </section>

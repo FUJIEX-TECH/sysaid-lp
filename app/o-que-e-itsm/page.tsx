@@ -2,14 +2,15 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
+import { breadcrumbSchema, datasDaPagina, ORG_ID } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "O que é ITSM? Guia de Gestão de Serviços de TI — SysAid Brasil",
+  title: "O que é ITSM? Conceito, ITIL e Como Escolher uma Plataforma | SysAid Brasil",
   description:
     "ITSM é a gestão de serviços de TI: processos, papéis e ferramentas para entregar TI como serviço. Entenda o conceito, a relação com ITIL, os processos principais e como escolher uma plataforma.",
   alternates: { canonical: "/o-que-e-itsm" },
   openGraph: {
-    title: "O que é ITSM? Guia de Gestão de Serviços de TI",
+    title: "O que é ITSM? Conceito, ITIL e Como Escolher uma Plataforma",
     description:
       "Conceito, relação com ITIL, processos principais e critérios para escolher uma plataforma de ITSM.",
     locale: "pt_BR",
@@ -117,6 +118,7 @@ const FAQ = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  ...datasDaPagina("/o-que-e-itsm"),
   mainEntity: FAQ.map((item) => ({
     "@type": "Question",
     name: item.q,
@@ -124,12 +126,35 @@ const faqSchema = {
   })),
 };
 
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  ...datasDaPagina("/o-que-e-itsm"),
+  mainEntityOfPage: "https://itsm.sysaid.com.br/o-que-e-itsm",
+  headline: "O que é ITSM? Conceito, ITIL e Como Escolher uma Plataforma",
+  description: metadata.description,
+  inLanguage: "pt-BR",
+  image: "https://itsm.sysaid.com.br/logos/logo.png",
+  author: { "@id": ORG_ID },
+  publisher: { "@id": ORG_ID },
+};
+
+const breadcrumb = breadcrumbSchema("/o-que-e-itsm");
+
 export default function OQueEItsmPage() {
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
       />
       <header className="site-header">
         <div className="container site-header__inner">
@@ -228,7 +253,12 @@ export default function OQueEItsmPage() {
               <p className="section-head__sub">
                 Ninguém implanta todos de uma vez. A maioria das operações
                 começa pelos dois primeiros e agrega os demais conforme o volume
-                e a maturidade crescem.
+                e a maturidade crescem. Como cada um aparece na ITIL 4 e um
+                roteiro de implantação passo a passo estão no guia de{" "}
+                <a href="/gestao-de-servicos-de-ti">
+                  gestão de serviços de TI: processos e ITIL 4
+                </a>
+                .
               </p>
             </div>
             <div className="grid-3">
@@ -289,6 +319,13 @@ export default function OQueEItsmPage() {
                 </div>
               ))}
             </div>
+            <p className="section-head__sub" style={{ marginTop: 32 }}>
+              Se a comparação já tem nome, veja lado a lado com as três
+              perguntas acima: <a href="/servicenow">SysAid x ServiceNow</a>,{" "}
+              <a href="/topdesk">SysAid x TOPdesk</a>,{" "}
+              <a href="/jira">SysAid x Jira Service Management</a> e{" "}
+              <a href="/glpi">SysAid x GLPI</a>.
+            </p>
           </div>
         </section>
 

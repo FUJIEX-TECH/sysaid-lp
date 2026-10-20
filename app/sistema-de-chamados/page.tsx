@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
+import { breadcrumbSchema, datasDaPagina, ORG_ID } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Sistema de Chamados de TI com IA | Abertura, SLA e Portal — SysAid Brasil",
@@ -125,6 +126,7 @@ const FAQ = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  ...datasDaPagina("/sistema-de-chamados"),
   mainEntity: FAQ.map((item) => ({
     "@type": "Question",
     name: item.q,
@@ -132,12 +134,34 @@ const faqSchema = {
   })),
 };
 
+// Página de produto/categoria: WebPage (não Article), com as datas reais.
+const webPageSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  ...datasDaPagina("/sistema-de-chamados"),
+  name: "Sistema de Chamados de TI com IA",
+  description: metadata.description,
+  inLanguage: "pt-BR",
+  publisher: { "@id": ORG_ID },
+  about: { "@type": "SoftwareApplication", name: "SysAid", applicationCategory: "BusinessApplication" },
+};
+
+const breadcrumb = breadcrumbSchema("/sistema-de-chamados");
+
 export default function SistemaDeChamadosPage() {
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
       />
       <header className="site-header">
         <div className="container site-header__inner">

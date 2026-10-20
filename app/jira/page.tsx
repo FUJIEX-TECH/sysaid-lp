@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
+import { datasDaPagina } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Alternativa ao Jira Service Management | ITSM com IA — SysAid Brasil",
@@ -105,6 +106,7 @@ const FAQ = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  ...datasDaPagina("/jira"),
   mainEntity: FAQ.map((item) => ({
     "@type": "Question",
     name: item.q,
@@ -275,7 +277,7 @@ export default function JiraPage() {
               {COMPARE.map((row) => (
                 <div className="ctable__row" role="row" key={row.crit}>
                   <span className="ctable__crit" role="cell">{row.crit}</span>
-                  <span className="ctable__them" role="cell">{row.them}</span>
+                  <span className="ctable__them" role="cell" data-label="Jira SM">{row.them}</span>
                   <span className="ctable__mine" role="cell">{row.sysaid}</span>
                 </div>
               ))}
@@ -285,6 +287,9 @@ export default function JiraPage() {
               respectivos titulares. Comparativo elaborado pela SysAid Brasil
               com base na documentação pública das soluções e em avaliações de
               usuários na G2.com.
+            </p>
+            <p className="section-head__sub" style={{ marginTop: 32 }}>
+              O Jira Service Management faz sentido quando o time de desenvolvimento já vive no Jira; para a TI de infraestrutura e suporte, o peso está em ativos, SLA e autoatendimento. O guia de <a href="/service-desk">service desk</a> detalha esses pontos, e a página de <a href="/esm">ESM</a> mostra como estender o atendimento para outras áreas. Outras comparações: <a href="/topdesk">SysAid x TOPdesk</a> e <a href="/zendesk">SysAid x Zendesk</a>.
             </p>
           </div>
         </section>

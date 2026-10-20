@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
+import { datasDaPagina } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Alternativa ao GLPI | ITSM com IA que resolve o chamado — SysAid Brasil",
@@ -106,6 +107,7 @@ const FAQ = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  ...datasDaPagina("/glpi"),
   mainEntity: FAQ.map((item) => ({
     "@type": "Question",
     name: item.q,
@@ -275,7 +277,7 @@ export default function GlpiPage() {
               {COMPARE.map((row) => (
                 <div className="ctable__row" role="row" key={row.crit}>
                   <span className="ctable__crit" role="cell">{row.crit}</span>
-                  <span className="ctable__them" role="cell">{row.glpi}</span>
+                  <span className="ctable__them" role="cell" data-label="GLPI">{row.glpi}</span>
                   <span className="ctable__mine" role="cell">{row.sysaid}</span>
                 </div>
               ))}
@@ -284,6 +286,9 @@ export default function GlpiPage() {
               GLPI é uma marca de seus respectivos titulares. Comparativo
               elaborado pela SysAid Brasil com base na documentação pública das
               soluções e em implantações reais.
+            </p>
+            <p className="section-head__sub" style={{ marginTop: 32 }}>
+              O GLPI nasceu como inventário e virou help desk; a pergunta de fundo é se a sua TI precisa de um sistema de chamados ou de uma plataforma de ITSM. O guia <a href="/o-que-e-itsm">o que é ITSM</a> separa as duas coisas, e o de <a href="/gestao-de-servicos-de-ti">processos de gestão de serviços de TI</a> mostra o que muda na operação. Se a cotação também tem ferramenta paga, veja <a href="/movidesk">SysAid x Movidesk</a> e <a href="/topdesk">SysAid x TOPdesk</a>.
             </p>
           </div>
         </section>
