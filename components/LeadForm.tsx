@@ -198,8 +198,9 @@ export default function LeadForm({ variant = "hero", submitLabel }: Props) {
         setSending(false);
         return;
       }
-      // marca o envio para a /obrigado disparar a conversao, e redireciona
-      sessionStorage.setItem("sysaid_lead", "1");
+      // marca o envio para a /obrigado disparar a conversao, e redireciona.
+      // Envio descartado pelo honeypot (hp) nao vira conversao: nao entrou no banco.
+      if (!data.hp) sessionStorage.setItem("sysaid_lead", "1");
       window.location.href = "/obrigado";
     } catch {
       setError("Erro de conexão. Tente novamente em instantes.");

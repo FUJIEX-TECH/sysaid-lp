@@ -16,14 +16,27 @@ type RdLead = {
   utm_content: string | null;
   utm_term: string | null;
   gclid: string | null;
+  form?: string | null;
 };
+
+// Identificador de conversao por formulario. O padrao ("site-fjx", o que o
+// Kaique ligou nas automacoes em 30/07/2026) vale pra LP e pra qualquer
+// formulario sem identificador proprio. Quando o Kaique passar os
+// identificadores dos formularios do WordPress (demo, teste gratis, contato),
+// basta definir na Vercel RDSTATION_IDENTIFIER_DEMO / _TRIAL / _CONTATO,
+// sem mexer em codigo.
+export function conversionIdentifierFor(form: string | null | undefined): string {
+  const padrao = process.env.RDSTATION_CONVERSION_IDENTIFIER || "site-fjx";
+  if (!form || form === "lp") return padrao;
+  const porForm = process.env[`RDSTATION_IDENTIFIER_${form.toUpperCase()}`];
+  return porForm && porForm.trim() ? porForm.trim() : padrao;
+}
 
 export type RdResult = { ok: boolean; detail: string };
 
 export async function sendToRdStation(lead: RdLead): Promise<RdResult> {
   const token = process.env.RDSTATION_TOKEN;
-  const identifier =
-    process.env.RDSTATION_CONVERSION_IDENTIFIER || "site-fjx";
+  const identifier = conversionIdentifierFor(lead.form);
 
   if (!token) {
     return { ok: false, detail: "RDSTATION_TOKEN ausente" };

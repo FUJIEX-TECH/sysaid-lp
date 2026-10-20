@@ -4,11 +4,15 @@ import { useMemo, useState } from "react";
 import type { Lead } from "@/lib/db";
 
 // extrai o caminho da pagina de origem a partir da URL completa gravada no lead
+// Caminho da pagina de origem. Lead da propria LP mostra so o caminho ("/movidesk");
+// lead de outro host (site novo sysaid.com.br, stg, localhost) mostra host + caminho,
+// pra distinguir a origem e achar os envios de teste de cara.
 function pagePath(url: string | null): string {
   if (!url) return "";
   try {
-    const p = new URL(url).pathname.replace(/\/$/, "");
-    return p === "" ? "/" : p;
+    const u = new URL(url);
+    const p = u.pathname.replace(/\/$/, "") || "/";
+    return u.host === "itsm.sysaid.com.br" ? p : `${u.host}${p}`;
   } catch {
     return "";
   }

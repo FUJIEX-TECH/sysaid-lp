@@ -4,6 +4,10 @@ import { isCorporateEmail, CORPORATE_EMAIL_ERROR } from "./email-domains";
 // Espelha os campos do formulario sys_LP (WPForms 2070):
 // email (gatilho, obrigatorio), nome e telefone obrigatorios, empresa opcional,
 // numero de administradores (select). UTMs + gclid capturados da URL.
+// Formularios que caem neste funil. "lp" = formulario da propria LP (padrao).
+export const FORM_IDS = z.enum(["lp", "demo", "trial", "contato"]);
+export type FormId = z.infer<typeof FORM_IDS>;
+
 export const leadSchema = z.object({
   // Só e-mail corporativo fecha o lead. Webmail gratuito e descartável são
   // barrados aqui (server), não só no client, senão bot/curl passa direto.
@@ -28,6 +32,12 @@ export const leadSchema = z.object({
 
   page_url: z.string().max(1000).optional().or(z.literal("")),
   referrer: z.string().max(1000).optional().or(z.literal("")),
+
+  // qual formulario mandou (site novo sysaid.com.br: demo, teste gratis, contato;
+  // a LP nao manda nada = "lp"). Define o identificador de conversao no RD Station
+  // (lib/rdstation.ts) e aparece no e-mail de notificacao. A pagina de origem
+  // continua em page_url.
+  form: FORM_IDS.optional().or(z.literal("")),
 
   // honeypot anti-spam: aceita qualquer valor aqui; a rota descarta em silencio
   // se vier preenchido (nao barrar na validacao pra nao "ensinar" o bot).
@@ -56,6 +66,7 @@ export const partialLeadSchema = z.object({
   page_url: z.string().max(1000).optional().or(z.literal("")),
   referrer: z.string().max(1000).optional().or(z.literal("")),
 
+  form: FORM_IDS.optional().or(z.literal("")),
   website: z.string().max(512).optional(), // honeypot
 });
 
