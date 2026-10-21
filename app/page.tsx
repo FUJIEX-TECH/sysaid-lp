@@ -13,6 +13,20 @@ const CLIENTES = [
   "cisco", "kpmg", "mcdonalds", "lufthansa", "ems",
 ];
 
+const NOME_CLIENTE: Record<string, string> = {
+  vale: "Vale", unimed: "Unimed", petrobras: "Petrobras", cocacola: "Coca-Cola",
+  siemens: "Siemens", cisco: "Cisco", kpmg: "KPMG", mcdonalds: "McDonald's",
+  lufthansa: "Lufthansa", ems: "EMS",
+};
+
+const SELOS = [
+  { src: "badge_2", alt: "SourceForge Leader Winter 2025" },
+  { src: "badge_5", alt: "TrustRadius Top Rated 2025" },
+  { src: "badge_7", alt: "GetApp Category Leaders 2025" },
+  { src: "badge_3", alt: "Gartner Peer Insights Customers' Choice 2025" },
+  { src: "badge_6", alt: "TrustRadius Buyer's Choice 2025" },
+];
+
 const MODULOS = [
   {
     t: "Service Desk e chamados",
@@ -154,7 +168,7 @@ export default function Home() {
                 <Image
                   key={c}
                   src={`/clientes/${c}.png`}
-                  alt={c}
+                  alt={`${NOME_CLIENTE[c] ?? c}, cliente SysAid`}
                   width={150}
                   height={60}
                   className="proof__logo"
@@ -281,11 +295,11 @@ export default function Home() {
               </div>
             </div>
             <div className="badges">
-              {["badge_2", "badge_5", "badge_7", "badge_3", "badge_6"].map((b) => (
+              {SELOS.map((b) => (
                 <Image
-                  key={b}
-                  src={`/badges/${b}.svg`}
-                  alt="Reconhecimento SysAid"
+                  key={b.src}
+                  src={`/badges/${b.src}.svg`}
+                  alt={`SysAid: ${b.alt}`}
                   width={78}
                   height={78}
                   className="badge"
