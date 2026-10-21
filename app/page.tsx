@@ -3,6 +3,7 @@ import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
 import type { Metadata } from "next";
 import { datasDaPagina } from "@/lib/seo";
+import { altCliente } from "@/lib/marcas";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -12,12 +13,6 @@ const CLIENTES = [
   "vale", "unimed", "petrobras", "cocacola", "siemens",
   "cisco", "kpmg", "mcdonalds", "lufthansa", "ems",
 ];
-
-const NOME_CLIENTE: Record<string, string> = {
-  vale: "Vale", unimed: "Unimed", petrobras: "Petrobras", cocacola: "Coca-Cola",
-  siemens: "Siemens", cisco: "Cisco", kpmg: "KPMG", mcdonalds: "McDonald's",
-  lufthansa: "Lufthansa", ems: "EMS",
-};
 
 const SELOS = [
   { src: "badge_2", alt: "SourceForge Leader Winter 2025" },
@@ -168,7 +163,7 @@ export default function Home() {
                 <Image
                   key={c}
                   src={`/clientes/${c}.png`}
-                  alt={`${NOME_CLIENTE[c] ?? c}, cliente SysAid`}
+                  alt={altCliente(c)}
                   width={150}
                   height={60}
                   className="proof__logo"

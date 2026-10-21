@@ -3,6 +3,7 @@ import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
+import { altCliente } from "@/lib/marcas";
 
 export const metadata: Metadata = {
   title: "Gestão de Serviços de TI: Processos, ITIL 4 e Como Implantar | SysAid Brasil",
@@ -589,7 +590,7 @@ export default function GestaoDeServicosDeTiPage() {
                 <Image
                   key={c}
                   src={`/clientes/${c}.png`}
-                  alt={c}
+                  alt={altCliente(c)}
                   width={150}
                   height={60}
                   className="proof__logo"
