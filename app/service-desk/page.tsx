@@ -257,8 +257,8 @@ export default function ServiceDeskPage() {
               <h2>O que é service desk</h2>
             </div>
             <p className="section-head__sub">
-              Service desk é o ponto único de contato entre os usuários e a área
-              de TI. Em vez de o pedido chegar por e-mail para um analista,
+              Service desk (em português, central de serviços de TI) é o ponto
+              único de contato entre os usuários e a área de TI. Em vez de o pedido chegar por e-mail para um analista,
               mensagem para outro e conversa de corredor com um terceiro, tudo
               entra por um mesmo canal e vira um registro rastreável. O termo
               vem da ITIL e descreve ao mesmo tempo o time, o processo e a
@@ -282,11 +282,15 @@ export default function ServiceDeskPage() {
           <div className="container">
             <div className="section-head">
               <p className="eyebrow">Na prática</p>
-              <h2>O que um service desk faz</h2>
+              <h2>O que faz um service desk</h2>
               <p className="section-head__sub">
-                A função não se resume a atender telefone. São seis
-                responsabilidades encadeadas, e é a última delas que costuma
-                faltar nas operações que nunca saem do modo apagar incêndio.
+                Um service desk recebe e registra tudo que chega para a TI,
+                classifica e prioriza cada demanda, resolve ou encaminha para
+                quem resolve, controla o prazo (SLA), mantém o usuário
+                informado e gera os indicadores da operação. Não se resume a
+                atender telefone: são seis responsabilidades encadeadas, e é a
+                última delas que costuma faltar nas operações que nunca saem do
+                modo apagar incêndio.
               </p>
             </div>
             <div className="grid-3">
