@@ -3,6 +3,7 @@ import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
 import type { Metadata } from "next";
 import { datasDaPagina } from "@/lib/seo";
+import { altCliente } from "@/lib/marcas";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -11,6 +12,14 @@ export const metadata: Metadata = {
 const CLIENTES = [
   "vale", "unimed", "petrobras", "cocacola", "siemens",
   "cisco", "kpmg", "mcdonalds", "lufthansa", "ems",
+];
+
+const SELOS = [
+  { src: "badge_2", alt: "SourceForge Leader Winter 2025" },
+  { src: "badge_5", alt: "TrustRadius Top Rated 2025" },
+  { src: "badge_7", alt: "GetApp Category Leaders 2025" },
+  { src: "badge_3", alt: "Gartner Peer Insights Customers' Choice 2025" },
+  { src: "badge_6", alt: "TrustRadius Buyer's Choice 2025" },
 ];
 
 const MODULOS = [
@@ -44,6 +53,10 @@ const FAQ = [
   {
     q: "Qual a diferença entre help desk e service desk?",
     a: "O help desk foca em resolver incidentes pontuais do usuário. O service desk é mais amplo: além de chamados, cobre gestão de ativos, mudanças, SLAs e a operação de TI como um todo, alinhada à ITIL. O SysAid entrega os dois na mesma plataforma.",
+  },
+  {
+    q: "O que é IA para ITSM e o que ela faz na prática?",
+    a: "IA para ITSM é o uso de inteligência artificial na gestão de serviços de TI: entender o pedido do usuário, classificar e priorizar o chamado, sugerir ou executar a solução e automatizar tarefas repetitivas. No SysAid, o Copilot faz isso de forma nativa, dentro da própria plataforma, e resolve até 90% das solicitações comuns antes de virarem ticket.",
   },
   {
     q: "Como a IA reduz o custo e o volume de chamados?",
@@ -150,7 +163,7 @@ export default function Home() {
                 <Image
                   key={c}
                   src={`/clientes/${c}.png`}
-                  alt={c}
+                  alt={altCliente(c)}
                   width={150}
                   height={60}
                   className="proof__logo"
@@ -201,7 +214,7 @@ export default function Home() {
                 O diferencial
               </p>
               <h2>
-                Enquanto os outros automatizam, o SysAid Copilot{" "}
+                IA para ITSM: enquanto os outros automatizam, o Copilot{" "}
                 <span className="hl">resolve</span>
               </h2>
               <p className="ia__lead">
@@ -277,11 +290,11 @@ export default function Home() {
               </div>
             </div>
             <div className="badges">
-              {["badge_2", "badge_5", "badge_7", "badge_3", "badge_6"].map((b) => (
+              {SELOS.map((b) => (
                 <Image
-                  key={b}
-                  src={`/badges/${b}.svg`}
-                  alt="Reconhecimento SysAid"
+                  key={b.src}
+                  src={`/badges/${b.src}.svg`}
+                  alt={`SysAid: ${b.alt}`}
                   width={78}
                   height={78}
                   className="badge"

@@ -3,6 +3,7 @@ import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
+import { altCliente, altSelo } from "@/lib/marcas";
 
 // Comparativa nova (7c, spec em clientes/sysaid/_growth/spec-7c-freshservice.md, 08/10/2026).
 // Alvo: quem avalia o Freshservice ("freshservice pricing", "freshservice itsm", "freshservice demo"),
@@ -201,7 +202,7 @@ export default function FreshservicePage() {
                 <Image
                   key={c}
                   src={`/clientes/${c}.png`}
-                  alt={c}
+                  alt={altCliente(c)}
                   width={150}
                   height={60}
                   className="proof__logo"
@@ -421,7 +422,7 @@ export default function FreshservicePage() {
                 <Image
                   key={b}
                   src={`/badges/${b}.svg`}
-                  alt="Reconhecimento SysAid"
+                  alt={altSelo(b)}
                   width={78}
                   height={78}
                   className="badge"
