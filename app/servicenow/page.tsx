@@ -3,6 +3,7 @@ import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
+import { altCliente, altSelo } from "@/lib/marcas";
 
 // Comparativa nova (7c, spec em clientes/sysaid/_growth/spec-7c-servicenow.md, 06/10/2026).
 // Alvo: quem avalia o ServiceNow para ITSM ("itsm servicenow", "o que é servicenow", "servicenow preço"),
@@ -10,7 +11,7 @@ import { datasDaPagina } from "@/lib/seo";
 export const metadata: Metadata = {
   title: "ServiceNow ITSM: o que é, preço e alternativa | SysAid",
   description:
-    "O que é o ServiceNow, como ele cobra e quando faz sentido. Compare com a SysAid: ITSM com ITIL 4, CMDB e IA, sem projeto de plataforma e com suporte em português.",
+    "O que é o ServiceNow, como ele cobra e quando faz sentido. Compare com a SysAid: ITSM com ITIL 4, CMDB e IA, sem projeto de plataforma e em português.",
   alternates: { canonical: "/servicenow" },
   openGraph: {
     title: "Alternativa ao ServiceNow para ITSM — SysAid Brasil",
@@ -195,7 +196,7 @@ export default function ServiceNowPage() {
                 <Image
                   key={c}
                   src={`/clientes/${c}.png`}
-                  alt={c}
+                  alt={altCliente(c)}
                   width={150}
                   height={60}
                   className="proof__logo"
@@ -377,7 +378,7 @@ export default function ServiceNowPage() {
                 <Image
                   key={b}
                   src={`/badges/${b}.svg`}
-                  alt="Reconhecimento SysAid"
+                  alt={altSelo(b)}
                   width={78}
                   height={78}
                   className="badge"

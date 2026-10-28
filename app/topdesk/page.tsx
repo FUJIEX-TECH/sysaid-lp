@@ -3,11 +3,12 @@ import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
+import { altCliente, altSelo } from "@/lib/marcas";
 
 export const metadata: Metadata = {
-  title: "Alternativa ao TopDesk | ITSM com IA para a sua TI — SysAid Brasil",
+  title: "Alternativa ao TopDesk: ITSM com IA para a TI | SysAid",
   description:
-    "TopDesk é forte em CMDB e Asset Management, mas a resolução ainda depende do analista. Conheça a plataforma ITSM com IA que resolve até 90% dos chamados antes de virarem ticket, com suporte em português.",
+    "TopDesk é forte em CMDB e ativos, mas a resolução ainda depende do analista. ITSM com IA que resolve até 90% dos chamados, com suporte em português.",
   alternates: { canonical: "/topdesk" },
   openGraph: {
     title: "Alternativa ao TopDesk: ITSM com IA — SysAid Brasil",
@@ -190,7 +191,7 @@ export default function TopDeskPage() {
                 <Image
                   key={c}
                   src={`/clientes/${c}.png`}
-                  alt={c}
+                  alt={altCliente(c)}
                   width={150}
                   height={60}
                   className="proof__logo"
@@ -339,7 +340,7 @@ export default function TopDeskPage() {
                 <Image
                   key={b}
                   src={`/badges/${b}.svg`}
-                  alt="Reconhecimento SysAid"
+                  alt={altSelo(b)}
                   width={78}
                   height={78}
                   className="badge"

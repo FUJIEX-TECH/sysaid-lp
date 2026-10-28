@@ -3,11 +3,12 @@ import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
+import { altCliente, altSelo } from "@/lib/marcas";
 
 export const metadata: Metadata = {
-  title: "Alternativa ao Jira Service Management | ITSM com IA — SysAid Brasil",
+  title: "Alternativa ao Jira Service Management com IA | SysAid",
   description:
-    "IA de nível empresarial numa plataforma tudo em um: o SysAid entrega ITSM completo sem a complexidade e os add-ons do Jira. Gestão de ativos inclusa e suporte em português.",
+    "ITSM completo com IA nativa, sem a complexidade e os add-ons do Jira Service Management. Gestão de ativos inclusa e suporte em português.",
   alternates: { canonical: "/jira" },
   openGraph: {
     title: "Alternativa ao Jira Service Management: ITSM com IA — SysAid Brasil",
@@ -191,7 +192,7 @@ export default function JiraPage() {
                 <Image
                   key={c}
                   src={`/clientes/${c}.png`}
-                  alt={c}
+                  alt={altCliente(c)}
                   width={150}
                   height={60}
                   className="proof__logo"
@@ -339,7 +340,7 @@ export default function JiraPage() {
                 <Image
                   key={b}
                   src={`/badges/${b}.svg`}
-                  alt="Reconhecimento SysAid"
+                  alt={altSelo(b)}
                   width={78}
                   height={78}
                   className="badge"
