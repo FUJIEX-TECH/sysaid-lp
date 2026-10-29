@@ -180,6 +180,9 @@ const SYSAID = [
   },
 ];
 
+const PARA_QUE_SERVE =
+  "A CMDB serve para a TI decidir com base no mapa real do ambiente: saber o que um incidente derruba, avaliar o impacto de uma mudança antes de aprovar, achar a causa de problemas que se repetem e responder auditoria sem planilha. Sem ela, essas respostas dependem da memória de quem conhece o ambiente.";
+
 const FAQ = [
   {
     q: "O que é CMDB?",
@@ -187,7 +190,7 @@ const FAQ = [
   },
   {
     q: "Para que serve a CMDB?",
-    a: "Serve para tomar decisão de operação com base no mapa real do ambiente: descobrir rapidamente o que um incidente afeta, encontrar a causa raiz de problemas que se repetem, avaliar o impacto de uma mudança antes de aprová-la e saber quem acionar quando um item falha. Sem CMDB, essas respostas dependem da memória de quem conhece o ambiente.",
+    a: PARA_QUE_SERVE,
   },
   {
     q: "Qual a diferença entre CMDB e inventário de TI?",
@@ -234,7 +237,7 @@ const articleSchema = {
     "O que é CMDB, o que entra como item de configuração, a CMDB no ITIL 4 e no ITSM, a diferença para gestão de ativos, um roteiro de implantação em seis passos e por que tantas CMDBs ficam desatualizadas.",
   inLanguage: "pt-BR",
   datePublished: "2026-10-06",
-  dateModified: "2026-10-06",
+  dateModified: "2026-10-29",
   author: { "@type": "Organization", "@id": "https://itsm.sysaid.com.br/#organization", name: "SysAid Brasil" },
   publisher: { "@type": "Organization", "@id": "https://itsm.sysaid.com.br/#organization", name: "SysAid Brasil" },
   mainEntityOfPage: "https://itsm.sysaid.com.br/cmdb",
@@ -339,6 +342,51 @@ export default function CmdbPage() {
               parar, e quem precisa ser avisado. Ela é uma peça da{" "}
               <a href="/gestao-de-servicos-de-ti">gestão de serviços de TI</a>,
               não um fim em si: só vale o que ela ajuda a decidir.
+            </p>
+          </div>
+        </section>
+
+        {/* PARA QUE SERVE */}
+        <section className="section section--flush-top" id="para-que-serve">
+          <div className="container container--narrow">
+            <div className="section-head">
+              <p className="eyebrow">Na prática</p>
+              <h2>Para que serve a CMDB</h2>
+            </div>
+            <p className="section-head__sub">{PARA_QUE_SERVE}</p>
+            <ul className="uses-list">
+              <li>
+                <strong>Incidente:</strong> mostra na hora quais serviços e
+                usuários são afetados quando um servidor, link ou aplicação
+                para, e quem acionar.
+              </li>
+              <li>
+                <strong>Mudança:</strong> antes de aprovar, lista tudo que
+                depende do item que vai mudar; o comitê decide pelo impacto,
+                não pelo palpite. É assim que a{" "}
+                <a href="/gestao-de-servicos-de-ti">gestão de serviços de TI</a>{" "}
+                reduz mudança que derruba produção.
+              </li>
+              <li>
+                <strong>Problema:</strong> cruza incidentes repetidos com os
+                itens em comum e encurta a busca pela causa raiz.
+              </li>
+              <li>
+                <strong>Auditoria e contratos:</strong> diz o que está coberto
+                por qual contrato e licença, e o que venceu.
+              </li>
+              <li>
+                <strong>Custos e capacidade:</strong> mostra o que sustenta cada
+                serviço de negócio, base para cortar o que não serve a nada.
+              </li>
+            </ul>
+            <p className="section-head__sub">
+              Esses usos só funcionam se a CMDB estiver atualizada, e é aí que a
+              maioria falha (veja{" "}
+              <a href="#cmdb-desatualizada">
+                por que tanta CMDB fica desatualizada
+              </a>
+              ).
             </p>
           </div>
         </section>
