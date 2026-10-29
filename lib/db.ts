@@ -3,7 +3,7 @@ import { neon } from "@neondatabase/serverless";
 // Cliente HTTP do Neon, ideal para funcoes serverless da Vercel (sem pool
 // persistente). A env DATABASE_URL vem da integracao Vercel <> Neon.
 // Lazy: so falha se for realmente usado sem a env configurada.
-function getSql() {
+export function getSql() {
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error(

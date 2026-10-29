@@ -1,5 +1,6 @@
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
+import LeadEntry from "@/components/LeadEntry";
 import SiteFooter from "@/components/SiteFooter";
 import type { Metadata } from "next";
 import { datasDaPagina } from "@/lib/seo";
@@ -130,7 +131,7 @@ export default function Home() {
               plataforma. Mais de 400 empresas no Brasil confiam na SysAid.
             </p>
             <div className="hero__form">
-              <LeadForm variant="hero" />
+              <LeadEntry variant="hero" />
             </div>
             <p className="hero__trust">
               Resolução até 12x mais rápida · Suporte local em português ·

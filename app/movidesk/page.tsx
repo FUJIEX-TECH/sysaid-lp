@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
+import LeadEntry from "@/components/LeadEntry";
 import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
 
@@ -172,7 +173,7 @@ export default function MovideskPage() {
               local em português.
             </p>
             <div className="hero__form">
-              <LeadForm variant="hero" />
+              <LeadEntry variant="hero" />
             </div>
             <p className="hero__trust">
               Nota 4,5/5 no G2 (750+ avaliações) · Reconhecida por G2, Gartner e
