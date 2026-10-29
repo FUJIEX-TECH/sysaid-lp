@@ -92,6 +92,7 @@ img, svg { max-width: 100%; height: auto; display: block; }
 
 .section { padding-block: var(--section-y); }
 .section--soft { background: var(--bg-soft); }
+.section--flush-top { padding-top: 0; }
 .section--dark { background: var(--green-900); color: #f1f5f2; }
 .section--dark h2, .section--dark h3 { color: #ffffff; }
 
@@ -602,3 +603,10 @@ img, svg { max-width: 100%; height: auto; display: block; }
 .site-footer__col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .site-footer__col a { color: #9fbbb0; text-decoration: none; font-size: 0.9rem; }
 .site-footer__col a:hover, .site-footer__col a:focus-visible { color: #fff; text-decoration: underline; }
+
+/* Lista de usos em seção clara (/cmdb "Para que serve") */
+.uses-list { list-style: none; padding: 0; margin: 8px 0 24px; }
+.uses-list li { padding: 10px 0 10px 22px; position: relative; color: var(--ink-400); font-size: 1.05rem; border-top: 1px solid rgba(0,0,0,.08); }
+.uses-list li:last-child { border-bottom: 1px solid rgba(0,0,0,.08); }
+.uses-list li::before { content: ""; position: absolute; left: 0; top: 21px; width: 10px; height: 2px; background: var(--green-900); }
+.uses-list strong { color: var(--green-900); font-weight: 600; }
