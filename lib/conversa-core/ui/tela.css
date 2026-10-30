@@ -242,7 +242,7 @@
   animation: cvt-sobe 0.3s ease both;
 }
 .cvm__nota { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cv-ink-400); }
-.cvm__texto { font-size: 0.95rem; line-height: 1.35; color: var(--cv-ink); }
+.cvm__texto { font-size: 0.95rem; line-height: 1.35; color: var(--cv-ink); overflow-wrap: anywhere; hyphens: auto; }
 .cvm__no--atual { border-style: dashed; }
 .cvm__no--problema { border-color: var(--cv-primary); border-left-width: 3px; }
 .cvm__no--causa { border-color: var(--cv-line-forte); }
@@ -258,7 +258,7 @@
 .cvm__grupo { display: flex; flex-direction: column; gap: 6px; }
 .cvm__grupo-nota { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cv-ink-400); text-align: center; }
 .cvm__destinos { position: relative; display: flex; flex-direction: column; gap: 6px; margin-left: 14px; padding-left: 12px; border-left: 1px solid var(--cv-line-forte); }
-.cvm__destinos .cvm__no { position: relative; }
+.cvm__destinos .cvm__no { position: relative; min-width: 0; }
 .cvm__destinos .cvm__no::before { content: ""; position: absolute; top: 50%; left: -12px; width: 12px; height: 1px; background: var(--cv-line-forte); }
 @container (min-width: 440px) {
   .cvm__destinos { flex-direction: row; gap: 8px; margin-left: 0; padding-left: 0; padding-top: 10px; border-left: 0; }
@@ -268,6 +268,11 @@
   .cvm__grupo--1 .cvm__destinos::after { display: none; }
   .cvm__destinos .cvm__no::before { top: -10px; left: 50%; width: 1px; height: 10px; }
 }
+
+/* na lateral o mapa fica sempre em coluna, em qualquer largura */
+.cvt__lateral .cvm__destinos { flex-direction: column; gap: 6px; margin-left: 14px; padding-left: 12px; padding-top: 0; border-left: 1px solid var(--cv-line-forte); }
+.cvt__lateral .cvm__destinos::before, .cvt__lateral .cvm__destinos::after { display: none; }
+.cvt__lateral .cvm__destinos .cvm__no::before { top: 50%; left: -12px; width: 12px; height: 1px; }
 
 /* empresa */
 .cve__cabeca { display: flex; align-items: center; gap: 14px; }

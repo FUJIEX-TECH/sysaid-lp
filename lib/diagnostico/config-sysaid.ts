@@ -298,7 +298,8 @@ export const configSysaid: ConfigConversa = {
       texto: {
         padrao: "Qual o nome da sua empresa?",
         casos: [
-          { quando: { empresaEncontrada: true }, texto: "Achei a sua empresa pelo e-mail{{saudacao}}. É essa?" },
+          // regra do produto (Fernando, 30/10): o chat não anuncia de onde tirou o dado; só confirma
+          { quando: { empresaEncontrada: true }, texto: "É essa a sua empresa{{saudacao}}?" },
           { quando: { variavel: "empresa_sugerida", definida: true }, texto: "É essa a sua empresa? {{empresa_sugerida}}" },
         ],
       },
