@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { chaveDe, criarCache, criarJev, criarLLM, escolhaDe } from "@/lib/conversa-core/servidor";
 import type { Gerado } from "@/lib/conversa-core";
-import { DORES_JEV, JEV_SYSAID_GERAR, LLM_SYSAID, PALPITE_PROMPT, SAIDA_PALPITE, SITUACOES, SYSTEM_PALPITE, perguntasDor } from "@/lib/diagnostico/servidor-sysaid";
+import { DORES_JEV, JEV_SYSAID_GERAR, LLM_SYSAID, PALPITE_PROMPT, SAIDA_PALPITE, SITUACOES, SYSTEM_PALPITE, perguntasDor, semHoje, travaGerado } from "@/lib/diagnostico/servidor-sysaid";
 
 export const runtime = "nodejs";
 
@@ -75,14 +75,22 @@ export async function POST(req: NextRequest) {
   if (!rl.valor) return NextResponse.json({ ok: false, motivo: `llm ${rl.motivo ?? rl.origem}` });
 
   const v = rl.valor;
-  const opcoes = v.opcoes.map((o) => o.trim()).filter(Boolean).slice(0, 3);
+  // trava de saída (servidor-sysaid.ts): palpite reprovado descarta tudo;
+  // pergunta reprovada deixa só o palpite (pergunta e opções fixas da config)
+  const trava = travaGerado(v);
+  if (!trava.palpite) {
+    log({ etapa: "trava", parte: "palpite", palpite: v.palpite });
+    return NextResponse.json({ ok: false, motivo: "llm fora da regra" });
+  }
+  if (!trava.pergunta) log({ etapa: "trava", parte: "pergunta", pergunta: v.pergunta, opcoes: v.opcoes });
+  const opcoes = v.opcoes.map((o) => o.trim());
   const gerado: Gerado = {
     id: "palpite",
     // só a entrada: a dor é saída (dados); quem precisa dela igual à resposta usa `seIgual`
     para: { dor_texto: texto },
     paraPrefixo: ["dor_texto"],
-    textos: { palpite: v.palpite.trim(), pergunta: v.pergunta.trim() },
-    listas: opcoes.length === 3 ? { opcoes } : undefined,
+    textos: trava.pergunta ? { palpite: v.palpite.trim(), pergunta: semHoje(v.pergunta) } : { palpite: v.palpite.trim() },
+    listas: trava.pergunta ? { opcoes } : undefined,
     dados: { dor },
     origem: rl.origem === "cache" ? "cache" : "servidor",
     medicao: { custoUsd: rl.custoUsd, ms: Date.now() - t0, llm: rl.origem, jev: rj.origem },

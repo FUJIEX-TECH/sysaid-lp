@@ -2,8 +2,8 @@
 // Diagnóstico ITSM — lado do SERVIDOR da configuração da SysAid (parte 2).
 // Só importar de rotas de API. Aqui moram: limites de custo, prompts da LLM
 // (palpite da dor, pergunta de aprofundamento) e perguntas do Jev (rótulo,
-// coerência, dor no texto livre). Dono do conteúdo: sysaid-growth (os prompts
-// abaixo são a 1ª versão do Severino, 30/10/2026; revisar a copy).
+// coerência, dor no texto livre). Dono do conteúdo: sysaid-growth (1ª versão do
+// Severino, 30/10/2026; copy revisada pelo sysaid-growth no mesmo dia).
 //
 // Três camadas: genérico = lib/conversa-core/servidor (clientes, cache, tetos);
 // configurável = este arquivo (modelo, tetos, prompts, rótulos);
@@ -58,9 +58,9 @@ export const DORES_JEV: Record<string, string> = {
 };
 
 export const ROTULOS_JEV: Record<string, string> = {
-  cotando: "a pessoa só quer preço ou orçamento pra comparar; não descreve problema nem intenção de mudar",
-  fora: "não é empresa cliente em potencial: estudante, curiosidade, concorrente, fornecedor vendendo algo, ou TI de 1 pessoa sem equipe",
-  cliente: "já usa SysAid hoje (menciona ser cliente, pedir suporte ou evoluir o que já tem)",
+  cotando: "a pessoa só quer preço ou orçamento pra comparar; não descreve problema de atendimento nem intenção de mudar",
+  fora: "não é empresa compradora em potencial: estudante, trabalho acadêmico, curiosidade, concorrente, fornecedor oferecendo serviço, TI de 1 pessoa sem equipe, ou texto fora do assunto",
+  cliente: "já usa SysAid hoje (diz que é cliente, pede suporte ou quer evoluir o que já tem)",
   nenhum: "nada acima: lead comum, com problema e intenção de avaliar",
 };
 
@@ -70,8 +70,8 @@ export function perguntasRotulo(): Record<string, PerguntaJev> {
     coerente: {
       type: "noul",
       instructions:
-        "As respostas são coerentes entre si (porte da empresa, número de técnicos, papel na decisão, prazo e o texto livre batem) e parecem de uma pessoa real preenchendo com atenção?",
-      criteria: { true: "coerente, parece real", false: "contraditório, aleatório ou texto sem sentido" },
+        "As respostas batem entre si (porte da empresa, número de técnicos, papel na decisão, prazo e texto livre) e parecem de uma pessoa real preenchendo com atenção? Ser estudante, só querer preço, já ser cliente ou escrever de forma grosseira NÃO é incoerência (isso é outro rótulo).",
+      criteria: { true: "coerente, parece real", false: "respostas que se contradizem, cliques aleatórios ou texto sem sentido (teclado batido, frase solta sem relação)" },
     },
     dor_texto: { type: "choice", criteria: DORES_JEV },
   };
@@ -87,26 +87,80 @@ export function perguntasDor(): Record<string, PerguntaJev> {
 // preço, sem promessa de produto (decisão 4 do plano: comparativa é frase fixa).
 // --------------------------------------------------------------------------
 export const SAIDA_PALPITE = z.object({
-  palpite: z.string().describe("1 frase, até 140 caracteres, que devolve o problema com as palavras da pessoa e termina com 'É isso?'"),
-  pergunta: z.string().describe("1 pergunta curta de aprofundamento sobre esse problema, até 90 caracteres"),
-  opcoes: z.array(z.string()).describe("exatamente 3 respostas curtas pra pergunta, até 40 caracteres cada, concretas, sem 'outro'"),
+  palpite: z.string().describe("1 frase de até 20 palavras (máx. 140 caracteres) que devolve o problema com as palavras da pessoa e termina com 'É isso?'"),
+  pergunta: z.string().describe("1 pergunta só, curta (até 12 palavras, máx. 90 caracteres), sobre como esse problema acontece no dia a dia"),
+  opcoes: z.array(z.string()).describe("exatamente 3 respostas diretas à pergunta, na voz da pessoa, até 40 caracteres cada, diferentes entre si, sem 'outro'"),
 });
 
-export const SYSTEM_PALPITE = `Você escreve as falas de um chat de diagnóstico de atendimento de TI (ITSM) de um site brasileiro de software. Fala em português do Brasil, tom direto e simpático, sem jargão, sem exclamação, sem emoji, sem travessão.
+// Revisado pelo sysaid-growth em 30/10/2026 (testes com 12 textos em
+// formulario-inteligente/qualifica-copy-testes-2026-10-30.md). O que mudou da
+// 1ª versão: tamanho em palavras, uma pergunta só, opções que respondem a
+// pergunta, nada de "não é X, e sim Y" inventado, regra pra texto grosseiro ou
+// só de preço, e o público (gestor de TI) explícito.
+export const SYSTEM_PALPITE = `Você escreve as falas de um chat de diagnóstico de atendimento de TI (service desk) num site brasileiro de software B2B. Quem lê é gestor, coordenador ou analista de TI de empresa média ou grande. Português do Brasil, tom de colega experiente: direto, cordial, profissional. Frases curtas. Sem exclamação, sem emoji, sem travessão, sem jargão de IA ou de marketing.
 
-Você NÃO decide nada: a categoria do problema já vem pronta (foi decidida por outra camada). Seu trabalho é só escrever:
-1. "palpite": uma frase que devolve o problema da pessoa com as palavras dela, reformulando o que ela escreveu (não repita o texto literal), e termina com "É isso?". Exemplo de forma: "Parece que o problema não é o SLA em si, e sim ninguém ser avisado antes de ele estourar. É isso?"
-2. "pergunta": uma pergunta curta de aprofundamento, concreta, sobre o dia a dia dela nesse problema (o que acontece hoje, por onde chega, o que o gestor pede).
-3. "opcoes": exatamente 3 respostas curtas e concretas pra pergunta, que cubram os casos mais comuns, pra pessoa responder com um toque.
+A categoria do problema já vem decidida por outra camada. Você não classifica, não vende e não aconselha: só escreve três coisas.
 
-Regras: nunca cite nome de produto, empresa, concorrente ou preço; nunca prometa funcionalidade; nunca invente fato; não dê conselho; não use "você precisa"; não comece com "Entendi". Se o texto da pessoa for curto ou vago, escreva o palpite a partir da categoria.`;
+1. "palpite": uma frase de até 20 palavras que devolve o problema com as palavras da pessoa, reformulado (não copie o texto), terminando com "É isso?". Comece com "Parece que". Use só o que a pessoa escreveu: não acrescente causa, consequência ou detalhe que ela não disse. Só use a forma "não é X, e sim Y" se o próprio texto fizer esse contraste.
+2. "pergunta": UMA pergunta curta (até 12 palavras), com um assunto só, sobre como o problema acontece hoje: quem percebe, por onde chega, com que frequência ou o que é feito à mão. Escolha um desses ângulos, nunca dois (errado: "Quem recebe e por qual canal chega?"). Não comece com "Hoje".
+3. "opcoes": exatamente 3 respostas que respondem essa pergunta de forma direta, escritas como a pessoa responderia (ex.: "Só quando o usuário reclama"), até 40 caracteres cada, diferentes entre si e cobrindo os casos mais comuns.
+
+Exemplos de palpite bom:
+- Texto "o SLA estoura e só fico sabendo quando o diretor reclama" → "Parece que o SLA estoura sem aviso e você só descobre pela cobrança do diretor. É isso?"
+- Texto "monto os indicadores no Excel todo mês" → "Parece que os indicadores do mês saem à mão, montados no Excel. É isso?"
+
+Regras fixas:
+- Nunca cite nome de produto, marca, empresa ou concorrente, nem a ferramenta que a pessoa usa.
+- Nunca fale de preço, valor, desconto ou condição comercial, nem nas opções, mesmo que a categoria seja custo: aí pergunte o que pesa no custo (forma de cobrança, módulos, contrato), sem números.
+- Nunca prometa recurso, resultado ou prazo, e não diga o que a solução faz.
+- Termos técnicos que a pessoa usou (SLA, N1, chamado, ativo) podem ficar; não introduza siglas novas.
+- Não use "você precisa", "Entendi", "Ótimo", "Claro".
+- Se o texto for grosseiro, irônico ou só pedir preço, não espelhe o tom, não fale de valor e não suponha o que a pessoa está fazendo (comparando, trocando, com pressa): escreva um palpite neutro a partir da categoria.
+- Não avalie a pessoa nem a ferramenta dela (nada de "já usam bem", "está aquém").
+- Se o texto for curto ou vago, escreva o palpite a partir da categoria, sem inventar detalhe.`;
+
+// trava de saída (sob medida SysAid). Palpite reprovado = descarta tudo (o chat
+// segue com a lista de dores). Só a pergunta reprovada = fica o palpite e a
+// pergunta e as opções voltam pras fixas da config (nunca pergunta gerada com
+// opção fixa). Motivos: marca, concorrente ou valor; tamanho; travessão ou
+// exclamação; duas perguntas numa só ("quem recebe e por qual canal").
+const PROIBIDOS = [
+  "sysaid", "glpi", "movidesk", "topdesk", "freshdesk", "freshservice", "freshworks", "zendesk", "jira", "servicenow",
+  "qualitor", "citsmart", "milvus", "octadesk", "ivanti", "manageengine", "atlassian", "r$", "us$", "reais", "desconto",
+];
+// avaliar a pessoa ou a ferramenta dela ("já usam bem", "está aquém") também reprova
+const AVALIA = /\b(usam|usa|usar) bem\b|aqu[ée]m|n[ãa]o rendem?\b/i;
+const limpo = (t: string) => !PROIBIDOS.some((p) => t.toLowerCase().includes(p)) && !/[!—–]/.test(t) && !AVALIA.test(t);
+const DUAS_PERGUNTAS = /,?\s(e|ou)\s+(como|qual|quais|quem|por qual|por onde|onde|quando|quantos?|quantas?|com que)\b/i;
+
+export function travaGerado(v: { palpite: string; pergunta: string; opcoes: string[] }): { palpite: boolean; pergunta: boolean } {
+  const palpite = limpo(v.palpite) && v.palpite.length <= 180 && /é isso\?$/i.test(v.palpite.trim());
+  const pergunta =
+    limpo([v.pergunta, ...v.opcoes].join(" ")) &&
+    v.pergunta.length <= 110 &&
+    !DUAS_PERGUNTAS.test(v.pergunta) &&
+    v.opcoes.length === 3 &&
+    v.opcoes.every((o) => o.trim().length > 0 && o.trim().length <= 50);
+  return { palpite, pergunta };
+}
+
+// "Hoje, quem percebe...?" → "Quem percebe...?" (o Haiku insiste no "Hoje,")
+export function semHoje(t: string): string {
+  const m = t.trim().match(/^hoje,\s*(.+)$/i);
+  return m ? m[1].charAt(0).toUpperCase() + m[1].slice(1) : t.trim();
+}
+
+// nome de ferramenta no texto vira "a ferramenta atual" antes de ir pra LLM
+// (sem isso o Haiku repete a marca no palpite e a trava descarta tudo)
+const MARCAS = new RegExp(`(?:\\b[oO]\\s+)?\\b(${PROIBIDOS.filter((p) => /^[a-z]+$/.test(p) && p !== "reais" && p !== "desconto").join("|")})\\b`, "gi");
+const semMarca = (t: string) => t.replace(MARCAS, "a ferramenta atual");
 
 export const PALPITE_PROMPT = (args: { dor: string; descricao: string; texto: string; situacao?: string }) =>
-  `Categoria decidida: ${args.dor} (${args.descricao}).${args.situacao ? ` Situação: ${args.situacao}.` : ""}\nTexto da pessoa: """${args.texto.slice(0, 600)}"""`;
+  `Categoria decidida: ${args.dor} (${args.descricao}).${args.situacao ? ` Situação: ${args.situacao}.` : ""}\nTexto da pessoa: """${semMarca(args.texto.slice(0, 600))}"""`;
 
 export const SITUACOES: Record<string, string> = {
   troca: "tem uma ferramenta e quer trocar",
   sem: "não tem ferramenta: e-mail, planilha ou WhatsApp",
-  cliente: "já usa o produto e quer evoluir",
+  cliente: "já é cliente e quer ampliar o uso (não avalie como usa hoje)",
   pesquisa: "está pesquisando o assunto",
 };
