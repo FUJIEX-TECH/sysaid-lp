@@ -64,7 +64,7 @@ export function criarPersistenciaLP(): Persistencia {
       }
     },
 
-    async enviar({ respostas, ctx, classificacao, honeypot }) {
+    async enviar({ respostas, ctx, classificacao, honeypot, medicao }) {
       const diag = {
         variante: "b",
         origem: ctx.origem,
@@ -77,6 +77,9 @@ export function criarPersistenciaLP(): Persistencia {
         rotulo_origem: classificacao.rotuloOrigem,
         rota: classificacao.rota,
         segundos: classificacao.segundos,
+        // parte 2: o que o Jev leu no texto livre (dor, coerência) e o custo da IA nesta sessão
+        jev: classificacao.jevDados ?? null,
+        medicao,
       };
       if (process.env.NODE_ENV !== "production") console.log("[diagnostico] classificação", diag);
 

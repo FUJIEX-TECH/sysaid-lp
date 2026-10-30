@@ -5,7 +5,7 @@
 // resto se recalcula sozinho. Nada aqui conhece cliente algum.
 // ==========================================================================
 
-import { avaliar, type Resolvedor } from "./condicoes";
+import { avaliar, geradoValido, type Resolvedor } from "./condicoes";
 import { pontuar, rotaDe } from "./pontuacao";
 import { recomendar } from "./recomendacao";
 import { renderTemplate, renderTexto } from "./texto";
@@ -41,8 +41,8 @@ export function criarMotor(config: ConfigConversa) {
     return { origem: config.origens.padrao, variaveis: {} };
   }
 
-  function contexto(pathname: string, respostas: Respostas, tempos?: Contexto["tempos"]): Contexto {
-    return { ...origemDoCaminho(pathname), respostas, tempos };
+  function contexto(pathname: string, respostas: Respostas, tempos?: Contexto["tempos"], gerados?: Contexto["gerados"]): Contexto {
+    return { ...origemDoCaminho(pathname), respostas, tempos, gerados };
   }
 
   // variáveis derivadas (config.variaveis) + o mapa, se houver recomendação
@@ -96,11 +96,17 @@ export function criarMotor(config: ConfigConversa) {
     return novo;
   }
 
-  // grava a resposta e aplica os efeitos declarados (ex.: "corrigir" refaz o porte)
-  function responder(respostas: Respostas, etapa: EtapaConfig, valor: string): Respostas {
+  // grava a resposta e aplica os efeitos declarados: "corrigir" refaz o porte;
+  // "é isso" no palpite copia pra outro campo um dado decidido pelo Jev
+  function responder(respostas: Respostas, etapa: EtapaConfig, valor: string, gerados?: Contexto["gerados"]): Respostas {
     const efeito = etapa.aoResponder?.find((a) => a.valor === valor);
-    if (efeito) return refazerDesde(respostas, efeito.refazerDesde);
-    return { ...respostas, [etapa.id]: valor };
+    if (efeito && "refazerDesde" in efeito) return refazerDesde(respostas, efeito.refazerDesde);
+    const novo: Respostas = { ...respostas, [etapa.id]: valor };
+    if (efeito && "definir" in efeito) {
+      const dado = gerados?.[efeito.definir.deGerado.id]?.dados?.[efeito.definir.deGerado.dado];
+      if (dado) novo[efeito.definir.campo] = dado;
+    }
+    return novo;
   }
 
   function encerramento(ctx: Contexto): Encerramento | null {
@@ -126,12 +132,28 @@ export function criarMotor(config: ConfigConversa) {
     return v !== undefined ? e.variantes.casos[v] : undefined;
   }
 
+  // texto/opções gerados no servidor, se a geração chegou e ainda vale
+  function geradoDe(e: EtapaConfig, ctx: Contexto): { texto?: string; opcoes?: Opcao[] } {
+    if (!e.gerado || !geradoValido(ctx, e.gerado.id)) return {};
+    const g = ctx.gerados![e.gerado.id];
+    const s = e.gerado.seIgual;
+    if (s && (ctx.respostas[s.campo] === undefined || ctx.respostas[s.campo] !== g.dados?.[s.dado])) return {};
+    const t = e.gerado.texto ? g.textos[e.gerado.texto] : undefined;
+    const l = e.gerado.opcoes ? g.listas?.[e.gerado.opcoes] : undefined;
+    // opções geradas ganham valores "a", "b", "c"...; as fixas (ex.: "Outro") vêm depois
+    const opcoes = l && l.length ? l.map((rotulo, i) => ({ valor: String.fromCharCode(97 + i), rotulo })) : undefined;
+    return { texto: t && t.trim() ? t : undefined, opcoes };
+  }
+
   function resolver(e: EtapaConfig, ctx: Contexto): EtapaResolvida {
     const variante = varianteDe(e, ctx);
-    const opcoes = variante?.opcoes ? lista(variante.opcoes) : opcoesDe(e.opcoes, ctx);
+    const gerado = geradoDe(e, ctx);
+    const fixas = variante?.opcoes ? lista(variante.opcoes) : opcoesDe(e.opcoes, ctx);
+    // com opções geradas, das fixas só sobrevivem as "de escape" (valor fora de a..z de uma letra)
+    const opcoes = gerado.opcoes ? [...gerado.opcoes, ...fixas.filter((o) => !/^[a-z]$/.test(o.valor))] : fixas;
     return {
       etapa: e,
-      texto: texto(variante?.texto ?? e.texto, ctx),
+      texto: gerado.texto ?? texto(variante?.texto ?? e.texto, ctx),
       opcoes,
       placeholder: texto(e.placeholder, ctx),
       prefill: e.prefill ? variavel(ctx, e.prefill) : "",
@@ -159,6 +181,7 @@ export function criarMotor(config: ConfigConversa) {
       ...p,
       rotulo: jev.rotulo ?? p.rotuloCodigo,
       rotuloOrigem: jev.origem,
+      jevDados: jev.dados,
       rota,
       segundos: ctx.tempos?.segundosTotal ?? 0,
     };

@@ -23,10 +23,15 @@ const schema = z.object({
     pontos: z.number().int().min(0).max(15),
     detalhe: z.record(z.string(), z.number()),
     classe: z.enum(["forte", "medio", "fraco"]),
-    rotulo: z.enum(["cotando", "fora", "cliente"]).nullable(),
+    rotulo: z.enum(["cotando", "fora", "cliente", "incoerente"]).nullable(),
     rotulo_origem: z.enum(["jev", "fallback"]),
     rota: z.string().max(16),
     segundos: z.number().int().min(0),
+    // parte 2 (30/10/2026): leitura do Jev no texto livre e custo da IA na sessão; vão só no diag_json
+    jev: z.record(z.string(), z.string().max(200)).nullable().optional(),
+    medicao: z
+      .object({ custoUsd: z.number().min(0), chamadasLlm: z.number().int(), chamadasJev: z.number().int(), cacheHits: z.number().int(), fallbacks: z.number().int() })
+      .optional(),
   }),
 });
 

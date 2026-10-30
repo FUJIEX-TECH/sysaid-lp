@@ -3,6 +3,19 @@ import type { Condicao, Contexto } from "./tipos";
 
 export type Resolvedor = (nome: string) => string | null | undefined;
 
+// Uma geração do servidor só vale enquanto as respostas que serviram de entrada
+// (`para`) continuam iguais; a pessoa corrigiu o texto = gerado descartado.
+export function geradoValido(ctx: Contexto, id: string): boolean {
+  const g = ctx.gerados?.[id];
+  if (!g) return false;
+  return Object.entries(g.para).every(([campo, valor]) => {
+    const atual = (ctx.respostas[campo] ?? "").trim();
+    if (atual === valor) return true;
+    // campo de texto lido antes do Enter: vale se a pessoa só continuou escrevendo
+    return !!g.paraPrefixo?.includes(campo) && valor.length >= 20 && atual.toLowerCase().startsWith(valor.toLowerCase());
+  });
+}
+
 // `variavel` olha primeiro as derivadas (config.variaveis), depois as da URL.
 export function avaliar(c: Condicao | undefined, ctx: Contexto, variavel?: Resolvedor): boolean {
   if (c === undefined || c === true) return true;
@@ -20,6 +33,7 @@ export function avaliar(c: Condicao | undefined, ctx: Contexto, variavel?: Resol
     const s = ctx.tempos?.segundosTotal ?? 0;
     return s >= c.tempoTotalEntre[0] && s <= c.tempoTotalEntre[1];
   }
+  if ("gerado" in c) return geradoValido(ctx, c.gerado) === c.disponivel;
   const valor = ctx.respostas[c.campo];
   if ("igual" in c) return valor === c.igual;
   if ("diferente" in c) return valor !== c.diferente;

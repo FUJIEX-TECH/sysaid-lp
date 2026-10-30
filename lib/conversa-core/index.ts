@@ -2,10 +2,11 @@
 // Regra da pasta: nenhum arquivo aqui importa nada de fora de lib/conversa-core/
 // nem cita cliente algum. Conferir com um grep por "@/" e por nome de cliente nesta pasta.
 export * from "./tipos";
-export { avaliar } from "./condicoes";
+export { avaliar, geradoValido } from "./condicoes";
 export { renderTemplate, renderTexto } from "./texto";
 export { criarMotor, type Motor, type EtapaResolvida } from "./motor";
 export { recomendar } from "./recomendacao";
 export { pontuar, rotaDe } from "./pontuacao";
-export { comTimeout, rotularComJev } from "./jev";
+export { comTimeout, rotularComJev, pedirGeracao, novaSessao } from "./jev";
+// o lado do servidor (LLM, Jev, custo) fica em "./servidor" e só entra em rota de API
 export { validarValor, normalizar, aplicarMascara, sugerirEmpresa, primeiroNome } from "./util";

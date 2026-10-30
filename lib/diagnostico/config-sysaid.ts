@@ -266,11 +266,28 @@ export const configSysaid: ConfigConversa = {
       recuperarAoCorrigir: true,
     },
     {
-      // fallback da dor (sem Jev lendo o texto): a pessoa confirma a dor na lista
+      // parte 2: o palpite escrito pela LLM a partir da dor que o Jev leu no texto.
+      // Só aparece se a geração chegou a tempo e o texto não mudou; "É isso" grava
+      // em `dor` o valor decidido pelo Jev (a LLM nunca classifica) e pula a lista.
+      id: "palpite",
+      passo: 3,
+      tipo: "escolha",
+      quando: { todas: [NAO_SUPORTE, { campo: "dor_texto", vazio: false }, { gerado: "palpite", disponivel: true }] },
+      texto: "Deixa eu ver se entendi.",
+      gerado: { id: "palpite", texto: "palpite" },
+      opcoes: [
+        { valor: "sim", rotulo: "É isso" },
+        { valor: "nao", rotulo: "Não é bem isso" },
+      ],
+      aoResponder: [{ valor: "sim", definir: { campo: "dor", deGerado: { id: "palpite", dado: "dor" } } }],
+    },
+    {
+      // fallback da dor (sem Jev lendo o texto, ou palpite errado): a pessoa confirma a dor na lista.
+      // Palpite confirmado já gravou `dor`: a lista nem entra no histórico.
       id: "dor",
       passo: 3,
       tipo: "escolha",
-      quando: NAO_SUPORTE,
+      quando: { todas: [NAO_SUPORTE, { nao: { campo: "palpite", igual: "sim" } }] },
       texto: {
         padrao: "Qual destas parece mais com o seu dia?",
         casos: [{ quando: { campo: "dor_texto", vazio: false }, texto: "Entendi. Qual destas parece mais com o que você descreveu?" }],
@@ -288,6 +305,9 @@ export const configSysaid: ConfigConversa = {
       quando: { todas: [{ campo: "dor", definido: true }, { campo: "dor", diferente: "vaga" }, NAO_SUPORTE] },
       texto: "",
       variantes: { porCampo: "dor", casos: aprofundamentoVariantes },
+      // parte 2: pergunta e 3 opções escritas pela LLM junto com o palpite; só
+      // valem se `dor` ainda é a que o Jev leu (senão, a pergunta fixa acima)
+      gerado: { id: "palpite", texto: "pergunta", opcoes: "opcoes", seIgual: { campo: "dor", dado: "dor" } },
     },
     {
       id: "usuarios",
@@ -471,17 +491,36 @@ export const configSysaid: ConfigConversa = {
       { rotulo: "cliente", quando: { campo: "situacao", igual: "cliente" } },
       { rotulo: "cotando", quando: { alguma: [{ campo: "prazo", igual: "cota" }, { todas: [{ campo: "dor", igual: "custo" }, { campo: "prazo", igual: "sem" }] }] } },
     ],
-    // cliente atual pedindo módulos = médio pro gerente de conta
-    rotaPorRotulo: { fora: "fora", cotando: "cotando", cliente: "medio" },
+    // cliente atual pedindo módulos = médio pro gerente de conta;
+    // "incoerente" (Jev, parte 2: respostas contraditórias ou texto sem sentido) cai em fraco
+    rotaPorRotulo: { fora: "fora", cotando: "cotando", cliente: "medio", incoerente: "fraco" },
   },
 
-  // Parte 2: /api/diagnostico/rotular fala com o jev.py no servidor. Até lá,
-  // desligado (fallback na hora, sem rede).
+  // Parte 2 (30/10/2026): /api/diagnostico/rotular fala com o Jev no servidor
+  // (chave JEV_API_KEY, interna; produção precisa de chave própria, decisão 7).
+  // Sem a flag, fallback na hora, sem rede.
   jev: {
     habilitado: process.env.NEXT_PUBLIC_DIAG_JEV === "1",
     endpoint: "/api/diagnostico/rotular",
-    timeoutMs: 800,
+    timeoutMs: 1500, // o servidor espera o Jev até 1200 ms (servidor-sysaid.ts); a pessoa está vendo "enviando"
   },
+
+  // Parte 2: enquanto a pessoa digita a dor, /api/diagnostico/gerar pede ao Jev
+  // a dor e à LLM o palpite + pergunta de aprofundamento (prompts em
+  // servidor-sysaid.ts). No Enter o chat espera no máximo `esperaMs`; passou,
+  // segue com a lista e a pergunta fixa.
+  geracoes:
+    process.env.NEXT_PUBLIC_DIAG_LLM === "1"
+      ? [
+          {
+            id: "palpite",
+            endpoint: "/api/diagnostico/gerar",
+            gatilho: { campo: "dor_texto", minCaracteres: 25, debounceMs: 600, passoCaracteres: 20 },
+            esperaMs: 900,
+            timeoutMs: 8000,
+          },
+        ]
+      : [],
 
   textos: {
     enviando: "Perfeito{{saudacao}}. Estou mandando o seu mapa e já te levo pra confirmação.",
