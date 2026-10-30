@@ -74,7 +74,7 @@ const APROFUNDAMENTO: Record<string, { texto: string; opcoes: string[] }> = {
   automacao: { texto: "Qual rotina mais rouba tempo?", opcoes: ["Aprovação de acesso", "Onboarding de funcionário", "Reset de senha"] },
   ativos: { texto: "O que você precisa saber e hoje não sabe?", opcoes: ["Quem está com qual máquina", "Licenças vencendo", "Histórico de cada equipamento"] },
   ia: { texto: "Onde a IA ajudaria primeiro?", opcoes: ["Responder dúvidas repetidas", "Classificar e rotear", "Resolver sozinha o simples"] },
-  custo: { texto: "O que pesa mais?", opcoes: ["Preço por agente", "Módulos cobrados à parte", "Dólar"] },
+  custo: { texto: "O que mais pesa no custo hoje?", opcoes: ["Cobrança por técnico", "Módulos cobrados à parte", "Cobrança em dólar"] },
   esm: { texto: "Qual área quer atender além da TI?", opcoes: ["RH", "Facilities", "Jurídico ou financeiro"] },
 };
 

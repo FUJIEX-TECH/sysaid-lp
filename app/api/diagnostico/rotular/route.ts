@@ -60,9 +60,13 @@ export async function POST(req: NextRequest) {
   const coerente = noulDe(rj.respostas, "coerente", 0.4);
   const dorTexto = (r.dor_texto ?? "").trim().length >= 15 ? escolhaDe(rj.respostas, "dor_texto", Object.keys(DORES_JEV), 0.35) : null;
 
+  // "fora" e "cliente" são mais específicos que "incoerente": estudante que
+  // chuta o porte continua "fora" (rota própria), não vira "fraco" (30/10/2026)
+  const especifico = rotulo === "fora" || rotulo === "cliente" || r.papel === "estuda" || r.situacao === "cliente";
+  const incoerente = coerente === false && !especifico;
   const resposta: RotuloJev = {
-    rotulo: coerente === false ? "incoerente" : rotulo && rotulo !== "nenhum" ? rotulo : null,
-    motivo: coerente === false ? "respostas contraditórias" : rotulo && rotulo !== "nenhum" ? ROTULOS_JEV[rotulo] : null,
+    rotulo: incoerente ? "incoerente" : rotulo && rotulo !== "nenhum" ? rotulo : null,
+    motivo: incoerente ? "respostas contraditórias" : rotulo && rotulo !== "nenhum" ? ROTULOS_JEV[rotulo] : null,
     origem: "jev",
     dados: {
       ...(dorTexto ? { dor_texto: dorTexto } : {}),
