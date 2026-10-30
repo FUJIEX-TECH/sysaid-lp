@@ -15,7 +15,7 @@ export default function GlobalRuntime() {
   return (
     <>
       <Analytics />
-      {!pathname.startsWith("/obrigado") && <ChatWidget />}
+      {!pathname.startsWith("/obrigado") && !pathname.startsWith("/diagnostico") && <ChatWidget />}
     </>
   );
 }

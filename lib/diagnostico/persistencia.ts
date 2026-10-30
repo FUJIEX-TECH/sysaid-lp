@@ -8,7 +8,7 @@
 // migração lib/migrations/2026-10-28-diagnostico.sql NÃO aplicada em produção).
 // ==========================================================================
 
-import type { Persistencia, Respostas } from "@/lib/conversa-core";
+import type { Contexto, Persistencia, Respostas } from "@/lib/conversa-core";
 
 const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "gclid"] as const;
 
@@ -20,6 +20,16 @@ function getUtm(): Record<string, string> {
     if (v) found[k] = v;
   }
   return found;
+}
+
+function utmDosSinais(s: Contexto["sinais"] | undefined): Record<string, string> {
+  if (!s) return {};
+  const out: Record<string, string> = {};
+  for (const k of UTM_KEYS) {
+    const v = s[k];
+    if (v) out[k] = v;
+  }
+  return out;
 }
 
 export function criarPersistenciaLP(): Persistencia {
@@ -65,10 +75,18 @@ export function criarPersistenciaLP(): Persistencia {
     },
 
     async enviar({ respostas, ctx, classificacao, honeypot, medicao }) {
+      const s = ctx.sinais;
       const diag = {
         variante: "b",
         origem: ctx.origem,
         concorrente: ctx.variaveis.concorrente ?? null,
+        // v2: o que a origem leu (intenção, canal) e os sinais crus (UTMs lembrados, página de entrada)
+        variaveis: ctx.variaveis,
+        sinais: s
+          ? { caminho: s.caminho, entrada: s.entrada, referrer: s.referrer, utm_source: s.utm_source, utm_medium: s.utm_medium, utm_campaign: s.utm_campaign, utm_term: s.utm_term, utm_content: s.utm_content, gclid: s.gclid }
+          : null,
+        // v2: a empresa lida pelo domínio (só o que é público; a pessoa confirmou ou corrigiu o nome em `respostas.empresa`)
+        empresa_lida: ctx.empresa ? { dominio: ctx.empresa.dominio, nome: ctx.empresa.nome, origem: ctx.empresa.origem, cnpj: ctx.empresa.cnpj ?? null, cidade: ctx.empresa.cidade ?? null, uf: ctx.empresa.uf ?? null } : null,
         respostas,
         pontos: classificacao.pontos,
         detalhe: classificacao.detalhe,
@@ -93,6 +111,8 @@ export function criarPersistenciaLP(): Persistencia {
         website: honeypot,
         page_url: window.location.href,
         referrer: document.referrer,
+        // UTMs da URL atual; se não tem, os lembrados da 1ª página (sinais)
+        ...utmDosSinais(s),
         ...ensureUtm(),
       };
       const res = await fetch("/api/lead", {

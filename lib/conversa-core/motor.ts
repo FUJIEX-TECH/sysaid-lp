@@ -6,13 +6,16 @@
 // ==========================================================================
 
 import { avaliar, geradoValido, type Resolvedor } from "./condicoes";
-import { pontuar, rotaDe } from "./pontuacao";
+import { montarMapa } from "./mapa";
+import { resolverOrigem, sinaisDoCaminho } from "./origem";
+import { pontuar, rotaDe, rotuloFinal } from "./pontuacao";
 import { recomendar } from "./recomendacao";
 import { renderTemplate, renderTexto } from "./texto";
 import type {
   Classificacao,
   ConfigConversa,
   Contexto,
+  Empresa,
   Encerramento,
   EtapaConfig,
   ListaOpcoes,
@@ -20,6 +23,7 @@ import type {
   Opcoes,
   Respostas,
   RotuloJev,
+  Sinais,
 } from "./tipos";
 
 export type EtapaResolvida = {
@@ -34,18 +38,27 @@ export function criarMotor(config: ConfigConversa) {
   const etapas = config.etapas;
 
   // --- contexto -------------------------------------------------------------
+  // parte 1: só o caminho; v2: os sinais completos (UTMs, referrer, entrada)
   function origemDoCaminho(pathname: string): { origem: string; variaveis: Record<string, string | null> } {
-    const slug = pathname.replace(/^\/+|\/+$/g, "").split("/")[0].toLowerCase();
-    const o = slug ? config.origens.porSlug[slug] : undefined;
-    if (o) return { origem: o.origem, variaveis: { ...o.variaveis } };
-    return { origem: config.origens.padrao, variaveis: {} };
+    const o = resolverOrigem(config.origens, sinaisDoCaminho(pathname));
+    return { origem: o.origem, variaveis: o.variaveis };
   }
 
-  function contexto(pathname: string, respostas: Respostas, tempos?: Contexto["tempos"], gerados?: Contexto["gerados"]): Contexto {
-    return { ...origemDoCaminho(pathname), respostas, tempos, gerados };
+  function contexto(
+    sinaisOuCaminho: Sinais | string,
+    respostas: Respostas,
+    tempos?: Contexto["tempos"],
+    gerados?: Contexto["gerados"],
+    empresa?: Empresa | null
+  ): Contexto {
+    const sinais = typeof sinaisOuCaminho === "string" ? sinaisDoCaminho(sinaisOuCaminho) : sinaisOuCaminho;
+    const o = resolverOrigem(config.origens, sinais);
+    return { origem: o.origem, variaveis: o.variaveis, respostas, tempos, gerados, sinais, empresa };
   }
 
-  // variáveis derivadas (config.variaveis) + o mapa, se houver recomendação
+  // variáveis derivadas (config.variaveis), o mapa em texto, e as de v2:
+  // {{resumo.<etapa>}} (a resposta como aparece na bolha), {{sinais.<x>}} (utm,
+  // parâmetro) e {{empresa.<x>}} (empresa lida pelo domínio)
   function resolvedor(ctx: Contexto): Resolvedor {
     return (nome) => {
       const fn = config.variaveis?.[nome];
@@ -54,6 +67,27 @@ export function criarMotor(config: ConfigConversa) {
         return recomendar(config.recomendacao, ctx, resolvedor(ctx))
           .map((n) => n.rotulo)
           .join(" → ");
+      }
+      if (nome.startsWith("resumo.")) {
+        const id = nome.slice(7);
+        const e = etapas.find((x) => x.id === id);
+        const v = ctx.respostas[id];
+        return e && v !== undefined ? resumo(e, v, ctx) : "";
+      }
+      if (nome.startsWith("sinais.")) {
+        const k = nome.slice(7);
+        const s = ctx.sinais;
+        if (!s) return "";
+        const direto = (s as unknown as Record<string, unknown>)[k];
+        if (typeof direto === "string") return direto;
+        return s.parametros[k] ?? "";
+      }
+      if (nome.startsWith("empresa.")) {
+        const k = nome.slice(8);
+        const e = ctx.empresa;
+        if (!e) return "";
+        const v = (e as unknown as Record<string, unknown>)[k];
+        return typeof v === "string" ? v : "";
       }
       return undefined;
     };
@@ -179,7 +213,7 @@ export function criarMotor(config: ConfigConversa) {
     const rota = rotaDe(config.pontuacao, p, jev.rotulo);
     return {
       ...p,
-      rotulo: jev.rotulo ?? p.rotuloCodigo,
+      rotulo: rotuloFinal(config.pontuacao, p, jev.rotulo),
       rotuloOrigem: jev.origem,
       jevDados: jev.dados,
       rota,
@@ -189,6 +223,11 @@ export function criarMotor(config: ConfigConversa) {
 
   function mapa(ctx: Contexto) {
     return config.recomendacao ? recomendar(config.recomendacao, ctx, resolvedor(ctx)) : [];
+  }
+
+  // v2: o mapa visual (nós e ligações) a partir de config.mapa
+  function mapaVisual(ctx: Contexto) {
+    return montarMapa(config, ctx, resolvedor(ctx));
   }
 
   return {
@@ -206,6 +245,8 @@ export function criarMotor(config: ConfigConversa) {
     resumo,
     classificar,
     mapa,
+    mapaVisual,
+    resolvedor,
   };
 }
 

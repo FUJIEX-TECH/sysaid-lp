@@ -53,3 +53,30 @@ export function sugerirEmpresa(email: string): string {
 export function primeiroNome(nome: string | undefined): string {
   return (nome ?? "").trim().split(/\s+/)[0] ?? "";
 }
+
+// v2: nome da pessoa pela parte local do e-mail ("mariana.costa@" → "Mariana Costa").
+// Só sugere quando parece nome: separador entre as partes, ou uma palavra só
+// com 4+ letras. Caixas de função (contato, ti, suporte...) e números não viram nome.
+const CAIXAS = new Set([
+  "contato", "comercial", "vendas", "suporte", "atendimento", "sac", "admin", "administrativo", "info", "informacoes",
+  "financeiro", "fiscal", "nfe", "faturamento", "compras", "rh", "dp", "marketing", "diretoria", "gerencia", "ti",
+  "sistemas", "infra", "helpdesk", "servicedesk", "noreply", "no-reply", "naoresponda", "webmaster", "ouvidoria", "juridico",
+  "contabilidade", "operacoes", "logistica", "qualidade", "projetos", "equipe", "time", "geral", "recepcao", "secretaria",
+]);
+
+export function sugerirNome(email: string): string {
+  const local = (email.split("@")[0] ?? "").toLowerCase().trim();
+  if (!local) return "";
+  const semMais = local.split("+")[0];
+  const partes = semMais
+    .split(/[._-]+/)
+    .map((p) => p.replace(/[^a-zà-ú]/gi, ""))
+    .filter((p) => p.length >= 2 && !CAIXAS.has(p));
+  if (!partes.length) return "";
+  if (partes.length === 1 && partes[0].length < 4) return "";
+  if (partes.length === 1 && !/[._-]/.test(semMais) && /^[a-z]{1,2}[a-z]+$/.test(partes[0]) && partes[0].length > 12) return "";
+  return partes
+    .slice(0, 3)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}

@@ -4,6 +4,7 @@
 // entrada, teto de custo por sessão e por hora, medição; falha = `null`, e quem
 // chama cai no texto fixo da configuração. Só roda no servidor (chave em
 // ANTHROPIC_API_KEY). Nada aqui conhece cliente algum: prompts vêm de fora.
+import { createHash } from "node:crypto";
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import type { z } from "zod";
@@ -34,16 +35,21 @@ export function criarLLM(cfg: LLMConfig) {
 
   // Gera um JSON no formato `schema` a partir de `system` (fixo, cacheado na
   // API) + `prompt` (varia). `chave` identifica a entrada pro cache local.
+  // `validar` (v2) é a trava de saída do cliente: reprovou, vira fallback e NÃO
+  // entra no cache (senão a reprovação se repetiria até o TTL); pode devolver
+  // um valor ajustado (ex.: fica o palpite, cai a pergunta).
   async function gerar<S extends z.ZodType>(args: {
     sessao: string;
     chave: string[];
     system: string;
     prompt: string;
     schema: S;
+    validar?: (valor: z.infer<S>) => { ok: true; valor?: z.infer<S> } | { ok: false; motivo: string };
   }): Promise<ResultadoLLM<z.infer<S>>> {
     const t0 = Date.now();
     if (!cfg.habilitado) return { valor: null, origem: "desligado", custoUsd: 0, ms: 0 };
-    const chave = chaveDe(cfg.modelo, args.system.length.toString(), ...args.chave);
+    // hash do system (não só o tamanho): mudou o prompt, muda a chave
+    const chave = chaveDe(cfg.modelo, createHash("sha1").update(args.system).digest("hex").slice(0, 16), ...args.chave);
     const emCache = cache.get(chave);
     if (emCache !== undefined) return { valor: emCache as z.infer<S>, origem: "cache", custoUsd: 0, ms: Date.now() - t0 };
 
@@ -68,8 +74,14 @@ export function criarLLM(cfg: LLMConfig) {
       if (res.stop_reason === "refusal" || !res.parsed_output) {
         return { valor: null, origem: "fallback", custoUsd, ms: Date.now() - t0, motivo: res.stop_reason ?? "sem saída" };
       }
-      cache.set(chave, res.parsed_output);
-      return { valor: res.parsed_output, origem: "ok", custoUsd, ms: Date.now() - t0 };
+      let valor = res.parsed_output as z.infer<S>;
+      if (args.validar) {
+        const v = args.validar(valor);
+        if (!v.ok) return { valor: null, origem: "fallback", custoUsd, ms: Date.now() - t0, motivo: `trava:${v.motivo}` };
+        if (v.valor !== undefined) valor = v.valor;
+      }
+      cache.set(chave, valor);
+      return { valor, origem: "ok", custoUsd, ms: Date.now() - t0 };
     } catch (err) {
       const motivo =
         err instanceof Anthropic.APIError ? `api ${err.status ?? err.name}` : err instanceof Error ? `${err.name}: ${err.message.slice(0, 80)}` : "erro";

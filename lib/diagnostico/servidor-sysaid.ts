@@ -12,6 +12,7 @@
 
 import { z } from "zod";
 import type { JevServidorConfig, LLMConfig, PerguntaJev } from "@/lib/conversa-core";
+import type { EmpresaServidorConfig } from "@/lib/conversa-core/servidor";
 
 // Haiku 5.5: US$ 0,10 / 0,50 por milhão (entrada / saída) até 100 K tokens de prompt
 export const LLM_SYSAID: LLMConfig = {
@@ -163,4 +164,18 @@ export const SITUACOES: Record<string, string> = {
   sem: "não tem ferramenta: e-mail, planilha ou WhatsApp",
   cliente: "já é cliente e quer ampliar o uso (não avalie como usa hoje)",
   pesquisa: "está pesquisando o assunto",
+};
+
+// --------------------------------------------------------------------------
+// v2 (30/10/2026, Severino): empresa pelo domínio do e-mail. Sem chave paga:
+// o site público (título, descrição, ícone, redes, CNPJ no rodapé) e a
+// BrasilAPI pelo CNPJ (razão social, cidade, abertura, porte). Ícone de
+// reserva: favicon grande do Google. Cache de 24 h por domínio.
+// --------------------------------------------------------------------------
+export const EMPRESA_SYSAID: EmpresaServidorConfig = {
+  habilitado: process.env.DIAG_EMPRESA !== "0",
+  timeoutMs: 2500,
+  cache: { ttlMs: 24 * 60 * 60 * 1000, maximo: 500 },
+  iconeFallback: "https://www.google.com/s2/favicons?domain={dominio}&sz=128",
+  cnpjUrl: "https://brasilapi.com.br/api/cnpj/v1/{cnpj}",
 };

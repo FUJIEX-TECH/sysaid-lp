@@ -70,6 +70,8 @@ export async function POST(req: NextRequest) {
     system: SYSTEM_PALPITE,
     prompt: PALPITE_PROMPT({ dor, descricao: DORES_JEV[dor], texto, situacao: SITUACOES[respostas.situacao ?? ""] }),
     schema: SAIDA_PALPITE,
+    // v2: a trava roda dentro do núcleo; palpite reprovado vira fallback e NÃO entra no cache
+    validar: (v) => (travaGerado(v).palpite ? { ok: true } : { ok: false, motivo: "palpite" }),
   });
   log({ etapa: "llm", origem: rl.origem, ms: rl.ms, custoUsd: rl.custoUsd, motivo: rl.motivo, jevMs: rj.ms });
   if (!rl.valor) return NextResponse.json({ ok: false, motivo: `llm ${rl.motivo ?? rl.origem}` });

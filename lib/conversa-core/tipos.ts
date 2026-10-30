@@ -19,6 +19,83 @@ export type Contexto = {
   gerados?: Record<string, Gerado>;
   // tempos medidos pelo motor (só na classificação)
   tempos?: { segundosTotal: number };
+  // v2: de onde a pessoa veio (URL, UTMs, gclid, referrer, página de entrada); ver origem.ts
+  sinais?: Sinais;
+  // v2: a empresa lida pelo domínio do e-mail (enriquecimento.ts), quando chegou
+  empresa?: Empresa | null;
+};
+
+// --------------------------------------------------------------------------
+// v2: origem pela campanha. `Sinais` é o que o navegador lê; `OrigemRegra` é
+// como cada cliente mapeia sinais → origem + variáveis (o mecanismo é genérico,
+// o mapa campanha → contexto é configuração).
+// --------------------------------------------------------------------------
+export type Sinais = {
+  caminho: string; // pathname da página do chat
+  entrada: string; // pathname da 1ª página vista na sessão (lembrada no sessionStorage), ou ""
+  referrer: string; // document.referrer
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_term?: string;
+  utm_content?: string;
+  gclid?: string;
+  // todos os parâmetros da URL (ex.: de=movidesk)
+  parametros: Record<string, string>;
+};
+
+// como um valor casa: igual (string ou lista), contém (sem acento, sem caixa) ou regex
+export type Casamento = string | string[] | { contem: string | string[] } | { regex: string };
+
+export type CondicaoOrigem = {
+  caminho?: Casamento; // primeiro segmento do pathname (ex.: "movidesk")
+  entrada?: Casamento; // primeiro segmento da página de entrada lembrada
+  referrer?: Casamento;
+  utm_source?: Casamento;
+  utm_medium?: Casamento;
+  utm_campaign?: Casamento;
+  utm_term?: Casamento;
+  utm_content?: Casamento;
+  gclid?: boolean; // veio de clique pago do Google
+  parametro?: Record<string, Casamento>; // qualquer outro parâmetro (ex.: de)
+  semCampanha?: boolean; // nenhum utm nem gclid
+};
+
+export type OrigemRegra = {
+  id: string;
+  quando: CondicaoOrigem | { alguma: CondicaoOrigem[] };
+  // base: define a origem (a 1ª que casa vence); acrescentar: só soma variáveis
+  modo?: "base" | "acrescentar";
+  origem?: string;
+  variaveis?: Record<string, string>;
+};
+
+// --------------------------------------------------------------------------
+// v2: empresa lida pelo domínio do e-mail (servidor/empresa.ts lê o site
+// público; o navegador só manda o domínio, nunca o e-mail)
+// --------------------------------------------------------------------------
+export type Empresa = {
+  dominio: string;
+  nome: string; // melhor nome encontrado (site, CNPJ) ou chute pelo domínio
+  site: string;
+  logo?: string; // URL de imagem (apple-touch-icon ou favicon grande)
+  descricao?: string;
+  redes: { instagram?: string; linkedin?: string; facebook?: string; youtube?: string };
+  cnpj?: string;
+  razaoSocial?: string;
+  cidade?: string;
+  uf?: string;
+  desde?: string; // ano de abertura
+  porte?: string;
+  atividade?: string;
+  origem: "site" | "cnpj" | "fallback";
+};
+
+export type EmpresaConfig = {
+  habilitado: boolean;
+  endpoint: string; // POST {dominio} → Empresa
+  campoEmail: string; // etapa cujo valor é o e-mail
+  timeoutMs: number;
 };
 
 // --------------------------------------------------------------------------
@@ -70,8 +147,10 @@ export type Condicao =
   | { campo: string; minCaracteres: number }
   | { origem: string }
   | { variavel: string; definida: boolean } // variável da URL ou derivada, não vazia
+  | { variavel: string; igual: string } // v2: variável da origem ou derivada com este valor
   | { tempoTotalEntre: [number, number] } // segundos, só na classificação
   | { gerado: string; disponivel: boolean } // geração do servidor chegou e ainda vale (`para` bate)
+  | { empresaEncontrada: boolean } // v2: a empresa pelo domínio chegou (com dado do site ou do CNPJ)
   | { todas: Condicao[] }
   | { alguma: Condicao[] }
   | { nao: Condicao };
@@ -174,6 +253,10 @@ export type PontuacaoConfig = {
   rotulos: { rotulo: string; quando: Condicao }[];
   // rótulo → rota; sem rótulo, a rota é a classe
   rotaPorRotulo: Record<string, string>;
+  // v2: quando o Jev e o código dão rótulos diferentes, vence o que vier antes
+  // nesta lista (ex.: ["fora", "cliente", "cotando", "incoerente"]); rótulo fora
+  // da lista perde; sem a lista, o do Jev vence (comportamento da parte 2)
+  precedenciaRotulos?: string[];
 };
 
 export type Classificacao = {
@@ -272,15 +355,66 @@ export type Persistencia = {
 // --------------------------------------------------------------------------
 // A configuração completa de um cliente
 // --------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// v2: painéis visuais gerados por código (porte, mapa, empresa, resumo) e o
+// mapa declarativo. Tudo que é texto vem da configuração; a forma é do núcleo.
+// --------------------------------------------------------------------------
+export type NoMapaConfig = { quando?: Condicao; texto: Texto; nota?: Texto };
+export type MapaConfig = {
+  atual: NoMapaConfig; // onde a pessoa está (sempre)
+  problema?: NoMapaConfig;
+  causa?: NoMapaConfig;
+  // nós do catálogo escolhidos pela recomendação (recomendacao.ts)
+  destino?: { quando?: Condicao; nota?: Texto; maximo?: number };
+  passo?: NoMapaConfig;
+  // rótulo das ligações
+  arestas?: { problema?: string; causa?: string; destino?: string; passo?: string };
+};
+export type NoMapa = { id: string; tipo: "atual" | "problema" | "causa" | "destino" | "passo"; texto: string; nota?: string };
+export type Mapa = { nos: NoMapa[]; arestas: { de: string; para: string; rotulo?: string }[] };
+
+export type PorteConfig = {
+  pessoas: { campo: string; valores: Record<string, number>; rotulo: Texto };
+  equipe: { campo: string; valores: Record<string, number>; rotulo: Texto };
+  titulo?: Texto;
+  legenda?: Texto; // pode usar {{porGlifo}} e {{razao}}
+};
+
+export type PainelConfig = {
+  id: string;
+  tipo: "porte" | "mapa" | "empresa" | "custom";
+  quando?: Condicao;
+  // etapa depois da qual o painel aparece no fluxo (ou junto da pergunta, se ela for a atual)
+  apos?: string;
+  // fluxo: dentro da conversa; lateral: coluna fixa no desktop (no celular cai no fluxo em `apos`)
+  lugar?: "fluxo" | "lateral";
+  titulo?: Texto;
+  Componente?: ComponentType<{ respostas: Respostas; ctx: Contexto }>;
+};
+
+export type ResumoConfig = {
+  titulo: Texto;
+  subtitulo?: Texto;
+  linhas: { rotulo: string; texto: Texto; quando?: Condicao }[];
+};
+
 export type ConfigConversa = {
   id: string;
-  marca: { titulo: string; rotuloRegiao: string };
+  marca: { titulo: string; rotuloRegiao: string; subtitulo?: string };
   // variáveis CSS --cv-* (ver ui/conversa.css)
   tema?: Record<string, string>;
   totalPassos: number;
   digitandoMs?: number;
-  // origem pela URL: primeiro segmento do caminho → origem + variáveis
-  origens: { padrao: string; porSlug: Record<string, { origem: string; variaveis: Record<string, string> }> };
+  // origem: `porSlug` (parte 1: primeiro segmento do caminho) e/ou `regras` (v2:
+  // UTMs, gclid, referrer, página de entrada, parâmetro). As regras rodam antes.
+  origens: {
+    padrao: string;
+    porSlug?: Record<string, { origem: string; variaveis: Record<string, string> }>;
+    regras?: OrigemRegra[];
+    // chave do sessionStorage pra lembrar os sinais da 1ª página (ex.: anúncio caiu
+    // na LP, a pessoa clicou e veio pro chat); vazio = não lembra
+    lembrar?: string;
+  };
   catalogos?: Record<string, Opcao[]>;
   abertura: Texto[];
   etapas: EtapaConfig[];
@@ -290,6 +424,13 @@ export type ConfigConversa = {
   jev: JevConfig;
   // gerações do servidor disparadas enquanto a pessoa digita (parte 2)
   geracoes?: GeracaoConfig[];
+  // v2: empresa pelo domínio do e-mail
+  empresa?: EmpresaConfig;
+  // v2: painéis visuais, mapa declarativo, porte e resumo lateral
+  paineis?: PainelConfig[];
+  mapa?: MapaConfig;
+  porte?: PorteConfig;
+  resumo?: ResumoConfig;
   textos: {
     enviando: string;
     erro: string;
@@ -297,6 +438,9 @@ export type ConfigConversa = {
     legal: string;
     corrigirDica: string;
     passoAria: string; // "Pergunta {{passo}} de {{total}}"
+    enviar?: string; // botão de enviar texto (padrão "Enviar")
+    corrigir?: string; // rótulo sob a bolha da pessoa (padrão "corrigir")
+    faltam?: string; // v2: "faltam ~{{n}}"
   };
   // variáveis derivadas, disponíveis nos templates como {{nome}}
   variaveis?: Record<string, (ctx: Contexto) => string>;

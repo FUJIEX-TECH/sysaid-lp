@@ -19,9 +19,23 @@ export function pontuar(cfg: PontuacaoConfig, ctx: Contexto, variavel?: Resolved
   return { pontos, detalhe, classe, rotuloCodigo };
 }
 
-// Rótulo vence ponto: o do Jev tem prioridade sobre o do código.
+// Rótulo vence ponto. Entre o rótulo do Jev e o do código: sem `precedenciaRotulos`
+// o do Jev vence (parte 2); com a lista, vence o que vier antes nela (v2: um
+// "fora" que o código já sabia não some por causa de um "incoerente" do Jev).
+export function rotuloFinal(cfg: PontuacaoConfig, p: PontuacaoParcial, rotuloJev: string | null): string | null {
+  const candidatos = [rotuloJev, p.rotuloCodigo].filter((r): r is string => !!r);
+  if (!candidatos.length) return null;
+  const prec = cfg.precedenciaRotulos;
+  if (!prec) return candidatos[0];
+  const posicao = (r: string) => {
+    const i = prec.indexOf(r);
+    return i < 0 ? prec.length : i;
+  };
+  return [...candidatos].sort((a, b) => posicao(a) - posicao(b))[0];
+}
+
 export function rotaDe(cfg: PontuacaoConfig, p: PontuacaoParcial, rotuloJev: string | null): string {
-  const rotulo = rotuloJev ?? p.rotuloCodigo;
+  const rotulo = rotuloFinal(cfg, p, rotuloJev);
   if (rotulo && cfg.rotaPorRotulo[rotulo]) return cfg.rotaPorRotulo[rotulo];
   return p.classe;
 }

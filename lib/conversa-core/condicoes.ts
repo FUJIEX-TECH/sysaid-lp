@@ -26,6 +26,7 @@ export function avaliar(c: Condicao | undefined, ctx: Contexto, variavel?: Resol
   if ("variavel" in c) {
     const v = variavel ? variavel(c.variavel) : undefined;
     const valor = v ?? ctx.variaveis[c.variavel];
+    if ("igual" in c) return typeof valor === "string" && valor === c.igual;
     const definida = typeof valor === "string" && valor.trim() !== "";
     return definida === c.definida;
   }
@@ -34,6 +35,7 @@ export function avaliar(c: Condicao | undefined, ctx: Contexto, variavel?: Resol
     return s >= c.tempoTotalEntre[0] && s <= c.tempoTotalEntre[1];
   }
   if ("gerado" in c) return geradoValido(ctx, c.gerado) === c.disponivel;
+  if ("empresaEncontrada" in c) return (!!ctx.empresa && ctx.empresa.origem !== "fallback") === c.empresaEncontrada;
   const valor = ctx.respostas[c.campo];
   if ("igual" in c) return valor === c.igual;
   if ("diferente" in c) return valor !== c.diferente;

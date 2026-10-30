@@ -1,0 +1,35 @@
+/* Qualifica v2 (SysAid): esqueleto enquanto a tela carrega e o convite no hero
+   da LP (variante B). A tela em si é lib/conversa-core/ui/tela.css. */
+.qualifica-carregando {
+  min-height: 100dvh;
+  background: var(--bg-soft);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.qualifica-carregando__quem { font-weight: 600; font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--green-700); }
+.qualifica-carregando__linha { display: block; width: 60%; max-width: 420px; height: 12px; background: var(--line); margin-top: 20px; }
+.qualifica-carregando__linha--curta { width: 40%; margin-top: 0; }
+
+/* convite no hero (variante B): no lugar do formulário, a porta pra conversa */
+.convite {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 22px 24px;
+  text-align: left;
+  border: 1px solid rgba(107, 217, 185, 0.35);
+  background: rgba(255, 255, 255, 0.04);
+}
+.convite__titulo {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-style: italic;
+  font-size: 1.45rem;
+  line-height: 1.2;
+  color: #fff;
+  margin: 0 0 6px;
+}
+.convite__texto { margin: 0 0 16px; color: #c9d9d1; font-size: 0.98rem; }
+.convite__acoes { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.convite__nota { font-size: 0.82rem; color: #86a498; }
