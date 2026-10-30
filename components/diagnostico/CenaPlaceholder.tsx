@@ -1,17 +1,19 @@
 "use client";
 
-import type { Respostas } from "@/lib/diagnostico/fluxo";
-import { sugerirEmpresa } from "@/lib/diagnostico/fluxo";
+import "./cena.css";
+import type { Contexto, Respostas } from "@/lib/conversa-core";
+import { sugerirEmpresa } from "@/lib/conversa-core";
 
-// Cena da central de atendimento: placeholder simples (porte e empresa).
-// A cena ilustrada de verdade (traço fino ou isométrico, decisões 9 e 10 do
-// plano) fica pra fatia 2. Aqui só o comportamento: técnicos aparecem conforme
-// o porte, pessoas atendidas viram um contador, a empresa entra no letreiro.
+// Cena da central de atendimento (SOB MEDIDA da SysAid): placeholder simples
+// (porte e empresa). A cena ilustrada de verdade (traço fino ou isométrico,
+// decisões 9 e 10 do plano) fica pra fatia 2. Aqui só o comportamento:
+// técnicos aparecem conforme o porte, pessoas atendidas viram um contador, a
+// empresa entra no letreiro. Entra no motor pelo slot `config.Cena`.
 
 const TECNICOS: Record<string, number> = { "1-2": 2, "3-10": 5, "+10": 8 };
 const PESSOAS: Record<string, string> = { "50": "até 50", "200": "51 a 200", "1000": "201 a 1.000", mais: "+1.000" };
 
-export default function CenaPlaceholder({ respostas }: { respostas: Respostas }) {
+export default function CenaPlaceholder({ respostas }: { respostas: Respostas; ctx: Contexto }) {
   const n = respostas.tecnicos ? TECNICOS[respostas.tecnicos] ?? 0 : 0;
   const pessoas = respostas.usuarios ? PESSOAS[respostas.usuarios] : null;
   const empresa = respostas.empresa || (respostas.email ? sugerirEmpresa(respostas.email) : "");

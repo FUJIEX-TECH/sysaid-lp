@@ -1,0 +1,34 @@
+/* Cena placeholder da central de TI (sob medida da SysAid): letreiro + mesas.
+   Tokens da LP (globals.css). O chat em si é estilizado em lib/conversa-core/ui/conversa.css. */
+.diag__cena {
+  background: var(--green-900);
+  color: #eef4f0;
+  padding: 14px 18px 12px;
+  border-bottom: 2px solid var(--green-400);
+}
+.diag__letreiro { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.diag__letreiro-nome {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 1.15rem;
+  letter-spacing: 0.01em;
+  color: #fff;
+}
+.diag__letreiro-meta { font-size: 0.78rem; color: #93b0a4; text-align: right; line-height: 1.2; }
+.diag__mesas { display: flex; gap: 8px; margin-top: 10px; min-height: 14px; }
+.diag__tecnico {
+  width: 14px; height: 14px;
+  background: var(--green-400);
+  border-radius: 50%;
+  animation: diag-pop 0.3s ease both;
+}
+.diag__tecnico--vazio { background: transparent; border: 1px dashed rgba(107, 217, 185, 0.5); animation: none; }
+
+@keyframes diag-pop { from { transform: scale(0); } to { transform: scale(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .diag__tecnico { animation: none; }
+}
+@media (max-width: 620px) {
+  .diag__cena { padding-inline: 14px; }
+}
