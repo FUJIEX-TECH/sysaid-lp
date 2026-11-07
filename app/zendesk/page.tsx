@@ -91,8 +91,8 @@ const FAQ = [
     a: "Sim. Os tickets do Zendesk são exportados com comentários, tags e campos personalizados e importados no SysAid; o número original pode ir num campo de referência, para quem buscar um chamado antigo achar. O diagnóstico define o recorte (todo o histórico ou só os últimos anos) e o que acontece com tickets ainda abertos no dia da virada.",
   },
   {
-    q: "Qual é a diferença prática da IA do SysAid?",
-    a: "O SysAid Copilot não se limita a sugerir texto. Ele entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho, além de sugerir respostas ao agente no que chega ao time. E está incluído na plataforma, sem add-on.",
+    q: "O SysAid é um service desk com IA agêntica, que resolve chamados sozinho?",
+    a: "Sim. O SysAid Copilot é IA agêntica: não se limita a sugerir texto, ele entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho, até 90% antes de virar chamado. A plataforma traz mais de 100 agentes de IA prontos para tarefas de ITSM e um AI Builder no-code para criar novos; o Copilot está incluído na plataforma, sem pacote de créditos. No Zendesk, a IA é um add-on pago.",
   },
   {
     q: "E o custo, como se compara?",
