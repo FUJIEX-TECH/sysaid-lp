@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { isCorporateEmail, CORPORATE_EMAIL_ERROR } from "./email-domains";
+import { CORPORATE_EMAIL_ERROR } from "./email-domains";
+import { isCorporateEmailServer } from "./email-domains-server";
 
 // Espelha os campos do formulario sys_LP (WPForms 2070):
 // email (gatilho, obrigatorio), nome e telefone obrigatorios, empresa opcional,
@@ -11,12 +12,13 @@ export type FormId = z.infer<typeof FORM_IDS>;
 export const leadSchema = z.object({
   // Só e-mail corporativo fecha o lead. Webmail gratuito e descartável são
   // barrados aqui (server), não só no client, senão bot/curl passa direto.
+  // No server vale também a lista completa de descartáveis (07/11/2026).
   email: z
     .string()
     .trim()
     .email("E-mail inválido")
     .max(255)
-    .refine(isCorporateEmail, CORPORATE_EMAIL_ERROR),
+    .refine(isCorporateEmailServer, CORPORATE_EMAIL_ERROR),
   name: z.string().trim().min(2, "Informe seu nome").max(120),
   phone: z.string().trim().min(8, "Telefone inválido").max(40),
   company: z.string().trim().max(160).optional().or(z.literal("")),
