@@ -1,8 +1,27 @@
 .admin {
-  max-width: 1280px;
-  margin: 0 auto;
+  width: 100%;
   padding: 28px 24px 80px;
 }
+@media (max-width: 640px) {
+  .admin { padding: 20px 16px 60px; }
+  .admin__controls input { min-width: 0; flex-basis: 100%; }
+  .admin__controls select { flex: 1 1 100%; min-width: 0; max-width: 100%; }
+}
+
+/* filtro de status (Completos / Parciais / Todos) */
+.admin__status {
+  display: inline-flex; border: 1.5px solid var(--line); border-radius: var(--radius-sm);
+  overflow: hidden; margin-bottom: 14px; max-width: 100%;
+}
+.admin__status-btn {
+  background: #fff; border: none; border-right: 1.5px solid var(--line);
+  padding: 9px 16px; font-family: var(--font-sans); font-size: 0.92rem; font-weight: 600;
+  color: var(--ink-400); cursor: pointer; white-space: nowrap;
+}
+.admin__status-btn:last-child { border-right: none; }
+.admin__status-btn:hover { color: var(--green-700); }
+.admin__status-btn.is-active { background: var(--green-700); color: #fff; }
+.admin__status-n { font-weight: 400; opacity: 0.8; margin-left: 4px; }
 .admin__top {
   display: flex; align-items: flex-start; justify-content: space-between;
   gap: 16px; margin-bottom: 24px;
@@ -36,21 +55,25 @@
 .admin__export:hover { background: #12503f; }
 
 .admin__tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
-.admin__table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.admin__tablewrap { -webkit-overflow-scrolling: touch; }
+.admin__table { width: 100%; min-width: 1100px; border-collapse: collapse; font-size: 0.88rem; }
 .admin__table thead th {
   text-align: left; background: var(--bg-soft); color: var(--ink-400);
-  font-weight: 600; padding: 12px 14px; border-bottom: 1px solid var(--line);
+  font-weight: 600; padding: 12px 10px; border-bottom: 1px solid var(--line);
   white-space: nowrap; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.03em;
 }
-.admin__table tbody td { padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.admin__table tbody td { padding: 11px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
 .admin__table tbody tr:hover { background: var(--bg-soft); }
-.admin__table .nowrap { white-space: nowrap; }
+.admin__table .nowrap { white-space: nowrap; overflow-wrap: normal; }
+.admin__table .email { min-width: 180px; overflow-wrap: anywhere; }
+.admin__table .url { min-width: 110px; max-width: 260px; overflow-wrap: anywhere; }
+.admin__table .camp { min-width: 140px; }
 .admin__table .gclid { text-align: center; color: var(--green-700); font-weight: 700; cursor: default; }
 .admin__empty { text-align: center; color: var(--ink-400); padding: 40px 0; }
 
 .pill {
   display: inline-block; padding: 3px 10px; border-radius: 999px;
-  font-size: 0.75rem; font-weight: 600; text-transform: capitalize;
+  font-size: 0.75rem; font-weight: 600; text-transform: capitalize; white-space: nowrap;
 }
 .pill--sent { background: #e6f4ea; color: #1e7e34; }
 .pill--failed { background: #fdecea; color: #c0392b; }

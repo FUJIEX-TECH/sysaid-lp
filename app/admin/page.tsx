@@ -3,11 +3,16 @@ import { verifyCookie, ADMIN_COOKIE } from "@/lib/auth";
 import { listLeads, type Lead } from "@/lib/db";
 import LoginForm from "./LoginForm";
 import LeadsTable from "./LeadsTable";
+import { parseStatus } from "./status";
 import "./admin.css";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminPage() {
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string | string[] }>;
+}) {
   const store = await cookies();
   const authed = verifyCookie(store.get(ADMIN_COOKIE)?.value);
 
@@ -24,5 +29,8 @@ export default async function AdminPage() {
     dbError = (err as Error).message;
   }
 
-  return <LeadsTable leads={leads} dbError={dbError} />;
+  const raw = (await searchParams).status;
+  const initialStatus = parseStatus(Array.isArray(raw) ? raw[0] : raw);
+
+  return <LeadsTable leads={leads} dbError={dbError} initialStatus={initialStatus} />;
 }

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { Lead } from "@/lib/db";
+import { STATUS_OPTIONS, matchesStatus, type StatusFilter } from "./status";
 
 // extrai o caminho da pagina de origem a partir da URL completa gravada no lead
 // Caminho da pagina de origem. Lead da propria LP mostra so o caminho ("/movidesk");
@@ -44,14 +45,16 @@ function toCsv(rows: Lead[]): string {
 export default function LeadsTable({
   leads,
   dbError,
+  initialStatus,
 }: {
   leads: Lead[];
   dbError: string | null;
+  initialStatus: StatusFilter;
 }) {
   const [q, setQ] = useState("");
   const [campaign, setCampaign] = useState("");
   const [page, setPage] = useState("");
-  const [completion, setCompletion] = useState<"" | "complete" | "partial">("");
+  const [status, setStatus] = useState<StatusFilter>(initialStatus);
   const [modalLead, setModalLead] = useState<Lead | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -80,32 +83,47 @@ export default function LeadsTable({
     return Array.from(set).sort();
   }, [leads]);
 
-  const filtered = useMemo(() => {
+  // troca o status e grava na URL (?status=parcial|todos; completo e o padrao, sem parametro)
+  function changeStatus(next: StatusFilter) {
+    setStatus(next);
+    const url = new URL(window.location.href);
+    if (next === "completo") url.searchParams.delete("status");
+    else url.searchParams.set("status", next);
+    window.history.replaceState(null, "", url.pathname + url.search + url.hash);
+  }
+
+  // leads que passam pela busca, campanha e pagina (sem o status): base dos contadores do filtro
+  const baseFiltered = useMemo(() => {
     const term = q.trim().toLowerCase();
     return leads.filter((l) => {
       if (campaign && l.utm_campaign !== campaign) return false;
       if (page && pagePath(l.page_url) !== page) return false;
-      if (completion && l.completion !== completion) return false;
       if (!term) return true;
       return [l.name, l.email, l.company, l.phone]
         .filter(Boolean)
         .some((v) => String(v).toLowerCase().includes(term));
     });
-  }, [leads, q, campaign, page, completion]);
+  }, [leads, q, campaign, page]);
 
-  const completeCount = useMemo(
-    () => leads.filter((l) => l.completion === "complete").length,
-    [leads]
+  const statusCounts = useMemo(() => {
+    const complete = baseFiltered.filter((l) => l.completion === "complete").length;
+    return { completo: complete, parcial: baseFiltered.length - complete, todos: baseFiltered.length };
+  }, [baseFiltered]);
+
+  const filtered = useMemo(
+    () => baseFiltered.filter((l) => matchesStatus(l.completion, status)),
+    [baseFiltered, status]
   );
-  const partialCount = leads.length - completeCount;
 
   const thisMonth = useMemo(() => {
     const now = new Date();
-    return leads.filter((l) => {
+    return filtered.filter((l) => {
       const d = new Date(l.created_at);
       return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     }).length;
-  }, [leads]);
+  }, [filtered]);
+
+  const statusLabel = STATUS_OPTIONS.find((o) => o.value === status)!.label.toLowerCase();
 
   function exportCsv() {
     const blob = new Blob([toCsv(filtered)], { type: "text/csv;charset=utf-8" });
@@ -128,7 +146,7 @@ export default function LeadsTable({
         <div>
           <h1>Leads · LP ITSM</h1>
           <p className="admin__sub">
-            {completeCount} completos · {partialCount} parciais · {thisMonth} neste mês
+            {filtered.length} {status === "todos" ? "leads" : statusLabel} · {thisMonth} neste mês
           </p>
         </div>
         <button className="admin__logout" onClick={logout}>Sair</button>
@@ -137,6 +155,20 @@ export default function LeadsTable({
       {dbError && (
         <div className="admin__error">Erro ao ler o banco: {dbError}</div>
       )}
+
+      <div className="admin__status" role="group" aria-label="Status do lead">
+        {STATUS_OPTIONS.map((o) => (
+          <button
+            key={o.value}
+            type="button"
+            className={`admin__status-btn${status === o.value ? " is-active" : ""}`}
+            aria-pressed={status === o.value}
+            onClick={() => changeStatus(o.value)}
+          >
+            {o.label} <span className="admin__status-n">{statusCounts[o.value]}</span>
+          </button>
+        ))}
+      </div>
 
       <div className="admin__controls">
         <input
@@ -155,11 +187,6 @@ export default function LeadsTable({
           {pages.map((p) => (
             <option key={p} value={p}>{p}</option>
           ))}
-        </select>
-        <select value={completion} onChange={(e) => setCompletion(e.target.value as "" | "complete" | "partial")}>
-          <option value="">Completos e parciais</option>
-          <option value="complete">Só completos</option>
-          <option value="partial">Só parciais</option>
         </select>
         <span className="admin__count">{filtered.length} exibidos</span>
         <button className="admin__export" onClick={exportCsv}>Exportar CSV</button>
@@ -186,7 +213,7 @@ export default function LeadsTable({
           <tbody>
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={12} className="admin__empty">Nenhum lead ainda.</td>
+                <td colSpan={12} className="admin__empty">Nenhum lead neste filtro.</td>
               </tr>
             )}
             {filtered.map((l) => (
@@ -198,12 +225,12 @@ export default function LeadsTable({
                   </span>
                 </td>
                 <td>{l.name || "—"}</td>
-                <td>{l.email}</td>
+                <td className="email">{l.email}</td>
                 <td>{l.company || "—"}</td>
                 <td className="nowrap">{l.phone || "—"}</td>
                 <td>{l.num_admins || "—"}</td>
-                <td>{l.utm_campaign || "—"}</td>
-                <td className="nowrap">{pagePath(l.page_url) || "—"}</td>
+                <td className="camp">{l.utm_campaign || "—"}</td>
+                <td className="url">{pagePath(l.page_url) || "—"}</td>
                 <td>{l.utm_source || "—"}</td>
                 <td className="gclid">
                   {l.gclid ? (
