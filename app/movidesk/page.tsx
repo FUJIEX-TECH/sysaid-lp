@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
+import QuantoCusta from "@/components/QuantoCusta";
 import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
 import { altCliente, altSelo } from "@/lib/marcas";
@@ -86,6 +87,10 @@ const FAQ = [
   {
     q: "O Movidesk atende bem o nosso suporte. Por que trocar?",
     a: "Se a operação é de atendimento ao cliente e o volume é estável, talvez não precise. A troca faz sentido quando a TI vira o usuário principal: aí entram gestão de mudanças, CMDB, vínculo de incidente com ativo, SLA de operação e auditoria, que são o território de uma plataforma ITSM. Nas avaliações públicas da G2, essa diferença aparece: 94 contra 61 em facilidade de uso e 90 contra 63 em gestão de mudanças.",
+  },
+  {
+    q: "Quanto custa o SysAid?",
+    a: "O SysAid é cotado pelo número de administradores (quem atende os chamados), em três planos, Básico, Completo e Enterprise, com assinatura anual ou licença perpétua, na nuvem ou no seu servidor. A SysAid Brasil não publica tabela de preço: a proposta sai do tamanho do time e dos módulos que entram, e dá para testar todas as funcionalidades por 30 dias sem custo antes de decidir.",
   },
   {
     q: "Dá para migrar o histórico de tickets?",
@@ -349,6 +354,12 @@ export default function MovideskPage() {
             </div>
           </div>
         </section>
+
+        {/* QUANTO CUSTA */}
+        <QuantoCusta
+          concorrente="Movidesk"
+          nota="Não há preço de tabela: a proposta sai depois de entender quantos administradores atendem, quais módulos entram na primeira onda e quanto do histórico do Movidesk vale migrar. Antes de decidir, dá para testar todas as funcionalidades por 30 dias sem custo."
+        />
 
         {/* FAQ */}
         <section className="section">

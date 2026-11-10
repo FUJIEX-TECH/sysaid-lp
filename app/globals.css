@@ -602,3 +602,15 @@ img, svg { max-width: 100%; height: auto; display: block; }
 .site-footer__col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .site-footer__col a { color: #9fbbb0; text-decoration: none; font-size: 0.9rem; }
 .site-footer__col a:hover, .site-footer__col a:focus-visible { color: #fff; text-decoration: underline; }
+
+/* Bloco "Quanto custa" das comparativas (components/QuantoCusta.tsx) */
+.planos { margin: 0; border-top: 1px solid var(--line); }
+.planos__row { display: grid; grid-template-columns: 180px 1fr; gap: 24px; padding: 22px 0; border-bottom: 1px solid var(--line); }
+.planos__row dt { font-family: var(--font-serif); font-size: 1.45rem; color: var(--ink); line-height: 1.2; }
+.planos__row dd { margin: 0; color: var(--ink-700); }
+.planos__nota { margin: 24px 0 0; color: var(--ink-400); }
+.planos__cta { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 20px; margin-top: 28px; }
+.planos__cta span { color: var(--ink-400); font-size: 0.95rem; }
+@media (max-width: 640px) {
+  .planos__row { grid-template-columns: 1fr; gap: 6px; padding: 18px 0; }
+}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
+import QuantoCusta from "@/components/QuantoCusta";
 import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
 import { altCliente, altSelo } from "@/lib/marcas";
@@ -85,6 +86,10 @@ const FAQ = [
   {
     q: "Já uso o TopDesk. Por que trocar?",
     a: "Porque o TopDesk registra e relaciona bem os ativos, mas a resolução do chamado continua manual. O SysAid Copilot entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho — o CMDB deixa de ser só um cadastro e passa a alimentar automação de verdade.",
+  },
+  {
+    q: "Quanto custa o SysAid?",
+    a: "O SysAid é cotado pelo número de administradores (quem atende os chamados), em três planos, Básico, Completo e Enterprise, com assinatura anual ou licença perpétua, na nuvem ou no seu servidor. A SysAid Brasil não publica tabela de preço: a proposta sai do tamanho do time e dos módulos que entram, e dá para testar todas as funcionalidades por 30 dias sem custo antes de decidir.",
   },
   {
     q: "Dá para migrar o CMDB e os ativos já cadastrados?",
@@ -349,6 +354,12 @@ export default function TopDeskPage() {
             </div>
           </div>
         </section>
+
+        {/* QUANTO CUSTA */}
+        <QuantoCusta
+          concorrente="TopDesk"
+          nota="No lugar de tiers que sobem por agente, Copilot, gestão de ativos e workflows fazem parte da plataforma, sem add-on. A proposta sai do número de administradores e dos módulos da primeira onda, e dá para testar tudo por 30 dias sem custo antes."
+        />
 
         {/* FAQ */}
         <section className="section">
