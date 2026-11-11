@@ -339,8 +339,9 @@ export default function Home() {
               <a href="/freshdesk">SysAid x Freshdesk</a>,{" "}
               <a href="/freshservice">SysAid x Freshservice</a>,{" "}
               <a href="/zendesk">SysAid x Zendesk</a>,{" "}
-              <a href="/jira">SysAid x Jira Service Management</a> e{" "}
-              <a href="/servicenow">SysAid x ServiceNow</a>.
+              <a href="/jira">SysAid x Jira Service Management</a>,{" "}
+              <a href="/servicenow">SysAid x ServiceNow</a> e{" "}
+              <a href="/manageengine">SysAid x ManageEngine ServiceDesk Plus</a>.
             </p>
           </div>
         </section>
