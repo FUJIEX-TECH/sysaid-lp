@@ -53,7 +53,7 @@ export const DORES_JEV: Record<string, string> = {
   automacao: "trabalho manual e repetitivo; falta automação de aprovação, onboarding, reset de senha",
   ativos: "não sabe quem está com qual equipamento, licenças, inventário, histórico de máquinas",
   ia: "quer usar IA no atendimento: responder dúvidas, classificar, resolver o simples sozinha",
-  custo: "preço, licença, módulos cobrados à parte, dólar; a ferramenta atual está cara",
+  custo: "preço, licença, cobrança por técnico, agente ou usuário, módulos cobrados à parte, dólar, contrato; a conta da ferramenta pesa ou só sobe",
   esm: "quer atender outros departamentos além da TI: RH, facilities, jurídico, financeiro",
   vaga: "o texto não descreve um problema claro de atendimento de TI ou não dá pra saber",
 };
@@ -107,7 +107,7 @@ export const SYSTEM_PALPITE = `Você escreve as falas de um chat de atendimento 
 
 A pessoa contou como o atendimento de TI funciona hoje (a situação). A categoria do problema já vem decidida por outra camada. Você não classifica, não vende e não aconselha: só escreve três coisas.
 
-1. "palpite": a implicação. Em 1 ou 2 frases (até 30 palavras no total), arrisque a consequência mais provável daquela situação no dia a dia: o que ela custa em chamado perdido, prazo (SLA) sem controle, retrabalho, hora de técnico, visibilidade pro gestor ou custo. Use as palavras da pessoa e ligue a consequência ao que ela disse ("se X, então Y"). Comece com "Se", "Então" ou "Imagino que". Termine SEMPRE com "É isso?". Uma consequência só, a mais provável; não liste várias. Não invente número, prazo nem detalhe que ela não deu.
+1. "palpite": a implicação. Em 1 ou 2 frases (até 30 palavras no total), arrisque a consequência mais provável daquela situação no dia a dia: o que ela custa em chamado perdido, prazo (SLA) sem controle, retrabalho, hora de técnico, visibilidade pro gestor ou dinheiro. Use as palavras da pessoa e ligue a consequência ao que ela disse ("se X, então Y"). Comece com "Se", "Então" ou "Imagino que". Termine SEMPRE com "É isso?". Uma consequência só; não liste várias. A implicação é SEMPRE sobre a categoria decidida: se a pessoa contou mais de uma coisa, fale da que pertence à categoria (ex.: categoria custo e ela citou SLA e cobrança por técnico → fale da conta, não do SLA). Não invente número, prazo nem detalhe que ela não deu.
 2. "pergunta": UMA pergunta curta (até 12 palavras), com um assunto só, sobre como o problema acontece hoje: quem percebe, por onde chega, com que frequência ou o que é feito à mão. Escolha um desses ângulos, nunca dois (errado: "Quem recebe e por qual canal chega?"). Não comece com "Hoje".
 3. "opcoes": exatamente 3 respostas que respondem essa pergunta de forma direta, escritas como a pessoa responderia (ex.: "Só quando o usuário reclama"), até 40 caracteres cada, diferentes entre si e cobrindo os casos mais comuns.
 
@@ -115,10 +115,11 @@ Exemplos de implicação boa:
 - Situação "os chamados chegam por e-mail e WhatsApp e alguém copia pra planilha depois" → "Se o chamado passa por WhatsApp e planilha, imagino que parte se perde no caminho e ninguém sabe o prazo de cada um. É isso?"
 - Situação "monto os indicadores no Excel todo mês" → "Então o gestor só enxerga o atendimento no fim do mês, e quem monta o Excel perde horas nisso. É isso?"
 - Situação "usamos uma ferramenta, mas o time abre chamado por fora" → "Se o time abre por fora, imagino que a fila oficial não mostra o volume real e o SLA fica sem controle. É isso?"
+- Categoria custo, situação "ninguém sabe o SLA e a cobrança por técnico pesa no custo" → "Se a cobrança é por técnico, imagino que cada pessoa nova no time aumenta a conta, e vocês acabam segurando a equipe pelo custo. É isso?"
 
 Regras fixas:
 - Nunca cite nome de produto, marca, empresa ou concorrente, nem a ferramenta que a pessoa usa.
-- Nunca fale de preço, valor, desconto ou condição comercial, nem nas opções, mesmo que a categoria seja custo: aí pergunte o que pesa no custo (forma de cobrança, módulos, contrato), sem números.
+- Na categoria custo, a implicação fala do peso na conta (cresce a cada técnico, módulo à parte, dólar, contrato), sempre sem número, valor, desconto ou condição comercial; a pergunta é sobre o que pesa no custo (forma de cobrança, módulos, contrato). Nas outras categorias, não fale de dinheiro.
 - Nunca prometa recurso, resultado ou prazo, e não diga o que a solução faz.
 - Termos técnicos que a pessoa usou (SLA, N1, chamado, ativo) podem ficar; não introduza siglas novas.
 - Não use "você precisa", "Entendi", "Ótimo", "Claro".
@@ -164,6 +165,16 @@ const semMarca = (t: string) => t.replace(MARCAS, "a ferramenta atual");
 
 export const PALPITE_PROMPT = (args: { dor: string; descricao: string; texto: string; situacao?: string }) =>
   `Categoria decidida: ${args.dor} (${args.descricao}).${args.situacao ? ` Situação: ${args.situacao}.` : ""}\nTexto da pessoa: """${semMarca(args.texto.slice(0, 600))}"""`;
+
+// 11/11/2026 (sysaid-growth): a dor mais quente. Quem veio de busca de preço
+// ("movidesk valores") e escreve sobre custo quer falar de custo, mesmo citando
+// SLA na mesma frase; o Jev escolhe uma categoria só e às vezes pega a outra.
+// Com sinal explícito de dinheiro no texto e origem de preço, a dor é custo.
+const SINAL_CUSTO = /\b(cust\w*|car[oa]s?|pre[çc]o|valor(es)?|cobran[çc]a|cobra[mr]?|licen[çc]\w*|mensalidade|d[óo]lar|fatura|contrato|por t[ée]cnico|por agente|por usu[áa]rio)\b/i;
+export function dorMaisQuente(dorJev: string | null, texto: string, variaveis: Record<string, string | null | undefined>): string | null {
+  if (variaveis.intencao === "preco" && SINAL_CUSTO.test(texto)) return "custo";
+  return dorJev;
+}
 
 export const SITUACOES: Record<string, string> = {
   troca: "tem uma ferramenta e quer trocar",

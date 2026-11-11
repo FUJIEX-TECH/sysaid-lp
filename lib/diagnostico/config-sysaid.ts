@@ -101,7 +101,7 @@ function rotuloFerramenta(ctx: Contexto): string {
 function nomeAtual(ctx: Contexto): string {
   const r = ctx.respostas;
   if (r.situacao === "sem" || r.ferramenta === "planilha") return "e-mail e planilha";
-  if (ctx.variaveis.concorrente && r.situacao === "troca") return `${ctx.variaveis.concorrente} hoje`;
+  if (ctx.variaveis.concorrente && (r.situacao === "troca" || !r.situacao)) return `${ctx.variaveis.concorrente} hoje`;
   const f = rotuloFerramenta(ctx);
   return f ? `${f} hoje` : "hoje";
 }
@@ -112,7 +112,7 @@ function atualNoMapa(ctx: Contexto): string {
   if (r.situacao === "cliente") return "SysAid hoje";
   if (r.situacao === "sem" || r.ferramenta === "planilha") return "E-mail, planilha e WhatsApp";
   if (r.situacao === "pesquisa") return "Pesquisando ITSM";
-  if (ctx.variaveis.concorrente && r.situacao === "troca") return `${ctx.variaveis.concorrente} hoje`;
+  if (ctx.variaveis.concorrente && (r.situacao === "troca" || !r.situacao)) return `${ctx.variaveis.concorrente} hoje`;
   const f = rotuloFerramenta(ctx);
   return f ? `${f} hoje` : "Sua central de TI";
 }
@@ -175,16 +175,23 @@ const NAO_SUPORTE = { campo: "cliente_tipo", diferente: "suporte" } as const;
 // pro registro; a `situacao` (troca | sem | cliente | pesquisa) sai do chip pelo
 // aoResponder da etapa situacao_texto. Texto livre não define `situacao`: o passo
 // "situacao" pergunta por chips só nesse caso.
+// 11/11/2026 (sysaid-growth): todo chip que não é "cliente" nem "só pesquisando"
+// diz o que incomoda (SLA, chamado perdido, relatório, custo), pra o Jev ter dor
+// e a implicação sempre aparecer. O texto do chip é o mesmo que a pessoa vê no
+// balão dela: nada de dor inventada no valor.
 const SITUACAO_CHIP = {
-  sem: "Os chamados chegam por e-mail e WhatsApp, sem fila",
-  sem_comp: "Avaliamos e não escolhemos",
-  troca: "Temos uma ferramenta, mas ela não dá conta",
-  troca_comp: "Usamos hoje e queremos trocar",
-  troca_brand: "Temos outra ferramenta e queremos trocar",
+  sem: "Chega por e-mail e WhatsApp, e às vezes se perde",
+  sem_comp: "Ainda avaliando. Hoje é e-mail e planilha",
+  troca: "Temos ferramenta, mas o SLA estoura sem ninguém ver",
+  troca_comp_sla: "Usamos, mas o SLA estoura sem ninguém ver",
+  troca_comp_rel: "Usamos, mas o gestor não tem os números que pede",
+  troca_comp_custo: "Usamos, e a conta sobe a cada técnico novo",
+  troca_brand: "Temos outra ferramenta, mas ela não dá conta do SLA",
   cliente: "Já usamos a SysAid",
   pesquisa: "Só estou pesquisando o assunto",
   pesquisa_comp: "Só estou comparando",
 };
+const chip = (k: keyof typeof SITUACAO_CHIP) => ({ valor: SITUACAO_CHIP[k], rotulo: SITUACAO_CHIP[k] });
 
 // --------------------------------------------------------------------------
 // Aparência (configurável): modo + tema + logo. O núcleo só conhece --cv-* e
@@ -319,15 +326,15 @@ export const configSysaid: ConfigConversa = {
     titulo: false,
     estado: { online: "online", digitando: "digitando", enviando: "enviando" },
     frase: {
-      padrao: "Vamos achar o melhor caminho pra sua TI.",
+      padrao: "Atendimento de TI sem chamado perdido.",
       casos: [
         {
           quando: { todas: [{ variavel: "concorrente", definida: true }, { variavel: "intencao", igual: "preco" }] },
-          texto: "Vamos ver o que muda na conta se você sair do {{concorrente}}.",
+          texto: "O que muda na conta se você sair do {{concorrente}}.",
         },
-        { quando: { variavel: "concorrente", definida: true }, texto: "Vamos ver o que muda se você sair do {{concorrente}}." },
-        { quando: { origem: "brand" }, texto: "Vamos te levar pro caminho certo na SysAid." },
-        { quando: { variavel: "intencao", igual: "preco" }, texto: "Antes do preço, vamos ver o que a sua TI precisa." },
+        { quando: { variavel: "concorrente", definida: true }, texto: "O que muda se você sair do {{concorrente}}." },
+        { quando: { origem: "brand" }, texto: "Suporte, módulos novos ou troca de ferramenta." },
+        { quando: { variavel: "intencao", igual: "preco" }, texto: "Primeiro o que a sua TI precisa, depois o preço." },
       ],
     },
     progresso: "barra",
@@ -383,36 +390,38 @@ export const configSysaid: ConfigConversa = {
   validadores: {
     // trava de 09/09/2026: só e-mail corporativo avança (o servidor confere de novo)
     // 11/11: recusa em tom de chat (o núcleo mostra o erro como fala do bot no estilo chat)
-    email_corporativo: (v) => (isCorporateEmail(v) ? null : "Esse parece um e-mail pessoal. Pra eu seguir com o seu mapa, me passa o e-mail da empresa?"),
+    email_corporativo: (v) => (isCorporateEmail(v) ? null : "Esse parece um e-mail pessoal. Me passa o da empresa que eu sigo daqui."),
   },
 
   // v2: a abertura muda com a origem (campanha, termo, página). Sem "diagnóstico",
   // "perguntas" nem "2 minutos" (11/11/2026). Copy a revisar pelo sysaid-growth.
   // 11/11/2026: dois balões curtos que entram em sequência (estilo chat); a 1ª pergunta
   // (situação) vem logo depois. Sem "diagnóstico", "perguntas" nem "2 minutos".
+  // Revisada pelo sysaid-growth em 11/11/2026: balão 1 cutuca a dor da origem,
+  // balão 2 diz que tem jeito ("Vamos achar o melhor caminho pra você").
   abertura: [
     {
-      padrao: "Oi, eu sou da SysAid.",
+      padrao: "Oi. Chamado que se perde no WhatsApp, SLA que estoura sem ninguém ver?",
       casos: [
         {
           quando: { todas: [{ variavel: "concorrente", definida: true }, { variavel: "intencao", igual: "preco" }] },
-          texto: "Oi. Veio ver o custo do {{concorrente}}?",
+          texto: "Oi. Veio ver quanto custa o {{concorrente}}?",
         },
         { quando: { variavel: "concorrente", definida: true }, texto: "Oi. Pensando em sair do {{concorrente}}?" },
         { quando: { origem: "brand" }, texto: "Oi, que bom ter você por aqui." },
-        { quando: { variavel: "intencao", igual: "preco" }, texto: "Oi. Procurando preço de ITSM?" },
+        { quando: { variavel: "intencao", igual: "preco" }, texto: "Oi. Procurando preço de ferramenta de chamados?" },
       ],
     },
     {
-      padrao: "Me conta como o atendimento de TI funciona aí hoje e eu te mostro o que mudaria.",
+      padrao: "Isso tem jeito. Vamos achar o melhor caminho pra você.",
       casos: [
         {
           quando: { todas: [{ variavel: "concorrente", definida: true }, { variavel: "intencao", igual: "preco" }] },
-          texto: "Me conta como vocês usam hoje e eu te mostro o que mudaria na conta e na operação se você trocasse.",
+          texto: "Se a conta cresce a cada técnico novo, tem saída. Vamos achar o melhor caminho pra você.",
         },
-        { quando: { variavel: "concorrente", definida: true }, texto: "Me conta como vocês usam hoje e eu te mostro o que mudaria." },
-        { quando: { origem: "brand" }, texto: "Me diz onde você está hoje e eu te levo pro caminho certo." },
-        { quando: { variavel: "intencao", igual: "preco" }, texto: "Antes do número, vamos ver o que a sua TI precisa de verdade." },
+        { quando: { variavel: "concorrente", definida: true }, texto: "O que está pesando aí tem jeito. Vamos achar o melhor caminho pra você." },
+        { quando: { origem: "brand" }, texto: "Vamos achar o melhor caminho pra você." },
+        { quando: { variavel: "intencao", igual: "preco" }, texto: "O preço certo depende do que pesa aí. Vamos achar o melhor caminho pra você." },
       ],
     },
   ],
@@ -431,43 +440,34 @@ export const configSysaid: ConfigConversa = {
       tipo: "texto",
       input: "textarea",
       texto: {
-        padrao: "Como a TI recebe e organiza os chamados hoje? Pode escrever do seu jeito ou tocar numa opção.",
+        padrao: "Pra começar: como os chamados chegam e são tratados aí hoje?",
         casos: [
-          { quando: { variavel: "concorrente", definida: true }, texto: "Como vocês usam o {{concorrente}} hoje? Pode escrever do seu jeito ou tocar numa opção." },
-          { quando: { origem: "brand" }, texto: "Me conta como está o atendimento de TI aí hoje. Pode escrever do seu jeito ou tocar numa opção." },
+          { quando: { variavel: "concorrente", definida: true }, texto: "Como está aí hoje com o {{concorrente}}?" },
+          { quando: { origem: "brand" }, texto: "Como está o atendimento de TI aí hoje?" },
         ],
       },
       placeholder: {
-        padrao: "ex.: chega por e-mail e WhatsApp, e a gente anota numa planilha",
+        padrao: "Escreve do seu jeito. Ex.: chega por e-mail e a gente anota numa planilha",
         casos: [
-          { quando: { variavel: "intencao", igual: "preco" }, texto: "ex.: pagamos por técnico e por módulo, e o custo subiu com o dólar" },
-          { quando: { variavel: "concorrente", definida: true }, texto: "ex.: usamos pra abrir chamado, mas o relatório não mostra o que o gestor pede" },
+          { quando: { variavel: "intencao", igual: "preco" }, texto: "Escreve do seu jeito. Ex.: pagamos por técnico e o custo só sobe" },
+          { quando: { variavel: "concorrente", definida: true }, texto: "Escreve do seu jeito. Ex.: o relatório não mostra o que o gestor pede" },
         ],
       },
       atalhos: {
-        padrao: [
-          { valor: SITUACAO_CHIP.sem, rotulo: "Por e-mail e WhatsApp, sem fila" },
-          { valor: SITUACAO_CHIP.troca, rotulo: "Temos uma ferramenta, mas não dá conta" },
-          { valor: SITUACAO_CHIP.cliente, rotulo: "Já usamos a SysAid" },
-          { valor: SITUACAO_CHIP.pesquisa, rotulo: "Só estou pesquisando" },
-        ],
+        padrao: [chip("sem"), chip("troca"), chip("cliente"), chip("pesquisa")],
         casos: [
           {
+            // veio de "movidesk preço/valores": o custo primeiro
+            quando: { todas: [{ variavel: "concorrente", definida: true }, { variavel: "intencao", igual: "preco" }] },
+            opcoes: [chip("troca_comp_custo"), chip("troca_comp_sla"), chip("sem_comp"), chip("pesquisa_comp")],
+          },
+          {
             quando: { variavel: "concorrente", definida: true },
-            opcoes: [
-              { valor: SITUACAO_CHIP.troca_comp, rotulo: "Usamos e queremos trocar" },
-              { valor: SITUACAO_CHIP.sem_comp, rotulo: "Avaliamos e não escolhemos" },
-              { valor: SITUACAO_CHIP.pesquisa_comp, rotulo: "Só estou comparando" },
-            ],
+            opcoes: [chip("troca_comp_sla"), chip("troca_comp_rel"), chip("sem_comp"), chip("pesquisa_comp")],
           },
           {
             quando: { origem: "brand" },
-            opcoes: [
-              { valor: SITUACAO_CHIP.cliente, rotulo: "Já usamos a SysAid" },
-              { valor: SITUACAO_CHIP.troca_brand, rotulo: "Temos outra ferramenta e queremos trocar" },
-              { valor: SITUACAO_CHIP.sem, rotulo: "Sem ferramenta: e-mail, planilha, WhatsApp" },
-              { valor: SITUACAO_CHIP.pesquisa, rotulo: "Só estou pesquisando" },
-            ],
+            opcoes: [chip("cliente"), chip("troca_brand"), chip("sem"), chip("pesquisa")],
           },
         ],
       },
@@ -476,7 +476,9 @@ export const configSysaid: ConfigConversa = {
         { valor: SITUACAO_CHIP.sem, definir: { campo: "situacao", valor: "sem" } },
         { valor: SITUACAO_CHIP.sem_comp, definir: { campo: "situacao", valor: "sem" } },
         { valor: SITUACAO_CHIP.troca, definir: { campo: "situacao", valor: "troca" } },
-        { valor: SITUACAO_CHIP.troca_comp, definir: { campo: "situacao", valor: "troca" } },
+        { valor: SITUACAO_CHIP.troca_comp_sla, definir: { campo: "situacao", valor: "troca" } },
+        { valor: SITUACAO_CHIP.troca_comp_rel, definir: { campo: "situacao", valor: "troca" } },
+        { valor: SITUACAO_CHIP.troca_comp_custo, definir: { campo: "situacao", valor: "troca" } },
         { valor: SITUACAO_CHIP.troca_brand, definir: { campo: "situacao", valor: "troca" } },
         { valor: SITUACAO_CHIP.cliente, definir: { campo: "situacao", valor: "cliente" } },
         { valor: SITUACAO_CHIP.pesquisa, definir: { campo: "situacao", valor: "pesquisa" } },
@@ -490,8 +492,11 @@ export const configSysaid: ConfigConversa = {
       id: "situacao",
       passo: 1,
       tipo: "escolha",
-      quando: { nao: { campo: "situacao_texto", em: Object.values(SITUACAO_CHIP) } },
-      texto: "Só pra eu situar: hoje vocês usam alguma ferramenta pra isso?",
+      // comparativa (Movidesk, TopDesk...): a pergunta de situação já foi sobre a
+      // ferramenta dele, então não pergunta de novo; quem escreveu texto livre conta
+      // como quem usa (pontuação `situacao_origem` e mapa "Movidesk hoje")
+      quando: { todas: [{ nao: { campo: "situacao_texto", em: Object.values(SITUACAO_CHIP) } }, { nao: { variavel: "concorrente", definida: true } }] },
+      texto: "E hoje vocês usam alguma ferramenta pra isso?",
       opcoes: {
         padrao: [
           { valor: "troca", rotulo: "Temos uma ferramenta e queremos trocar" },
@@ -503,8 +508,8 @@ export const configSysaid: ConfigConversa = {
           {
             quando: { origem: "comparativa" },
             opcoes: [
-              { valor: "troca", rotulo: "Uso hoje e penso em trocar" },
-              { valor: "sem", rotulo: "Avaliei e não escolhi" },
+              { valor: "troca", rotulo: "Usamos e pensamos em trocar" },
+              { valor: "sem", rotulo: "Avaliamos e não escolhemos" },
               { valor: "pesquisa", rotulo: "Só estou comparando" },
             ],
           },
@@ -525,7 +530,7 @@ export const configSysaid: ConfigConversa = {
       passo: 1,
       tipo: "escolha",
       quando: { campo: "situacao", igual: "cliente" },
-      texto: "Que bom ter você por aqui. É suporte ou quer conhecer módulos novos?",
+      texto: "Boa. Você precisa de suporte ou quer conhecer módulos novos?",
       opcoes: [
         { valor: "suporte", rotulo: "Preciso de suporte" },
         { valor: "modulos", rotulo: "Quero conhecer módulos novos" },
@@ -543,7 +548,7 @@ export const configSysaid: ConfigConversa = {
       gerado: { id: "palpite", texto: "palpite" },
       opcoes: [
         { valor: "sim", rotulo: "É isso" },
-        { valor: "mais", rotulo: "Tem mais" },
+        { valor: "mais", rotulo: "Tem mais coisa" },
       ],
       aoResponder: [
         { valor: "sim", definir: { campo: "dor", deGerado: { id: "palpite", dado: "dor" } } },
@@ -556,9 +561,9 @@ export const configSysaid: ConfigConversa = {
       tipo: "texto",
       input: "textarea",
       quando: { campo: "palpite", igual: "mais" },
-      texto: "Conta o que mais está pesando.",
-      placeholder: "ex.: e o diretor cobra um relatório que eu não tenho",
-      validar: [{ regra: "minCaracteres", valor: 5, mensagem: "Conta um pouco mais." }],
+      texto: "O que mais está pesando aí?",
+      placeholder: "Ex.: o diretor cobra um relatório que eu não tenho",
+      validar: [{ regra: "minCaracteres", valor: 5, mensagem: "Me conta um pouco mais." }],
       recuperarAoCorrigir: true,
     },
     {
@@ -567,7 +572,7 @@ export const configSysaid: ConfigConversa = {
       passo: 2,
       tipo: "escolha",
       quando: { todas: [NAO_SUPORTE, { nao: { campo: "palpite", em: ["sim", "mais"] } }] },
-      texto: "Entendi. Qual destas parece mais com o que pesa no seu dia?",
+      texto: "E o que mais pesa no dia a dia aí?",
       opcoes: {
         padrao: { catalogo: "dores_generica" },
         casos: [
@@ -597,9 +602,9 @@ export const configSysaid: ConfigConversa = {
       tipo: "texto",
       input: "email",
       quando: NAO_SUPORTE,
-      texto: "Pra eu montar o seu mapa: qual o seu e-mail corporativo?",
+      texto: "Já tenho uma ideia do caminho. Qual o seu e-mail da empresa?",
       placeholder: "voce@suaempresa.com.br",
-      validar: [{ regra: "email", mensagem: "Esse e-mail não parece completo. Confere pra mim?" }, { regra: "custom", nome: "email_corporativo" }],
+      validar: [{ regra: "email", mensagem: "Acho que faltou alguma coisa nesse e-mail. Confere pra mim?" }, { regra: "custom", nome: "email_corporativo" }],
       normalizar: "minusculas",
     },
     {
@@ -619,8 +624,8 @@ export const configSysaid: ConfigConversa = {
       },
       texto: "É a {{empresa.nome}}, {{nome_sugerido_curto}}?",
       opcoes: [
-        { valor: "sim", rotulo: "Sim, sou eu" },
-        { valor: "nao", rotulo: "Não é isso" },
+        { valor: "sim", rotulo: "Isso mesmo" },
+        { valor: "nao", rotulo: "Não é bem isso" },
       ],
       aoResponder: [
         { valor: "sim", definir: { campo: "nome", deVariavel: "nome_sugerido" } },
@@ -636,17 +641,17 @@ export const configSysaid: ConfigConversa = {
       autoComplete: "name",
       quando: { todas: [NAO_SUPORTE, { nao: { campo: "confirma", igual: "sim" } }] },
       texto: {
-        padrao: "Como você prefere ser chamado(a)?",
+        padrao: "E como eu te chamo?",
         casos: [
-          { quando: { campo: "confirma", igual: "nao" }, texto: "Sem problema. Como você prefere ser chamado(a)?" },
-          { quando: { variavel: "nome_sugerido", definida: true }, texto: "Posso te chamar de {{nome_sugerido}}? Se preferir outro nome, é só corrigir." },
+          { quando: { campo: "confirma", igual: "nao" }, texto: "Sem problema. Como eu te chamo?" },
+          { quando: { variavel: "nome_sugerido", definida: true }, texto: "Posso te chamar de {{nome_sugerido}}?" },
         ],
       },
       placeholder: "Seu nome",
       prefill: "nome_sugerido",
       confirmarRotulo: "Pode, sim",
       recuperarAoCorrigir: true,
-      validar: [{ regra: "minCaracteres", valor: 2, mensagem: "Me diz como te chamar, pra eu seguir." }],
+      validar: [{ regra: "minCaracteres", valor: 2, mensagem: "Me diz como te chamar." }],
     },
     {
       id: "empresa",
@@ -656,17 +661,17 @@ export const configSysaid: ConfigConversa = {
       autoComplete: "organization",
       quando: { todas: [NAO_SUPORTE, { nao: { campo: "confirma", igual: "sim" } }] },
       texto: {
-        padrao: "E qual é a sua empresa{{saudacao}}?",
+        padrao: "E a empresa{{saudacao}}?",
         casos: [
-          { quando: { campo: "confirma", igual: "nao" }, texto: "E qual é a sua empresa{{saudacao}}?" },
-          { quando: { empresaEncontrada: true }, texto: "É essa a sua empresa{{saudacao}}?" },
+          { quando: { campo: "confirma", igual: "nao" }, texto: "E a empresa{{saudacao}}?" },
+          { quando: { empresaEncontrada: true }, texto: "A empresa é essa{{saudacao}}?" },
         ],
       },
       placeholder: "Empresa",
       prefill: "empresa_prefill",
       confirmarRotulo: "Sim, é essa",
       recuperarAoCorrigir: true,
-      validar: [{ regra: "minCaracteres", valor: 2, mensagem: "Me diz a empresa, pra eu montar o mapa certo." }],
+      validar: [{ regra: "minCaracteres", valor: 2, mensagem: "Me diz o nome da empresa." }],
     },
     {
       // só quando vai trocar e a ferramenta ainda não veio da URL
@@ -693,7 +698,7 @@ export const configSysaid: ConfigConversa = {
       passo: 4,
       tipo: "escolha",
       quando: NAO_SUPORTE,
-      texto: "Quantas pessoas a TI atende?",
+      texto: "Quantas pessoas a TI atende aí?",
       opcoes: [
         { valor: "50", rotulo: "Até 50" },
         { valor: "200", rotulo: "51 a 200" },
@@ -707,7 +712,7 @@ export const configSysaid: ConfigConversa = {
       passo: 4,
       tipo: "escolha",
       quando: NAO_SUPORTE,
-      texto: "E quantos técnicos ou administradores cuidam disso?",
+      texto: "E quantos técnicos cuidam disso?",
       opcoes: [
         { valor: "1-2", rotulo: "1 a 2" },
         { valor: "3-10", rotulo: "3 a 10" },
@@ -734,12 +739,12 @@ export const configSysaid: ConfigConversa = {
       passo: 5,
       tipo: "escolha",
       quando: NAO_SUPORTE,
-      texto: "Qual o seu papel nessa decisão?",
+      texto: "E qual o seu papel nessa escolha?",
       opcoes: [
         { valor: "decide", rotulo: "Decido" },
         { valor: "influencia", rotulo: "Avalio e recomendo" },
         { valor: "levanta", rotulo: "Me pediram pra levantar opções" },
-        { valor: "estuda", rotulo: "Estudante / curiosidade" },
+        { valor: "estuda", rotulo: "Sou estudante ou só curioso" },
       ],
     },
     {
@@ -747,11 +752,11 @@ export const configSysaid: ConfigConversa = {
       passo: 5,
       tipo: "escolha",
       quando: NAO_SUPORTE,
-      texto: "E quando pretende mudar?",
+      texto: "Pra quando vocês querem isso resolvido?",
       opcoes: [
         { valor: "tri", rotulo: "Neste trimestre" },
         { valor: "6m", rotulo: "Próximos 6 meses" },
-        { valor: "sem", rotulo: "Sem data" },
+        { valor: "sem", rotulo: "Ainda sem data" },
         { valor: "cota", rotulo: "Só preciso de um orçamento pra comparar" },
       ],
     },
@@ -772,7 +777,7 @@ export const configSysaid: ConfigConversa = {
       input: "tel",
       mascara: "telefone_br",
       quando: NAO_SUPORTE,
-      texto: "Pra te mandar o mapa{{saudacao}}: qual o seu WhatsApp?",
+      texto: "Qual o seu WhatsApp{{saudacao}}? Pra eu te mandar esse mapa.",
       placeholder: "(11) 99999-9999",
       validar: [{ regra: "minDigitos", valor: 10, mensagem: "Informe um telefone com DDD." }],
     },
@@ -902,6 +907,13 @@ export const configSysaid: ConfigConversa = {
       { id: "prazo", campo: "prazo", pontos: { tri: 3, "6m": 2, sem: 0, cota: 0 } },
     ],
     extras: [
+      // comparativa com texto livre: o passo "situacao" não roda (a pergunta já foi
+      // sobre a ferramenta dele), então conta como quem usa e pensa em trocar (= troca)
+      {
+        id: "situacao_origem",
+        quando: { todas: [{ variavel: "concorrente", definida: true }, { nao: { campo: "situacao", definido: true } }, { campo: "situacao_texto", vazio: false }] },
+        pontos: 3,
+      },
       // capricho: texto da dor com 60+ caracteres e tempo total entre 90 s e 12 min
       { id: "capricho", quando: { todas: [{ campo: "situacao_texto", minCaracteres: 60 }, { tempoTotalEntre: [90, 12 * 60] }] }, pontos: 1 },
     ],
@@ -953,7 +965,7 @@ export const configSysaid: ConfigConversa = {
       : [],
 
   textos: {
-    enviando: "Perfeito{{saudacao}}. Estou mandando o seu mapa e já te levo pra confirmação.",
+    enviando: "Fechado{{saudacao}}. Estou mandando o seu mapa.",
     erro: "Não consegui enviar agora. Confira o e-mail e tente de novo em instantes.",
     tentarDeNovo: "Tentar de novo",
     legal: "Ao continuar, você concorda em ser contatado pela SysAid. Sem spam.",

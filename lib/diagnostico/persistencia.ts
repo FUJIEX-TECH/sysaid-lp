@@ -43,6 +43,7 @@ function notasSpin(r: Respostas, ctx: Contexto): string {
   if (r.palpite === "sim") linhas.push("Resposta: é isso");
   if (r.palpite === "mais") linhas.push(`Resposta: tem mais${r.implicacao_mais ? `: ${r.implicacao_mais}` : ""}`);
   if (r.situacao) linhas.push(`Situação (chip): ${r.situacao}`);
+  else if (ctx.variaveis.concorrente && r.situacao_texto) linhas.push(`Situação (pela origem): usa ${ctx.variaveis.concorrente}`);
   if (r.dor) linhas.push(`Dor: ${r.dor}`);
   return linhas.join("\n").slice(0, 1900);
 }

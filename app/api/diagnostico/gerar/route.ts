@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { chaveDe, criarCache, criarJev, criarLLM, escolhaDe } from "@/lib/conversa-core/servidor";
 import type { Gerado } from "@/lib/conversa-core";
-import { DORES_JEV, JEV_SYSAID_GERAR, LLM_SYSAID, PALPITE_PROMPT, SAIDA_PALPITE, SITUACOES, SYSTEM_PALPITE, perguntasDor, semHoje, travaGerado } from "@/lib/diagnostico/servidor-sysaid";
+import { DORES_JEV, dorMaisQuente, JEV_SYSAID_GERAR, LLM_SYSAID, PALPITE_PROMPT, SAIDA_PALPITE, SITUACOES, SYSTEM_PALPITE, perguntasDor, semHoje, travaGerado } from "@/lib/diagnostico/servidor-sysaid";
 
 export const runtime = "nodejs";
 
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ ok: false, error: "Dados inválidos" }, { status: 422 });
 
-  const { sessao, respostas, origem } = parsed.data;
+  const { sessao, respostas, origem, variaveis } = parsed.data;
   const texto = (respostas.situacao_texto ?? "").trim();
   if (texto.length < 10) return NextResponse.json({ ok: false, error: "texto curto" }, { status: 422 });
   const t0 = Date.now();
@@ -49,7 +49,8 @@ export async function POST(req: NextRequest) {
   const estado = {
     origem,
     situacao: respostas.situacao ?? null,
-    ferramenta: respostas.ferramenta ?? respostas.ferramenta_outra ?? null,
+    ferramenta: respostas.ferramenta ?? respostas.ferramenta_outra ?? variaveis.concorrente ?? null,
+    intencao_da_busca: variaveis.intencao ?? null,
     texto_livre: texto,
   };
   const chaveDor = chaveDe("dor", respostas.situacao ?? "", texto);
@@ -60,6 +61,8 @@ export async function POST(req: NextRequest) {
     dor = escolhaDe(rj.respostas, "dor", DORES, 0.35);
     if (dor) cacheDor.set(chaveDor, dor);
   }
+  // origem de preço + texto falando de dinheiro: custo vence (sysaid-growth, 11/11/2026)
+  dor = dorMaisQuente(dor, texto, variaveis);
   if (!dor || dor === "vaga") {
     log({ etapa: "jev", origem: rj.origem, ms: rj.ms, motivo: rj.motivo ?? dor ?? "sem dor" });
     return NextResponse.json({ ok: false, motivo: rj.origem === "ok" ? "dor vaga" : `jev ${rj.motivo ?? rj.origem}` });
@@ -70,7 +73,13 @@ export async function POST(req: NextRequest) {
     sessao,
     chave: ["palpite", dor, respostas.situacao ?? "", texto],
     system: SYSTEM_PALPITE,
-    prompt: PALPITE_PROMPT({ dor, descricao: DORES_JEV[dor], texto, situacao: SITUACOES[respostas.situacao ?? ""] }),
+    prompt: PALPITE_PROMPT({
+      dor,
+      descricao: DORES_JEV[dor],
+      texto,
+      // comparativa com texto livre não passa pelo chip de situação: a origem diz que usa a ferramenta
+      situacao: SITUACOES[respostas.situacao ?? ""] ?? (variaveis.concorrente ? SITUACOES.troca : undefined),
+    }),
     schema: SAIDA_PALPITE,
     // v2: a trava roda dentro do núcleo; palpite reprovado vira fallback e NÃO entra no cache
     validar: (v) => (travaGerado(v).palpite ? { ok: true } : { ok: false, motivo: "palpite" }),

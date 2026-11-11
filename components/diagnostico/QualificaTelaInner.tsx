@@ -7,7 +7,7 @@ import { criarPersistenciaLP } from "@/lib/diagnostico/persistencia";
 import type { Evento } from "@/lib/conversa-core";
 
 const TEXTOS = {
-  empresaFonte: "Dados públicos do site da empresa e da Receita Federal. Se não for essa, é só corrigir o nome.",
+  // sem linha de fonte no cartão da empresa: o chat não anuncia de onde tirou o dado (regra do Fernando, 11/11/2026)
   empresaRotulos: { site: "Site", razaoSocial: "Razão social", cidade: "Cidade", desde: "Desde", porte: "Porte", atividade: "Atividade" },
 };
 
