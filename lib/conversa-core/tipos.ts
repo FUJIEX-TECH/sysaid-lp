@@ -409,6 +409,19 @@ export type ConfigConversa = {
     // widget usa o token --cv-logo-altura (18 px)
     logo?: { src: string; alt: string; href?: string; hrefRotulo?: string; altura?: number };
   };
+  // cabeçalho (tela e widget): o que mostrar além do logo. Sem nada aqui, fica
+  // como sempre foi (título, subtítulo, contagem "n de total" e barra curta).
+  // Um chat de verdade desliga título e contagem e liga a presença e a frase.
+  cabecalho?: {
+    titulo?: boolean; // mostrar marca.titulo (padrão true)
+    subtitulo?: boolean; // mostrar marca.subtitulo (padrão true)
+    // presença: ponto + texto ("online", "digitando"...), muda com o estado da conversa
+    estado?: { online: string; digitando: string; enviando?: string; encerrado?: string };
+    // frase de abertura na linha do cabeçalho, por origem (só na tela cheia)
+    frase?: Texto;
+    // contagem + barra curta (padrão), só a barra fina na borda de baixo, ou nada
+    progresso?: "contagem-e-barra" | "contagem" | "barra" | "nenhum";
+  };
   // claro (padrão) ou escuro: cada modo tem o próprio padrão neutro no CSS do
   // núcleo (ui/tela.css, ui/conversa.css); `tema` sobrescreve por cima
   modo?: "claro" | "escuro";

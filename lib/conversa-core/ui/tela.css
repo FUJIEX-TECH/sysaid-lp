@@ -105,34 +105,41 @@
   --cv-textura-tamanho: 56px 56px;
 }
 
-/* cabeçalho fino, fixo */
+/* cabeçalho fino, fixo. O conteúdo alinha com a coluna da conversa (mesma
+   largura máxima e margens do corpo; no desktop, a mesma grade conversa +
+   lateral), não com as bordas da janela. */
 .cvt__topo {
   position: sticky;
   top: 0;
   z-index: 5;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 12px 16px;
   background: color-mix(in srgb, var(--cv-bg) 92%, transparent);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--cv-line);
 }
+.cvt__topo-inner { --cvt-topo-y: 12px; max-width: 1100px; margin: 0 auto; padding: var(--cvt-topo-y) 16px; }
+.cvt__topo-linha { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; }
 .cvt__marca { display: flex; align-items: center; gap: 14px; min-width: 0; }
 .cvt__logo { display: block; flex: none; line-height: 0; }
 .cvt__logo img { display: block; height: var(--cv-logo-altura); width: auto; }
 a.cvt__logo:focus-visible { outline: 2px solid var(--cv-focus); outline-offset: 4px; }
 .cvt__titulos { display: flex; flex-direction: column; min-width: 0; }
-.cvt__logo + .cvt__titulos { padding-left: 14px; border-left: 1px solid var(--cv-line-forte); }
+.cvt__logo + .cvt__titulos, .cvt__logo + .cvt__estado { padding-left: 14px; border-left: 1px solid var(--cv-line-forte); }
 .cvt__quem { font-family: var(--cv-font-mono); font-weight: 600; font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--cv-primary); white-space: nowrap; }
 .cvt__sub { font-size: 0.8rem; color: var(--cv-ink-400); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* presença: ponto + "online"/"digitando" (textos da config); o ponto pisca enquanto digita */
+.cvt__estado { display: inline-flex; align-items: center; gap: 7px; font-family: var(--cv-font-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cv-ink-400); white-space: nowrap; line-height: 1; }
+.cvt__estado::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--cv-primary); }
+.cvt__estado--digitando::before { animation: cvt-pisca 0.9s infinite ease-in-out; }
+/* frase de abertura na linha do cabeçalho (por origem, da config) */
+.cvt__frase { margin: 0 0 0 auto; font-family: var(--cv-font-titulo); font-style: italic; font-weight: 400; font-size: 0.95rem; line-height: 1.3; color: var(--cv-ink-700); text-align: right; }
+/* progresso: contagem "n de total" + barra curta (padrão), ou só a barra fina na borda de baixo */
 .cvt__progresso { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex: 0 0 auto; }
 .cvt__passo { font-family: var(--cv-font-mono); font-variant-numeric: tabular-nums; font-size: 0.82rem; color: var(--cv-ink-400); display: flex; align-items: baseline; gap: 4px; }
 .cvt__passo em { font-style: normal; }
 .cvt__passo small { font-size: 0.72rem; margin-left: 6px; }
 .cvt__barra { display: block; width: 120px; height: 2px; background: var(--cv-line); }
 .cvt__barra i { display: block; height: 100%; background: var(--cv-primary); transition: width 0.4s ease; }
+.cvt__barra--fina { position: absolute; left: 0; right: 0; bottom: calc(-1 * var(--cvt-topo-y) - 1px); width: auto; height: 2px; background: transparent; }
 
 /* corpo: uma coluna no celular; conversa + lateral no desktop */
 .cvt__corpo {
@@ -391,6 +398,7 @@ a.cvt__logo:focus-visible { outline: 2px solid var(--cv-focus); outline-offset: 
 .cvt[data-modo="escuro"] .cvt__topo { background: color-mix(in srgb, var(--cv-bg) 86%, transparent); }
 .cvt[data-modo="escuro"] .cvt__quem { font-weight: 500; letter-spacing: 0.1em; font-size: 0.78rem; }
 .cvt[data-modo="escuro"] .cvt__barra { background: var(--cv-line-forte); }
+.cvt[data-modo="escuro"] .cvt__barra--fina { background: transparent; }
 .cvt[data-modo="escuro"] .cvt__passo { font-size: 0.78rem; }
 .cvt[data-modo="escuro"] .cvg__num strong { font-weight: 500; letter-spacing: -0.01em; }
 .cvt[data-modo="escuro"] .cvm__no--atual { background: transparent; }
@@ -405,6 +413,10 @@ a.cvt__logo:focus-visible { outline: 2px solid var(--cv-focus); outline-offset: 
 @media (max-width: 479px) {
   .cvt__sub { display: none; }
 }
+/* no celular a frase desce pra uma 2ª linha do cabeçalho, alinhada à esquerda */
+@media (max-width: 599px) {
+  .cvt__frase { flex-basis: 100%; margin-left: 0; text-align: left; font-size: 0.9rem; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .cvt__bot, .cvt__eu, .cvg, .cvm__no, .cvr__linha { animation: none; }
@@ -413,11 +425,13 @@ a.cvt__logo:focus-visible { outline: 2px solid var(--cv-focus); outline-offset: 
 
 /* desktop: conversa à esquerda (estreita), lateral fixa à direita */
 @media (min-width: 960px) {
-  .cvt__topo { padding: 14px 40px; }
+  /* o cabeçalho usa a mesma grade do corpo: a linha vai da borda esquerda da conversa à borda direita da lateral */
+  .cvt__topo-inner { --cvt-topo-y: 14px; padding: var(--cvt-topo-y) 40px; display: grid; grid-template-columns: minmax(0, 620px) 300px; column-gap: 72px; justify-content: start; }
+  .cvt__topo-linha { grid-column: 1 / -1; flex-wrap: nowrap; }
   .cvt__corpo { grid-template-columns: minmax(0, 620px) 300px; gap: 72px; padding: 40px 40px 120px; justify-content: start; }
   .cvt__opcoes { flex-direction: row; flex-wrap: wrap; }
   .cvt__opcao { max-width: 100%; }
   .cvt__eu { max-width: 80%; }
-  .cvt__lateral { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 76px; align-self: start; }
+  .cvt__lateral { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 72px; align-self: start; }
   .cvt__lateral .cvg { margin-left: 0; }
 }

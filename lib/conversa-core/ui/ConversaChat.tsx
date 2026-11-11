@@ -40,6 +40,22 @@ export default function ConversaChat({ config, persistencia, onEvento }: Props) 
   const logo = config.marca.logo;
   // eslint-disable-next-line @next/next/no-img-element
   const logoImg = logo ? <img src={logo.src} alt={logo.alt} /> : null;
+  // o que o topo mostra (config.cabecalho): título, presença, contagem e/ou barra fina
+  const cab = config.cabecalho ?? {};
+  const progresso = cab.progresso ?? "contagem-e-barra";
+  const comContagem = progresso === "contagem" || progresso === "contagem-e-barra";
+  const comBarra = progresso === "barra" || progresso === "contagem-e-barra";
+  const total = config.totalPassos;
+  const estado = !cab.estado
+    ? ""
+    : fim === "enviando"
+      ? cab.estado.enviando ?? cab.estado.online
+      : fim === "encerrado"
+        ? cab.estado.encerrado ?? cab.estado.online
+        : digitando
+          ? cab.estado.digitando
+          : cab.estado.online;
+  const passoAria = motor.texto(config.textos.passoAria, ctx, { passo: passoAtual, total });
 
   return (
     <div className="cv" data-modo={config.modo ?? "claro"} role="region" aria-label={config.marca.rotuloRegiao} style={config.tema as React.CSSProperties}>
@@ -55,11 +71,31 @@ export default function ConversaChat({ config, persistencia, onEvento }: Props) 
             ) : (
               <span className="cv__logo">{logoImg}</span>
             ))}
-          <span className="cv__quem">{config.marca.titulo}</span>
+          {cab.titulo !== false && <span className="cv__quem">{config.marca.titulo}</span>}
+          {estado && (
+            <span className={`cv__estado${digitando && !fim ? " cv__estado--digitando" : ""}`} aria-hidden="true">
+              {estado}
+            </span>
+          )}
         </div>
-        <span className="cv__passo" aria-label={motor.texto(config.textos.passoAria, ctx, { passo: passoAtual, total: config.totalPassos })}>
-          {passoAtual}/{config.totalPassos}
-        </span>
+        {comContagem && (
+          <span className="cv__passo" aria-label={passoAria}>
+            {passoAtual}/{total}
+          </span>
+        )}
+        {comBarra && (
+          <span
+            className="cv__barra"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={total}
+            aria-valuenow={Math.min(passoAtual, total)}
+            aria-label={passoAria}
+            style={comContagem ? { display: "none" } : undefined}
+          >
+            <i style={{ width: `${fim === "enviando" ? 100 : Math.round(((Math.max(1, passoAtual) - 1) / total) * 100)}%` }} />
+          </span>
+        )}
       </div>
 
       <div className="cv__log" ref={logRef} role="log" aria-live="polite" aria-relevant="additions">

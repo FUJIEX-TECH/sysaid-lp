@@ -91,6 +91,7 @@
 }
 
 .cv__topo {
+  position: relative;
   display: flex; align-items: center; justify-content: space-between;
   gap: 12px;
   padding: 8px 18px;
@@ -103,9 +104,16 @@
 .cv__logo { display: block; flex: none; line-height: 0; }
 .cv__logo img { display: block; height: var(--cv-logo-altura); width: auto; }
 a.cv__logo:focus-visible { outline: 2px solid var(--cv-focus); outline-offset: 3px; }
-.cv__logo + .cv__quem { padding-left: 10px; border-left: 1px solid var(--cv-line); }
+.cv__logo + .cv__quem, .cv__logo + .cv__estado { padding-left: 10px; border-left: 1px solid var(--cv-line); }
 .cv__quem { font-family: var(--cv-font-mono); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--cv-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* presença: ponto + "online"/"digitando" (config.cabecalho.estado) */
+.cv__estado { display: inline-flex; align-items: center; gap: 6px; font-family: var(--cv-font-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cv-ink-400); white-space: nowrap; line-height: 1; }
+.cv__estado::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--cv-primary); }
+.cv__estado--digitando::before { animation: cv-pisca 0.9s infinite ease-in-out; }
 .cv__passo { font-family: var(--cv-font-mono); font-variant-numeric: tabular-nums; flex: none; }
+/* barra fina de progresso (config.cabecalho.progresso = "barra"), na borda de baixo do topo */
+.cv__barra { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; }
+.cv__barra i { display: block; height: 100%; background: var(--cv-primary); transition: width 0.4s ease; }
 .cv[data-modo="escuro"] .cv__quem { font-weight: 500; letter-spacing: 0.08em; }
 
 /* o histórico que rola */

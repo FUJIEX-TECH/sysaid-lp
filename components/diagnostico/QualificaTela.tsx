@@ -20,7 +20,6 @@ const Tela = dynamic(() => import("./QualificaTelaInner"), {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={marca.logo.src} alt={marca.logo.alt} style={{ height: marca.logo.altura ?? 22 }} />
         )}
-        <span className="qualifica-carregando__quem">{marca.titulo}</span>
       </span>
       <span className="qualifica-carregando__linha" />
       <span className="qualifica-carregando__linha qualifica-carregando__linha--curta" />

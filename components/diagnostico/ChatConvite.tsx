@@ -26,8 +26,9 @@ export default function ChatConvite() {
 
   return (
     <div className="convite">
-      <p className="convite__titulo">Diagnóstico ITSM em 2 minutos</p>
-      <p className="convite__texto">Sete perguntas rápidas, quase tudo por botão. No fim você recebe o mapa do seu problema e o caminho na SysAid.</p>
+      {/* copy sem cara de formulário (Fernando, 11/11/2026); versão final é do sysaid-growth */}
+      <p className="convite__titulo">Vamos achar o melhor caminho pra sua TI</p>
+      <p className="convite__texto">Conte o que trava o atendimento hoje. É uma conversa rápida, quase tudo por botão, e no fim você sai com o mapa do seu caso e o caminho na SysAid.</p>
       <div className="convite__acoes">
         <a className="btn btn--lime" href={href}>
           Começar a conversa

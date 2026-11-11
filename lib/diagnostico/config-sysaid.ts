@@ -277,8 +277,28 @@ export const COR_NAVEGADOR_SYSAID = { claro: "#175d4a", escuro: "#0b0f0d" }[MODO
 
 export const configSysaid: ConfigConversa = {
   id: "sysaid-diagnostico-itsm",
-  // o logo já diz "SysAid"; o título fica só com o nome do diagnóstico
-  marca: { titulo: "Diagnóstico ITSM", rotuloRegiao: "Diagnóstico ITSM em 2 minutos", subtitulo: "Em 2 minutos, o mapa do seu problema", logo: LOGO[MODO_SYSAID] },
+  // Cara de conversa, não de formulário (Fernando, 11/11/2026): sem título
+  // "Diagnóstico ITSM", sem subtítulo, sem contagem "n de 7". O cabeçalho é logo +
+  // presença ("online"/"digitando") + uma frase por origem, e só a barra fina de
+  // progresso. Copy a revisar pelo sysaid-growth (anotado no backlog dele).
+  marca: { titulo: "SysAid", rotuloRegiao: "Conversa com a SysAid", logo: LOGO[MODO_SYSAID] },
+  cabecalho: {
+    titulo: false,
+    estado: { online: "online", digitando: "digitando", enviando: "enviando" },
+    frase: {
+      padrao: "Vamos achar o melhor caminho pra sua TI.",
+      casos: [
+        {
+          quando: { todas: [{ variavel: "concorrente", definida: true }, { variavel: "intencao", igual: "preco" }] },
+          texto: "Vamos ver o que muda na conta se você sair do {{concorrente}}.",
+        },
+        { quando: { variavel: "concorrente", definida: true }, texto: "Vamos ver o que muda se você sair do {{concorrente}}." },
+        { quando: { origem: "brand" }, texto: "Vamos te levar pro caminho certo na SysAid." },
+        { quando: { variavel: "intencao", igual: "preco" }, texto: "Antes do preço, vamos ver o que a sua TI precisa." },
+      ],
+    },
+    progresso: "barra",
+  },
   modo: MODO_SYSAID,
   tema: TEMA[MODO_SYSAID],
   totalPassos: 7,
@@ -326,21 +346,22 @@ export const configSysaid: ConfigConversa = {
     email_corporativo: (v) => (isCorporateEmail(v) ? null : CORPORATE_EMAIL_ERROR),
   },
 
-  // v2: a abertura muda com a origem (campanha, termo, página). Copy a revisar pelo sysaid-growth.
+  // v2: a abertura muda com a origem (campanha, termo, página). Sem "diagnóstico",
+  // "perguntas" nem "2 minutos" (11/11/2026). Copy a revisar pelo sysaid-growth.
   abertura: [
     {
-      padrao: "Diagnóstico em 2 minutos: veja o que mudaria pra você.",
+      padrao: "O que trava o atendimento de TI hoje? Me conta e eu te mostro o que mudaria pra você.",
       casos: [
         {
           quando: { todas: [{ variavel: "concorrente", definida: true }, { variavel: "intencao", igual: "preco" }] },
-          texto: "Veio ver o custo do {{concorrente}}? Em 2 minutos eu te mostro o que mudaria na conta e na operação se você trocasse.",
+          texto: "Veio ver o custo do {{concorrente}}? Me conta como está hoje e eu te mostro o que mudaria na conta e na operação se você trocasse.",
         },
-        { quando: { variavel: "concorrente", definida: true }, texto: "Em 2 minutos eu te mostro o que mudaria se você saísse do {{concorrente}}." },
+        { quando: { variavel: "concorrente", definida: true }, texto: "Pensando em sair do {{concorrente}}? Me conta como está hoje e eu te mostro o que mudaria." },
         { quando: { origem: "brand" }, texto: "Você já conhece a SysAid. Me diz onde você está hoje e eu te levo pro caminho certo." },
-        { quando: { variavel: "intencao", igual: "preco" }, texto: "Procurando preço de ITSM? Antes do número, 2 minutos pra ver o que você precisa de verdade." },
+        { quando: { variavel: "intencao", igual: "preco" }, texto: "Procurando preço de ITSM? Antes do número, vamos ver o que você precisa de verdade." },
       ],
     },
-    "São 7 perguntas rápidas, quase tudo por botão. No fim você recebe o mapa do seu problema.",
+    "É rápido: quase tudo por botão, e no fim você sai com o mapa do seu caso.",
   ],
 
   etapas: [
@@ -789,9 +810,10 @@ export const configSysaid: ConfigConversa = {
     enviando: "Perfeito{{saudacao}}. Estou mandando o seu mapa e já te levo pra confirmação.",
     erro: "Não consegui enviar agora. Confira o e-mail e tente de novo em instantes.",
     tentarDeNovo: "Tentar de novo",
-    legal: "Ao enviar, você concorda em ser contatado pela SysAid. Sem spam.",
+    legal: "Ao continuar, você concorda em ser contatado pela SysAid. Sem spam.",
     corrigirDica: "Tocar pra corrigir esta resposta.",
-    passoAria: "Pergunta {{passo}} de {{total}}",
+    // só pro leitor de tela (rótulo da barra fina de progresso)
+    passoAria: "Parte {{passo}} de {{total}} da conversa",
     enviar: "Enviar",
     corrigir: "corrigir",
   },

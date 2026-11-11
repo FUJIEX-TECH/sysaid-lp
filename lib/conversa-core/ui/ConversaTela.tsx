@@ -131,46 +131,87 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
   const pct = Math.round(((Math.max(1, passoAtual) - 1) / total) * 100);
   const faltam = config.textos.faltam ? motor.texto(config.textos.faltam, ctx, { n: Math.max(0, total - passoAtual + 1) }) : "";
 
-  // logo do cliente no cabeçalho (link quando tem href); altura pelo token --cv-logo-altura
+  // cabeçalho, tudo pela config: logo do cliente (link quando tem href; altura pelo
+  // token --cv-logo-altura), título/subtítulo opcionais, presença ("online"/
+  // "digitando"), frase por origem e progresso (contagem + barra, só a barra fina
+  // na borda de baixo, ou nada). O conteúdo alinha com a coluna da conversa.
   const logo = config.marca.logo;
   const logoEstilo = logo?.altura ? ({ "--cv-logo-altura": `${logo.altura}px` } as React.CSSProperties) : undefined;
   // eslint-disable-next-line @next/next/no-img-element
   const logoImg = logo ? <img src={logo.src} alt={logo.alt} /> : null;
+  const cab = config.cabecalho ?? {};
+  const mostrarTitulo = cab.titulo !== false;
+  const mostrarSub = cab.subtitulo !== false && !!config.marca.subtitulo;
+  const progresso = cab.progresso ?? "contagem-e-barra";
+  const comContagem = progresso === "contagem" || progresso === "contagem-e-barra";
+  const comBarra = progresso === "barra" || progresso === "contagem-e-barra";
+  const estado = !cab.estado
+    ? ""
+    : fim === "enviando"
+      ? cab.estado.enviando ?? cab.estado.online
+      : fim === "encerrado"
+        ? cab.estado.encerrado ?? cab.estado.online
+        : digitando
+          ? cab.estado.digitando
+          : cab.estado.online;
+  const frase = cab.frase ? motor.texto(cab.frase, ctx) : "";
+  const progressoAria = {
+    role: "progressbar" as const,
+    "aria-valuemin": 0,
+    "aria-valuemax": total,
+    "aria-valuenow": Math.min(passoAtual, total),
+    "aria-label": motor.texto(config.textos.passoAria, ctx, { passo: passoAtual, total }),
+  };
+  const larguraBarra = `${fim === "enviando" ? 100 : pct}%`;
 
   return (
     <div className="cvt" data-modo={config.modo ?? "claro"} style={config.tema as React.CSSProperties}>
       <header className="cvt__topo">
-        <div className="cvt__marca">
-          {logo &&
-            (logo.href ? (
-              <a className="cvt__logo" href={logo.href} aria-label={logo.hrefRotulo} style={logoEstilo}>
-                {logoImg}
-              </a>
-            ) : (
-              <span className="cvt__logo" style={logoEstilo}>
-                {logoImg}
+        <div className="cvt__topo-inner">
+          <div className="cvt__topo-linha">
+            <div className="cvt__marca">
+              {logo &&
+                (logo.href ? (
+                  <a className="cvt__logo" href={logo.href} aria-label={logo.hrefRotulo} style={logoEstilo}>
+                    {logoImg}
+                  </a>
+                ) : (
+                  <span className="cvt__logo" style={logoEstilo}>
+                    {logoImg}
+                  </span>
+                ))}
+              {(mostrarTitulo || mostrarSub) && (
+                <div className="cvt__titulos">
+                  {mostrarTitulo && <span className="cvt__quem">{config.marca.titulo}</span>}
+                  {mostrarSub && <span className="cvt__sub">{config.marca.subtitulo}</span>}
+                </div>
+              )}
+              {estado && (
+                <span className={`cvt__estado${digitando && !fim ? " cvt__estado--digitando" : ""}`} aria-hidden="true">
+                  {estado}
+                </span>
+              )}
+            </div>
+            {frase && <p className="cvt__frase">{frase}</p>}
+            {comContagem && (
+              <div className="cvt__progresso" {...progressoAria}>
+                <span className="cvt__passo">
+                  {passoAtual} <em>de</em> {total}
+                  {faltam && <small>{faltam}</small>}
+                </span>
+                {comBarra && (
+                  <span className="cvt__barra">
+                    <i style={{ width: larguraBarra }} />
+                  </span>
+                )}
+              </div>
+            )}
+            {!comContagem && comBarra && (
+              <span className="cvt__barra cvt__barra--fina" {...progressoAria}>
+                <i style={{ width: larguraBarra }} />
               </span>
-            ))}
-          <div className="cvt__titulos">
-            <span className="cvt__quem">{config.marca.titulo}</span>
-            {config.marca.subtitulo && <span className="cvt__sub">{config.marca.subtitulo}</span>}
+            )}
           </div>
-        </div>
-        <div
-          className="cvt__progresso"
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={total}
-          aria-valuenow={Math.min(passoAtual, total)}
-          aria-label={motor.texto(config.textos.passoAria, ctx, { passo: passoAtual, total })}
-        >
-          <span className="cvt__passo">
-            {passoAtual} <em>de</em> {total}
-            {faltam && <small>{faltam}</small>}
-          </span>
-          <span className="cvt__barra">
-            <i style={{ width: `${fim === "enviando" ? 100 : pct}%` }} />
-          </span>
         </div>
       </header>
 
