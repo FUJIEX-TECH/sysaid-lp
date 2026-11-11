@@ -8,9 +8,20 @@
   flex-direction: column;
   gap: 14px;
 }
+.qualifica-carregando__marca { display: flex; align-items: center; gap: 14px; }
+.qualifica-carregando__marca img { display: block; width: auto; }
+.qualifica-carregando__marca img + .qualifica-carregando__quem { padding-left: 14px; border-left: 1px solid var(--line); }
 .qualifica-carregando__quem { font-weight: 600; font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--green-700); }
 .qualifica-carregando__linha { display: block; width: 60%; max-width: 420px; height: 12px; background: var(--line); margin-top: 20px; }
 .qualifica-carregando__linha--curta { width: 40%; margin-top: 0; }
+
+/* modo escuro (espelha o --cv-bg do TEMA_ESCURO em config-sysaid.ts) */
+.qualifica-carregando[data-modo="escuro"] { background: #0b0f0d; }
+.qualifica-carregando[data-modo="escuro"] .qualifica-carregando__quem { font-family: var(--font-mono); font-weight: 500; font-size: 0.78rem; letter-spacing: 0.1em; color: var(--green-400); }
+.qualifica-carregando[data-modo="escuro"] .qualifica-carregando__marca img + .qualifica-carregando__quem { border-left-color: rgba(255, 255, 255, 0.2); }
+.qualifica-carregando[data-modo="escuro"] .qualifica-carregando__linha { background: rgba(255, 255, 255, 0.08); }
+/* o documento acompanha o modo: sem faixa branca no overscroll do iOS nem antes de a tela montar */
+body:has(.cvt[data-modo="escuro"]), body:has(.qualifica-carregando[data-modo="escuro"]) { background: #0b0f0d; }
 
 /* convite no hero (variante B): no lugar do formulário, a porta pra conversa */
 .convite {

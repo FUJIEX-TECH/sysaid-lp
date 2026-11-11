@@ -35,13 +35,28 @@ export default function ConversaChat({ config, persistencia, onEvento }: Props) 
   }, [digitando, versao, erro]);
 
   const Cena = config.Cena;
+  // no widget o logo fica pequeno (token --cv-logo-altura, 18 px por padrão); o
+  // `altura` da configuração vale só pra tela cheia, que tem cabeçalho próprio
+  const logo = config.marca.logo;
+  // eslint-disable-next-line @next/next/no-img-element
+  const logoImg = logo ? <img src={logo.src} alt={logo.alt} /> : null;
 
   return (
-    <div className="cv" role="region" aria-label={config.marca.rotuloRegiao} style={config.tema as React.CSSProperties}>
+    <div className="cv" data-modo={config.modo ?? "claro"} role="region" aria-label={config.marca.rotuloRegiao} style={config.tema as React.CSSProperties}>
       {Cena && <Cena respostas={respostas} ctx={ctx} />}
 
       <div className="cv__topo">
-        <span className="cv__quem">{config.marca.titulo}</span>
+        <div className="cv__marca">
+          {logo &&
+            (logo.href ? (
+              <a className="cv__logo" href={logo.href} aria-label={logo.hrefRotulo}>
+                {logoImg}
+              </a>
+            ) : (
+              <span className="cv__logo">{logoImg}</span>
+            ))}
+          <span className="cv__quem">{config.marca.titulo}</span>
+        </div>
         <span className="cv__passo" aria-label={motor.texto(config.textos.passoAria, ctx, { passo: passoAtual, total: config.totalPassos })}>
           {passoAtual}/{config.totalPassos}
         </span>

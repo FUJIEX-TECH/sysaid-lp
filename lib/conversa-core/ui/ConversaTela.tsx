@@ -131,12 +131,30 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
   const pct = Math.round(((Math.max(1, passoAtual) - 1) / total) * 100);
   const faltam = config.textos.faltam ? motor.texto(config.textos.faltam, ctx, { n: Math.max(0, total - passoAtual + 1) }) : "";
 
+  // logo do cliente no cabeçalho (link quando tem href); altura pelo token --cv-logo-altura
+  const logo = config.marca.logo;
+  const logoEstilo = logo?.altura ? ({ "--cv-logo-altura": `${logo.altura}px` } as React.CSSProperties) : undefined;
+  // eslint-disable-next-line @next/next/no-img-element
+  const logoImg = logo ? <img src={logo.src} alt={logo.alt} /> : null;
+
   return (
-    <div className="cvt" style={config.tema as React.CSSProperties}>
+    <div className="cvt" data-modo={config.modo ?? "claro"} style={config.tema as React.CSSProperties}>
       <header className="cvt__topo">
         <div className="cvt__marca">
-          <span className="cvt__quem">{config.marca.titulo}</span>
-          {config.marca.subtitulo && <span className="cvt__sub">{config.marca.subtitulo}</span>}
+          {logo &&
+            (logo.href ? (
+              <a className="cvt__logo" href={logo.href} aria-label={logo.hrefRotulo} style={logoEstilo}>
+                {logoImg}
+              </a>
+            ) : (
+              <span className="cvt__logo" style={logoEstilo}>
+                {logoImg}
+              </span>
+            ))}
+          <div className="cvt__titulos">
+            <span className="cvt__quem">{config.marca.titulo}</span>
+            {config.marca.subtitulo && <span className="cvt__sub">{config.marca.subtitulo}</span>}
+          </div>
         </div>
         <div
           className="cvt__progresso"
@@ -175,7 +193,7 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
           )}
 
           {!digitando && atual && atualResolvida && !fim && (
-            <div className="cvt__par cvt__par--atual">
+            <div className="cvt__par cvt__par--atual" data-etapa={atual.id}>
               <p className="cvt__bot">{atualResolvida.texto}</p>
               {noFluxo(atual.id).map(painel)}
 

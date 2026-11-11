@@ -1,13 +1,15 @@
 /* ==========================================================================
-   conversa-core — estilo genérico do chat. Tudo que é marca entra pelas
-   variáveis --cv-* (config.tema); os valores abaixo são só o padrão neutro.
-   Cantos retos, hierarquia por peso e tamanho, sem cartão arredondado.
-   Celular primeiro.
+   conversa-core — estilo genérico do widget (ConversaChat). Tudo que é marca
+   entra pelas variáveis --cv-* (config.tema); os valores abaixo são o padrão
+   neutro claro e, em .cv[data-modo="escuro"], o escuro. O inline style do
+   tema sobrescreve os dois. Cantos retos, hierarquia por peso e tamanho,
+   sem cartão arredondado. Celular primeiro.
    ========================================================================== */
 
 .cv {
   --cv-bg: #f6f6f6;
   --cv-superficie: #fff;
+  --cv-superficie-2: var(--cv-superficie);
   --cv-ink: #1a1a1a;
   --cv-ink-700: #333;
   --cv-ink-400: #777;
@@ -23,10 +25,24 @@
   --cv-erro: #b3261e;
   --cv-sombra: 0 24px 60px rgba(0, 0, 0, 0.14);
   --cv-sombra-botao: 0 8px 20px rgba(0, 0, 0, 0.12);
+  /* a resposta da pessoa (bolha à direita) */
+  --cv-eu-bg: var(--cv-primary);
+  --cv-eu-ink: var(--cv-primary-contrast);
+  --cv-eu-borda: transparent;
+  --cv-eu-hover: var(--cv-primary-hover);
+  /* botões de opção */
+  --cv-opcao-bg: var(--cv-superficie);
+  --cv-opcao-ink: var(--cv-primary);
+  --cv-opcao-borda: var(--cv-primary);
+  --cv-opcao-hover-bg: var(--cv-primary);
+  --cv-opcao-hover-ink: var(--cv-primary-contrast);
+  --cv-opcao-hover-borda: var(--cv-primary);
   --cv-font: inherit;
+  --cv-font-mono: var(--cv-font); /* rótulos e contador (mono, se o cliente der) */
   --cv-radius: 0;
   --cv-max: 560px;
   --cv-log-max: min(62vh, 560px);
+  --cv-logo-altura: 18px;
 
   position: relative;
   width: 100%;
@@ -42,16 +58,55 @@
   flex-direction: column;
 }
 
+/* padrão neutro do modo escuro (sem cor de cliente); o tema do cliente vem por cima */
+.cv[data-modo="escuro"] {
+  color-scheme: dark;
+  --cv-bg: #0e0f0f;
+  --cv-superficie: #151717;
+  --cv-superficie-2: #121414;
+  --cv-ink: #ebecec;
+  --cv-ink-700: #bdc0bf;
+  --cv-ink-400: #969a99;
+  --cv-primary: #e9eaea;
+  --cv-primary-hover: #fff;
+  --cv-primary-contrast: #0e0f0f;
+  --cv-accent: #bfc3c2;
+  --cv-line: rgba(255, 255, 255, 0.09);
+  --cv-borda: rgba(255, 255, 255, 0.14);
+  --cv-input-borda: rgba(255, 255, 255, 0.34);
+  --cv-mais-borda: rgba(255, 255, 255, 0.28);
+  --cv-erro: #ff8a80;
+  --cv-sombra: 0 24px 60px rgba(0, 0, 0, 0.5);
+  --cv-sombra-botao: 0 8px 20px rgba(0, 0, 0, 0.4);
+  --cv-eu-bg: rgba(255, 255, 255, 0.1);
+  --cv-eu-ink: var(--cv-ink);
+  --cv-eu-borda: rgba(255, 255, 255, 0.28);
+  --cv-eu-hover: rgba(255, 255, 255, 0.16);
+  --cv-opcao-bg: var(--cv-superficie);
+  --cv-opcao-ink: var(--cv-ink);
+  --cv-opcao-borda: rgba(255, 255, 255, 0.2);
+  --cv-opcao-hover-bg: rgba(255, 255, 255, 0.1);
+  --cv-opcao-hover-ink: #fff;
+  --cv-opcao-hover-borda: rgba(255, 255, 255, 0.5);
+}
+
 .cv__topo {
   display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
   padding: 8px 18px;
   font-size: 0.78rem;
   color: var(--cv-ink-400);
   border-bottom: 1px solid var(--cv-line);
   background: var(--cv-superficie);
 }
-.cv__quem { font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--cv-primary); }
-.cv__passo { font-variant-numeric: tabular-nums; }
+.cv__marca { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.cv__logo { display: block; flex: none; line-height: 0; }
+.cv__logo img { display: block; height: var(--cv-logo-altura); width: auto; }
+a.cv__logo:focus-visible { outline: 2px solid var(--cv-focus); outline-offset: 3px; }
+.cv__logo + .cv__quem { padding-left: 10px; border-left: 1px solid var(--cv-line); }
+.cv__quem { font-family: var(--cv-font-mono); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--cv-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cv__passo { font-family: var(--cv-font-mono); font-variant-numeric: tabular-nums; flex: none; }
+.cv[data-modo="escuro"] .cv__quem { font-weight: 500; letter-spacing: 0.08em; }
 
 /* o histórico que rola */
 .cv__log {
@@ -84,9 +139,10 @@
 }
 .cv__bolha--eu {
   align-self: flex-end;
-  background: var(--cv-primary);
-  color: var(--cv-primary-contrast);
-  border: 0;
+  padding: 10px 13px;
+  background: var(--cv-eu-bg);
+  color: var(--cv-eu-ink);
+  border: 1px solid var(--cv-eu-borda);
   font: inherit;
   font-size: 0.98rem;
   text-align: left;
@@ -94,7 +150,7 @@
   position: relative;
 }
 .cv__bolha--eu:hover:not(:disabled),
-.cv__bolha--eu:focus-visible { background: var(--cv-primary-hover); outline: 2px solid var(--cv-focus); outline-offset: 2px; }
+.cv__bolha--eu:focus-visible { background: var(--cv-eu-hover); outline: 2px solid var(--cv-focus); outline-offset: 2px; }
 .cv__bolha--eu:disabled { cursor: default; opacity: 0.85; }
 .cv__bolha--eu::after {
   content: "corrigir";
@@ -126,18 +182,18 @@
   font: inherit;
   font-size: 0.93rem;
   padding: 9px 14px;
-  background: var(--cv-superficie);
-  color: var(--cv-primary);
-  border: 1.5px solid var(--cv-primary);
+  background: var(--cv-opcao-bg);
+  color: var(--cv-opcao-ink);
+  border: 1.5px solid var(--cv-opcao-borda);
   border-radius: var(--cv-radius);
   cursor: pointer;
   text-align: left;
-  transition: background 0.12s, color 0.12s;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
 }
-.cv__opcao:hover, .cv__opcao:focus-visible { background: var(--cv-primary); color: var(--cv-primary-contrast); outline: none; }
+.cv__opcao:hover, .cv__opcao:focus-visible { background: var(--cv-opcao-hover-bg); color: var(--cv-opcao-hover-ink); border-color: var(--cv-opcao-hover-borda); outline: none; }
 .cv__opcao:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--cv-focus) 60%, transparent); }
 .cv__opcao--mais { border-style: dashed; color: var(--cv-ink-400); border-color: var(--cv-mais-borda); }
-.cv__opcao--mais:hover { background: var(--cv-superficie); color: var(--cv-ink); border-color: var(--cv-ink); }
+.cv__opcao--mais:hover { background: var(--cv-opcao-bg); color: var(--cv-ink); border-color: var(--cv-ink); }
 
 /* entrada de texto */
 .cv__form { display: flex; flex-direction: column; gap: 8px; }
@@ -148,10 +204,11 @@
   font-family: var(--cv-font);
   border: 1.5px solid var(--cv-input-borda);
   border-radius: var(--cv-radius);
-  background: var(--cv-superficie);
+  background: var(--cv-superficie-2);
   color: var(--cv-ink);
   resize: vertical;
 }
+.cv__form input::placeholder, .cv__form textarea::placeholder { color: var(--cv-ink-400); opacity: 1; }
 .cv__form input:focus, .cv__form textarea:focus { outline: 2px solid var(--cv-accent); border-color: transparent; }
 .cv__acoes { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .cv__enviar {

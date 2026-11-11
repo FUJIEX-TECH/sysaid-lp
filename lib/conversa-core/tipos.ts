@@ -400,8 +400,19 @@ export type ResumoConfig = {
 
 export type ConfigConversa = {
   id: string;
-  marca: { titulo: string; rotuloRegiao: string; subtitulo?: string };
-  // variáveis CSS --cv-* (ver ui/conversa.css)
+  marca: {
+    titulo: string;
+    rotuloRegiao: string;
+    subtitulo?: string;
+    // logo do cliente no cabeçalho (tela e widget); `href` vira link (`hrefRotulo` é o
+    // aria-label do link), `alt` é obrigatório; `altura` (px) vale na tela cheia, o
+    // widget usa o token --cv-logo-altura (18 px)
+    logo?: { src: string; alt: string; href?: string; hrefRotulo?: string; altura?: number };
+  };
+  // claro (padrão) ou escuro: cada modo tem o próprio padrão neutro no CSS do
+  // núcleo (ui/tela.css, ui/conversa.css); `tema` sobrescreve por cima
+  modo?: "claro" | "escuro";
+  // variáveis CSS --cv-* (ver ui/tela.css: cores, fontes, textura, bolha da pessoa, opções)
   tema?: Record<string, string>;
   totalPassos: number;
   digitandoMs?: number;

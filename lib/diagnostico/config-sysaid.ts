@@ -171,31 +171,116 @@ const ORIGENS_REGRAS: OrigemRegra[] = [
 // --------------------------------------------------------------------------
 const NAO_SUPORTE = { campo: "cliente_tipo", diferente: "suporte" } as const;
 
+// --------------------------------------------------------------------------
+// Aparência (configurável): modo + tema + logo. O núcleo só conhece --cv-* e
+// o data-modo; tudo que é SysAid (cores da LP, logo, fontes) mora aqui.
+// --------------------------------------------------------------------------
+// Qual modo vai pro ar. "escuro" desde 11/11/2026 (pedido do Fernando); o claro
+// continua pronto: trocar esta constante basta (tela, widget ?v=chat, esqueleto
+// e theme-color da página seguem).
+export const MODO_SYSAID: "claro" | "escuro" = "escuro";
+
+// Tema claro: tokens da LP (globals.css): verde #175d4a, menta #6bd9b9, lima, tinta
+const TEMA_CLARO: Record<string, string> = {
+  "--cv-bg": "var(--bg-soft)",
+  "--cv-ink": "var(--ink)",
+  "--cv-ink-700": "var(--ink-700)",
+  "--cv-ink-400": "var(--ink-400)",
+  "--cv-primary": "var(--green-700)",
+  "--cv-primary-hover": "#12503f",
+  "--cv-accent": "var(--green-400)",
+  "--cv-focus": "var(--lime)",
+  "--cv-line": "var(--line)",
+  "--cv-borda": "rgba(107, 217, 185, 0.35)",
+  "--cv-input-borda": "#d4ddd8",
+  "--cv-mais-borda": "#b9c6c0",
+  "--cv-sombra": "var(--shadow-lg)",
+  "--cv-sombra-botao": "var(--shadow)",
+  "--cv-font": "var(--font-sans)",
+  // v2 (tela cheia e gráficos)
+  "--cv-font-titulo": "var(--font-serif)",
+  "--cv-primary-tinta": "var(--green-100)",
+  "--cv-line-forte": "#c3d0c9",
+};
+
+// Tema escuro (11/11/2026, direção do Fernando): console de infraestrutura, não
+// "cara de IA". Fundo quase preto com tinta de verde e grade fina de 1 px,
+// rótulos e números em mono (IBM Plex Mono, --font-mono da LP), abertura em
+// Besley itálica como na LP, menta da marca só onde orienta (barra de
+// progresso, botão principal, resposta da pessoa, nó "o que resolve", equipe no
+// porte), lima só no foco do teclado. Contraste conferido (WCAG AA): tinta
+// #e8ede9 16:1 e #b9c2bc 10,6:1 sobre o fundo, #939d97 6,5:1 sobre a
+// superfície (rótulos pequenos), menta 11:1 sobre o fundo e o fundo 11:1 sobre
+// a menta (botão), borda dos campos #5f6663 3:1.
+const TEMA_ESCURO: Record<string, string> = {
+  "--cv-bg": "#0b0f0d",
+  "--cv-superficie": "#111714",
+  "--cv-superficie-2": "#0e1311",
+  "--cv-ink": "#e8ede9",
+  "--cv-ink-700": "#b9c2bc",
+  "--cv-ink-400": "#939d97",
+  "--cv-primary": "var(--green-400)",
+  "--cv-primary-hover": "#8ae4ca",
+  "--cv-primary-contrast": "#0b0f0d",
+  "--cv-primary-tinta": "rgba(107, 217, 185, 0.1)",
+  "--cv-accent": "var(--green-400)",
+  "--cv-focus": "var(--lime)",
+  "--cv-line": "rgba(255, 255, 255, 0.09)",
+  "--cv-line-forte": "rgba(255, 255, 255, 0.2)",
+  "--cv-input-borda": "#5f6663",
+  "--cv-mais-borda": "rgba(255, 255, 255, 0.28)",
+  "--cv-erro": "#ff8a80",
+  // a resposta da pessoa: tinta de menta com filete, não bloco sólido
+  "--cv-eu-bg": "rgba(107, 217, 185, 0.12)",
+  "--cv-eu-ink": "#dff7ee",
+  "--cv-eu-borda": "rgba(107, 217, 185, 0.45)",
+  "--cv-eu-hover": "rgba(107, 217, 185, 0.2)",
+  // opções: neutras; a menta só entra no hover/foco
+  "--cv-opcao-bg": "#111714",
+  "--cv-opcao-ink": "#e8ede9",
+  "--cv-opcao-borda": "rgba(255, 255, 255, 0.2)",
+  "--cv-opcao-hover-bg": "rgba(107, 217, 185, 0.12)",
+  "--cv-opcao-hover-ink": "#dff7ee",
+  "--cv-opcao-hover-borda": "var(--green-400)",
+  // gráficos
+  "--cv-glifo": "#4f5c56",
+  "--cv-glifo-equipe": "var(--green-400)",
+  "--cv-logo-caixa": "#fff",
+  // fontes
+  "--cv-font": "var(--font-sans)",
+  "--cv-font-titulo": "var(--font-serif)",
+  "--cv-font-mono": "var(--font-mono)",
+  "--cv-font-numero": "var(--font-mono)",
+  // fundo: leve tinta de menta no canto superior esquerdo + grade fina de 56 px,
+  // quase imperceptível (é textura, não desenho)
+  "--cv-grade": "rgba(255, 255, 255, 0.022)",
+  "--cv-textura":
+    "radial-gradient(900px 420px at 0% 0%, rgba(107, 217, 185, 0.07), transparent 65%), linear-gradient(var(--cv-grade) 1px, transparent 1px), linear-gradient(90deg, var(--cv-grade) 1px, transparent 1px)",
+  "--cv-textura-tamanho": "auto, 56px 56px, 56px 56px",
+  // widget (?v=chat) dentro do hero
+  "--cv-borda": "rgba(255, 255, 255, 0.14)",
+  "--cv-sombra": "0 24px 60px rgba(0, 0, 0, 0.5)",
+  "--cv-sombra-botao": "0 8px 20px rgba(0, 0, 0, 0.4)",
+};
+
+const TEMA = { claro: TEMA_CLARO, escuro: TEMA_ESCURO };
+
+// Logo da SysAid no cabeçalho (tela e widget): branco no escuro, preto no claro.
+// Arquivos em public/logos/ (os mesmos do rodapé da LP). Link pra home da LP.
+const LOGO = {
+  claro: { src: "/logos/logo-black.svg", alt: "SysAid", href: "/", hrefRotulo: "SysAid Brasil, página inicial", altura: 24 },
+  escuro: { src: "/logos/logo-white.svg", alt: "SysAid", href: "/", hrefRotulo: "SysAid Brasil, página inicial", altura: 24 },
+};
+
+// cor da barra do navegador (theme-color) na página do chat, por modo
+export const COR_NAVEGADOR_SYSAID = { claro: "#175d4a", escuro: "#0b0f0d" }[MODO_SYSAID];
+
 export const configSysaid: ConfigConversa = {
   id: "sysaid-diagnostico-itsm",
-  marca: { titulo: "SysAid · Diagnóstico ITSM", rotuloRegiao: "Diagnóstico ITSM em 2 minutos", subtitulo: "Em 2 minutos, o mapa do seu problema" },
-  // tokens da LP (globals.css): verde #175d4a, menta #6bd9b9, lima, tinta
-  tema: {
-    "--cv-bg": "var(--bg-soft)",
-    "--cv-ink": "var(--ink)",
-    "--cv-ink-700": "var(--ink-700)",
-    "--cv-ink-400": "var(--ink-400)",
-    "--cv-primary": "var(--green-700)",
-    "--cv-primary-hover": "#12503f",
-    "--cv-accent": "var(--green-400)",
-    "--cv-focus": "var(--lime)",
-    "--cv-line": "var(--line)",
-    "--cv-borda": "rgba(107, 217, 185, 0.35)",
-    "--cv-input-borda": "#d4ddd8",
-    "--cv-mais-borda": "#b9c6c0",
-    "--cv-sombra": "var(--shadow-lg)",
-    "--cv-sombra-botao": "var(--shadow)",
-    "--cv-font": "var(--font-sans)",
-    // v2 (tela cheia e gráficos)
-    "--cv-font-titulo": "var(--font-serif)",
-    "--cv-primary-tinta": "var(--green-100)",
-    "--cv-line-forte": "#c3d0c9",
-  },
+  // o logo já diz "SysAid"; o título fica só com o nome do diagnóstico
+  marca: { titulo: "Diagnóstico ITSM", rotuloRegiao: "Diagnóstico ITSM em 2 minutos", subtitulo: "Em 2 minutos, o mapa do seu problema", logo: LOGO[MODO_SYSAID] },
+  modo: MODO_SYSAID,
+  tema: TEMA[MODO_SYSAID],
   totalPassos: 7,
   digitandoMs: 300,
 

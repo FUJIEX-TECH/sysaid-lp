@@ -1,14 +1,20 @@
 /* ==========================================================================
    conversa-core — v2: a tela cheia (ConversaTela) e os gráficos gerados por
    código (porte, mapa, empresa, resumo). Marca entra pelas variáveis --cv-*
-   (config.tema); abaixo, o padrão neutro. Direção: página clara, coluna de
-   conversa estreita à esquerda e lateral fixa à direita (assimétrico), filetes
-   de 1 px, cantos retos, hierarquia por tamanho e peso leve. Celular primeiro.
+   (config.tema) e o modo (config.modo: "claro" | "escuro") escolhe o padrão
+   neutro por baixo: o claro em .cvt, o escuro em .cvt[data-modo="escuro"].
+   O inline style do tema sobrescreve os dois.
+   Direção: coluna de conversa estreita à esquerda e lateral fixa à direita
+   (assimétrico), filetes de 1 px, cantos retos, hierarquia por tamanho e
+   peso leve. No escuro, cara de console: grade fina no fundo, rótulos e
+   números em mono (se o cliente der --cv-font-mono), acento com parcimônia.
+   Celular primeiro.
    ========================================================================== */
 
 .cvt {
   --cv-bg: #f6f6f6;
   --cv-superficie: #fff;
+  --cv-superficie-2: var(--cv-superficie); /* campos de texto */
   --cv-ink: #1a1a1a;
   --cv-ink-700: #333;
   --cv-ink-400: #777;
@@ -23,17 +29,80 @@
   --cv-input-borda: #d4d4d4;
   --cv-mais-borda: #c4c4c4;
   --cv-erro: #b3261e;
+  /* a resposta da pessoa (bloco à direita) */
+  --cv-eu-bg: var(--cv-primary);
+  --cv-eu-ink: var(--cv-primary-contrast);
+  --cv-eu-borda: transparent;
+  --cv-eu-hover: var(--cv-primary-hover);
+  /* botões de opção */
+  --cv-opcao-bg: var(--cv-superficie);
+  --cv-opcao-ink: var(--cv-primary);
+  --cv-opcao-borda: var(--cv-primary);
+  --cv-opcao-hover-bg: var(--cv-primary);
+  --cv-opcao-hover-ink: var(--cv-primary-contrast);
+  --cv-opcao-hover-borda: var(--cv-primary);
+  /* gráficos */
+  --cv-glifo: var(--cv-ink-400); /* bonequinho comum */
+  --cv-glifo-equipe: var(--cv-primary); /* a equipe em destaque */
+  --cv-logo-caixa: #fff; /* fundo do logo da empresa lida (logos precisam de fundo conhecido) */
+  /* fontes: corpo; títulos (abertura, resumo, nome da empresa); rótulos e dados
+     (mono, se o cliente der); número grande do porte */
   --cv-font: inherit;
   --cv-font-titulo: inherit;
+  --cv-font-mono: var(--cv-font);
+  --cv-font-numero: var(--cv-font-titulo);
   --cv-radius: 0;
+  /* textura do fundo (ex.: grade fina) e logo do cliente no cabeçalho */
+  --cv-textura: none;
+  --cv-textura-tamanho: auto;
+  --cv-logo-altura: 22px;
 
   min-height: 100dvh;
-  background: var(--cv-bg);
+  background-color: var(--cv-bg);
+  background-image: var(--cv-textura);
+  background-size: var(--cv-textura-tamanho);
   color: var(--cv-ink-700);
   font-family: var(--cv-font);
   text-align: left;
   display: flex;
   flex-direction: column;
+}
+
+/* padrão neutro do modo escuro (sem cor de cliente); o tema do cliente vem por cima */
+.cvt[data-modo="escuro"] {
+  color-scheme: dark;
+  --cv-bg: #0e0f0f;
+  --cv-superficie: #151717;
+  --cv-superficie-2: #121414;
+  --cv-ink: #ebecec;
+  --cv-ink-700: #bdc0bf;
+  --cv-ink-400: #969a99;
+  --cv-primary: #e9eaea;
+  --cv-primary-hover: #fff;
+  --cv-primary-contrast: #0e0f0f;
+  --cv-primary-tinta: rgba(255, 255, 255, 0.08);
+  --cv-accent: #bfc3c2;
+  --cv-focus: #ffd400;
+  --cv-line: rgba(255, 255, 255, 0.09);
+  --cv-line-forte: rgba(255, 255, 255, 0.2);
+  --cv-input-borda: rgba(255, 255, 255, 0.34);
+  --cv-mais-borda: rgba(255, 255, 255, 0.28);
+  --cv-erro: #ff8a80;
+  --cv-eu-bg: rgba(255, 255, 255, 0.1);
+  --cv-eu-ink: var(--cv-ink);
+  --cv-eu-borda: rgba(255, 255, 255, 0.28);
+  --cv-eu-hover: rgba(255, 255, 255, 0.16);
+  --cv-opcao-bg: var(--cv-superficie);
+  --cv-opcao-ink: var(--cv-ink);
+  --cv-opcao-borda: rgba(255, 255, 255, 0.2);
+  --cv-opcao-hover-bg: rgba(255, 255, 255, 0.1);
+  --cv-opcao-hover-ink: #fff;
+  --cv-opcao-hover-borda: rgba(255, 255, 255, 0.5);
+  --cv-glifo: #4f5555;
+  /* grade fina: quase imperceptível de propósito (textura, não desenho) */
+  --cv-grade: rgba(255, 255, 255, 0.022);
+  --cv-textura: linear-gradient(var(--cv-grade) 1px, transparent 1px), linear-gradient(90deg, var(--cv-grade) 1px, transparent 1px);
+  --cv-textura-tamanho: 56px 56px;
 }
 
 /* cabeçalho fino, fixo */
@@ -50,11 +119,16 @@
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--cv-line);
 }
-.cvt__marca { display: flex; flex-direction: column; min-width: 0; }
-.cvt__quem { font-weight: 600; font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--cv-primary); white-space: nowrap; }
+.cvt__marca { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.cvt__logo { display: block; flex: none; line-height: 0; }
+.cvt__logo img { display: block; height: var(--cv-logo-altura); width: auto; }
+a.cvt__logo:focus-visible { outline: 2px solid var(--cv-focus); outline-offset: 4px; }
+.cvt__titulos { display: flex; flex-direction: column; min-width: 0; }
+.cvt__logo + .cvt__titulos { padding-left: 14px; border-left: 1px solid var(--cv-line-forte); }
+.cvt__quem { font-family: var(--cv-font-mono); font-weight: 600; font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--cv-primary); white-space: nowrap; }
 .cvt__sub { font-size: 0.8rem; color: var(--cv-ink-400); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cvt__progresso { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex: 0 0 auto; }
-.cvt__passo { font-variant-numeric: tabular-nums; font-size: 0.82rem; color: var(--cv-ink-400); display: flex; align-items: baseline; gap: 4px; }
+.cvt__passo { font-family: var(--cv-font-mono); font-variant-numeric: tabular-nums; font-size: 0.82rem; color: var(--cv-ink-400); display: flex; align-items: baseline; gap: 4px; }
 .cvt__passo em { font-style: normal; }
 .cvt__passo small { font-size: 0.72rem; margin-left: 6px; }
 .cvt__barra { display: block; width: 120px; height: 2px; background: var(--cv-line); }
@@ -75,7 +149,7 @@
 .cvt__abertura { display: flex; flex-direction: column; gap: 10px; padding-bottom: 6px; }
 .cvt__par { display: flex; flex-direction: column; gap: 10px; }
 
-/* falas: o bot fala solto, com um filete; a pessoa responde em bloco sólido */
+/* falas: o bot fala solto, com um filete; a pessoa responde em bloco */
 .cvt__bot {
   margin: 0;
   padding: 2px 0 2px 14px;
@@ -102,10 +176,10 @@
   align-self: flex-end;
   max-width: 88%;
   margin: 0;
-  padding: 10px 14px;
-  background: var(--cv-primary);
-  color: var(--cv-primary-contrast);
-  border: 0;
+  padding: 9px 13px;
+  background: var(--cv-eu-bg);
+  color: var(--cv-eu-ink);
+  border: 1px solid var(--cv-eu-borda);
   border-radius: var(--cv-radius);
   font: inherit;
   font-size: 0.98rem;
@@ -115,7 +189,7 @@
   position: relative;
   animation: cvt-sobe 0.22s ease both;
 }
-.cvt__eu:hover:not(:disabled), .cvt__eu:focus-visible { background: var(--cv-primary-hover); outline: 2px solid var(--cv-focus); outline-offset: 2px; }
+.cvt__eu:hover:not(:disabled), .cvt__eu:focus-visible { background: var(--cv-eu-hover); outline: 2px solid var(--cv-focus); outline-offset: 2px; }
 .cvt__eu:disabled { cursor: default; opacity: 0.85; }
 .cvt__eu::after {
   content: attr(data-corrigir);
@@ -142,18 +216,18 @@
   font-size: 0.95rem;
   line-height: 1.3;
   padding: 11px 14px;
-  background: var(--cv-superficie);
-  color: var(--cv-primary);
-  border: 1px solid var(--cv-primary);
+  background: var(--cv-opcao-bg);
+  color: var(--cv-opcao-ink);
+  border: 1px solid var(--cv-opcao-borda);
   border-radius: var(--cv-radius);
   cursor: pointer;
   text-align: left;
-  transition: background 0.12s, color 0.12s;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
 }
-.cvt__opcao:hover, .cvt__opcao:focus-visible { background: var(--cv-primary); color: var(--cv-primary-contrast); outline: none; }
+.cvt__opcao:hover, .cvt__opcao:focus-visible { background: var(--cv-opcao-hover-bg); color: var(--cv-opcao-hover-ink); border-color: var(--cv-opcao-hover-borda); outline: none; }
 .cvt__opcao:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--cv-focus) 60%, transparent); }
 .cvt__opcao--mais { border-style: dashed; color: var(--cv-ink-400); border-color: var(--cv-mais-borda); }
-.cvt__opcao--mais:hover { background: var(--cv-superficie); color: var(--cv-ink); border-color: var(--cv-ink); }
+.cvt__opcao--mais:hover { background: var(--cv-opcao-bg); color: var(--cv-ink); border-color: var(--cv-ink); }
 
 /* entrada de texto */
 .cvt__form { display: flex; flex-direction: column; gap: 10px; padding-left: 14px; }
@@ -165,11 +239,14 @@
   line-height: 1.4;
   border: 1px solid var(--cv-input-borda);
   border-radius: var(--cv-radius);
-  background: var(--cv-superficie);
+  background: var(--cv-superficie-2);
   color: var(--cv-ink);
   resize: vertical;
 }
+.cvt__form input::placeholder, .cvt__form textarea::placeholder { color: var(--cv-ink-400); opacity: 1; }
 .cvt__form input:focus, .cvt__form textarea:focus { outline: 2px solid var(--cv-accent); border-color: transparent; }
+/* no escuro o foco é um filete só (borda + 1 px), pra não somar com o botão de acento */
+.cvt[data-modo="escuro"] .cvt__form input:focus, .cvt[data-modo="escuro"] .cvt__form textarea:focus { outline: 1px solid var(--cv-accent); outline-offset: 0; border-color: var(--cv-accent); }
 .cvt__acoes { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .cvt__enviar {
   display: inline-flex; align-items: center; justify-content: center;
@@ -212,6 +289,7 @@
 }
 .cvg__titulo {
   display: block;
+  font-family: var(--cv-font-mono);
   font-size: 0.72rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -224,10 +302,10 @@
 .cvg--porte .cvg__equipe svg { flex: none; }
 .cvg__rotulo { font-size: 0.85rem; color: var(--cv-ink-700); }
 .cvg__pessoas { display: block; width: 100%; height: auto; }
-.cvg__p { fill: var(--cv-ink-400); opacity: 0; animation: cvg-pop 0.35s ease forwards; }
-.cvg__p--equipe { fill: var(--cv-primary); }
+.cvg__p { fill: var(--cv-glifo); opacity: 0; animation: cvg-pop 0.35s ease forwards; }
+.cvg__p--equipe { fill: var(--cv-glifo-equipe); }
 .cvg__num { margin: 12px 0 0; display: flex; flex-direction: column; gap: 2px; }
-.cvg__num strong { font-family: var(--cv-font-titulo); font-weight: 400; font-size: 1.5rem; line-height: 1.1; color: var(--cv-ink); }
+.cvg__num strong { font-family: var(--cv-font-numero); font-weight: 400; font-size: 1.5rem; line-height: 1.1; color: var(--cv-ink); }
 .cvg__num span { font-size: 0.8rem; color: var(--cv-ink-400); }
 
 /* mapa */
@@ -241,7 +319,7 @@
   background: var(--cv-superficie);
   animation: cvt-sobe 0.3s ease both;
 }
-.cvm__nota { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cv-ink-400); }
+.cvm__nota { font-family: var(--cv-font-mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cv-ink-400); }
 .cvm__texto { font-size: 0.95rem; line-height: 1.35; color: var(--cv-ink); overflow-wrap: anywhere; hyphens: auto; }
 .cvm__no--atual { border-style: dashed; }
 .cvm__no--problema { border-color: var(--cv-primary); border-left-width: 3px; }
@@ -252,11 +330,11 @@
 .cvm__no--passo .cvm__nota { opacity: 0.75; }
 .cvm__liga { position: relative; height: 26px; display: flex; align-items: center; justify-content: center; }
 .cvm__liga::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--cv-line-forte); }
-.cvm__liga span { position: relative; font-size: 0.66rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--cv-ink-400); background: var(--cv-superficie); padding: 0 6px; }
+.cvm__liga span { position: relative; font-family: var(--cv-font-mono); font-size: 0.66rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--cv-ink-400); background: var(--cv-superficie); padding: 0 6px; }
 /* destinos: em coluna (lateral estreita, celular); em linha quando o painel é largo */
 .cvg--mapa { container-type: inline-size; }
 .cvm__grupo { display: flex; flex-direction: column; gap: 6px; }
-.cvm__grupo-nota { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cv-ink-400); text-align: center; }
+.cvm__grupo-nota { font-family: var(--cv-font-mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cv-ink-400); text-align: center; }
 .cvm__destinos { position: relative; display: flex; flex-direction: column; gap: 6px; margin-left: 14px; padding-left: 12px; border-left: 1px solid var(--cv-line-forte); }
 .cvm__destinos .cvm__no { position: relative; min-width: 0; }
 .cvm__destinos .cvm__no::before { content: ""; position: absolute; top: 50%; left: -12px; width: 12px; height: 1px; background: var(--cv-line-forte); }
@@ -281,18 +359,18 @@
   width: 52px; height: 52px;
   display: flex; align-items: center; justify-content: center;
   border: 1px solid var(--cv-line);
-  background: #fff;
+  background: var(--cv-logo-caixa);
   overflow: hidden;
 }
 .cve__logo img { width: 40px; height: 40px; object-fit: contain; }
 .cve__inicial { font-family: var(--cv-font-titulo); font-size: 1.6rem; color: var(--cv-primary); }
 .cve__ident { display: flex; flex-direction: column; min-width: 0; }
 .cve__nome { font-family: var(--cv-font-titulo); font-weight: 400; font-size: 1.35rem; line-height: 1.15; color: var(--cv-ink); }
-.cve__site { font-size: 0.82rem; color: var(--cv-ink-400); text-decoration: none; }
+.cve__site { font-family: var(--cv-font-mono); font-size: 0.82rem; color: var(--cv-ink-400); text-decoration: none; }
 .cve__site:hover { text-decoration: underline; }
 .cve__desc { margin: 12px 0 0; font-size: 0.88rem; line-height: 1.45; color: var(--cv-ink-700); }
 .cve__dados { margin: 12px 0 0; padding: 10px 0 0; border-top: 1px solid var(--cv-line); display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px 16px; }
-.cve__dado dt { font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cv-ink-400); }
+.cve__dado dt { font-family: var(--cv-font-mono); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cv-ink-400); }
 .cve__dado dd { margin: 1px 0 0; font-size: 0.88rem; color: var(--cv-ink); }
 .cve__redes { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; }
 .cve__redes a { font-size: 0.8rem; color: var(--cv-primary); text-decoration: none; border-bottom: 1px solid var(--cv-line-forte); }
@@ -304,8 +382,21 @@
 .cvr__sub { margin: 4px 0 0; font-size: 0.78rem; color: var(--cv-ink-400); }
 .cvr__lista { margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; }
 .cvr__linha { padding: 9px 0; border-top: 1px solid var(--cv-line); animation: cvt-sobe 0.25s ease both; }
-.cvr__linha dt { font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cv-ink-400); }
+.cvr__linha dt { font-family: var(--cv-font-mono); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cv-ink-400); }
 .cvr__linha dd { margin: 2px 0 0; font-size: 0.92rem; color: var(--cv-ink); line-height: 1.35; }
+
+/* --------------------------------------------------------------------------
+   modo escuro: ajustes de desenho que não são cor (o que é cor está nos tokens)
+   -------------------------------------------------------------------------- */
+.cvt[data-modo="escuro"] .cvt__topo { background: color-mix(in srgb, var(--cv-bg) 86%, transparent); }
+.cvt[data-modo="escuro"] .cvt__quem { font-weight: 500; letter-spacing: 0.1em; font-size: 0.78rem; }
+.cvt[data-modo="escuro"] .cvt__barra { background: var(--cv-line-forte); }
+.cvt[data-modo="escuro"] .cvt__passo { font-size: 0.78rem; }
+.cvt[data-modo="escuro"] .cvg__num strong { font-weight: 500; letter-spacing: -0.01em; }
+.cvt[data-modo="escuro"] .cvm__no--atual { background: transparent; }
+/* no escuro o problema se marca só pelo filete esquerdo (acento com parcimônia) */
+.cvt[data-modo="escuro"] .cvm__no--problema { border-color: var(--cv-line-forte); border-left-color: var(--cv-primary); }
+.cvt[data-modo="escuro"] .cve__redes a { border-bottom-color: color-mix(in srgb, var(--cv-primary) 40%, transparent); }
 
 @keyframes cvt-sobe { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes cvt-pisca { 0%, 80%, 100% { opacity: 0.25; } 40% { opacity: 1; } }

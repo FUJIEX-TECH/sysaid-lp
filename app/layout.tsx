@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Figtree, Besley } from "next/font/google";
+import { Figtree, Besley, IBM_Plex_Mono } from "next/font/google";
 import GlobalRuntime from "@/components/GlobalRuntime";
 import "./globals.css";
 
@@ -14,6 +14,15 @@ const besley = Besley({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   variable: "--font-besley",
+  display: "swap",
+});
+
+// mono pros rótulos e dados do Qualifica (tema escuro, 11/11/2026); o arquivo
+// só baixa onde algum elemento usa --font-mono
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-plex-mono",
   display: "swap",
 });
 
@@ -83,7 +92,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-BR" className={`${figtree.variable} ${besley.variable}`}>
+    <html lang="pt-BR" className={`${figtree.variable} ${besley.variable} ${plexMono.variable}`}>
       <head>
         <script
           type="application/ld+json"
