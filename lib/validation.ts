@@ -68,6 +68,8 @@ export const partialLeadSchema = z.object({
 
   form: FORM_IDS.optional().or(z.literal("")),
   website: z.string().max(512).optional(), // honeypot
+  // Qualifica (11/11/2026): situação e implicação contadas antes do e-mail
+  notes: z.string().max(2000).optional().or(z.literal("")),
 });
 
 export type PartialLeadInput = z.infer<typeof partialLeadSchema>;

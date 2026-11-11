@@ -96,6 +96,9 @@ export type EmpresaConfig = {
   endpoint: string; // POST {dominio} → Empresa
   campoEmail: string; // etapa cujo valor é o e-mail
   timeoutMs: number;
+  // segura a pergunta seguinte ao e-mail (mostrando "digitando") até a empresa
+  // chegar, no máximo isto; assim dá pra confirmar nome e empresa de uma vez
+  esperaMs?: number;
 };
 
 // --------------------------------------------------------------------------
@@ -195,6 +198,9 @@ export type EtapaConfig = {
   input?: "email" | "text" | "tel" | "textarea";
   autoComplete?: string;
   placeholder?: Texto;
+  // respostas rápidas (chips) numa etapa de texto: tocar responde com o `valor`
+  // do chip, sem validação; a pessoa também pode escrever do jeito dela
+  atalhos?: Opcoes;
   validar?: Validacao[];
   normalizar?: "minusculas";
   mascara?: "telefone_br";
@@ -212,11 +218,16 @@ export type EtapaConfig = {
   // `seIgual`: só usa o gerado se a resposta do campo for igual ao dado do Jev
   // (ex.: a pergunta gerada pra dor "sla" não serve se a pessoa escolheu "custo")
   gerado?: { id: string; texto?: string; opcoes?: string; seIgual?: { campo: string; dado: string } };
-  // efeitos colaterais de uma resposta: "corrigir" na coerência refaz o porte;
-  // "é isso" no palpite grava noutro campo um dado decidido pelo Jev
+  // efeitos colaterais de uma resposta (todos os que casam com o valor valem):
+  // "corrigir" na coerência refaz o porte; "é isso" no palpite grava noutro
+  // campo um dado decidido pelo Jev; um chip grava um valor fixo noutro campo
+  // (ex.: a situação por trás da frase); "sim" na confirmação copia uma
+  // variável (nome sugerido, empresa lida) pra resposta
   aoResponder?: (
     | { valor: string; refazerDesde: string }
     | { valor: string; definir: { campo: string; deGerado: { id: string; dado: string } } }
+    | { valor: string; definir: { campo: string; valor: string } }
+    | { valor: string; definir: { campo: string; deVariavel: string } }
   )[];
 };
 
@@ -425,6 +436,15 @@ export type ConfigConversa = {
   // claro (padrão) ou escuro: cada modo tem o próprio padrão neutro no CSS do
   // núcleo (ui/tela.css, ui/conversa.css); `tema` sobrescreve por cima
   modo?: "claro" | "escuro";
+  // "editorial" (padrão): fala do bot com filete, abertura com título grande,
+  // botão de enviar ao lado do campo. "chat": balões, abertura em balões curtos
+  // que entram em sequência com "digitando" entre eles, botão de enviar dentro
+  // do campo, opções como chips, erro de validação como fala do bot. As formas
+  // (raio do balão, do campo, do chip, do cartão; fundo do balão) são tokens
+  // --cv-radius-* e --cv-bot-* no tema
+  estilo?: "editorial" | "chat";
+  // intervalo entre os balões da abertura no estilo chat (padrão 650 ms)
+  aberturaMs?: number;
   // variáveis CSS --cv-* (ver ui/tela.css: cores, fontes, textura, bolha da pessoa, opções)
   tema?: Record<string, string>;
   totalPassos: number;

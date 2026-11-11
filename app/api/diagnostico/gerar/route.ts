@@ -7,7 +7,9 @@ import { DORES_JEV, JEV_SYSAID_GERAR, LLM_SYSAID, PALPITE_PROMPT, SAIDA_PALPITE,
 export const runtime = "nodejs";
 
 // Diagnóstico ITSM, parte 2 (30/10/2026): geração "palpite" chamada pelo chat
-// ENQUANTO a pessoa digita a dor (lib/conversa-core/ui, config.geracoes).
+// ENQUANTO a pessoa digita (lib/conversa-core/ui, config.geracoes). Desde
+// 11/11/2026 o texto é a SITUAÇÃO (SPIN-S, `situacao_texto`, chip ou livre) e o
+// "palpite" é a IMPLICAÇÃO (SPIN-I): o que aquilo custa no dia a dia.
 // Jev decide a dor a partir do texto (800 ms); a LLM (Haiku) escreve o palpite,
 // a pergunta de aprofundamento e 3 opções. Jev fora = sem geração (o chat segue
 // com a lista de dores); LLM fora = sem geração (pergunta fixa da config).
@@ -39,8 +41,8 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) return NextResponse.json({ ok: false, error: "Dados inválidos" }, { status: 422 });
 
   const { sessao, respostas, origem } = parsed.data;
-  const texto = (respostas.dor_texto ?? "").trim();
-  if (texto.length < 15) return NextResponse.json({ ok: false, error: "texto curto" }, { status: 422 });
+  const texto = (respostas.situacao_texto ?? "").trim();
+  if (texto.length < 10) return NextResponse.json({ ok: false, error: "texto curto" }, { status: 422 });
   const t0 = Date.now();
 
   // 1) Jev decide a dor
@@ -89,8 +91,8 @@ export async function POST(req: NextRequest) {
   const gerado: Gerado = {
     id: "palpite",
     // só a entrada: a dor é saída (dados); quem precisa dela igual à resposta usa `seIgual`
-    para: { dor_texto: texto },
-    paraPrefixo: ["dor_texto"],
+    para: { situacao_texto: texto },
+    paraPrefixo: ["situacao_texto"],
     textos: trava.pergunta ? { palpite: v.palpite.trim(), pergunta: semHoje(v.pergunta) } : { palpite: v.palpite.trim() },
     listas: trava.pergunta ? { opcoes } : undefined,
     dados: { dor },

@@ -30,6 +30,7 @@ export type EtapaResolvida = {
   etapa: EtapaConfig;
   texto: string;
   opcoes: Opcao[];
+  atalhos: Opcao[]; // chips de resposta rápida numa etapa de texto
   placeholder: string;
   prefill: string;
 };
@@ -130,15 +131,27 @@ export function criarMotor(config: ConfigConversa) {
     return novo;
   }
 
-  // grava a resposta e aplica os efeitos declarados: "corrigir" refaz o porte;
-  // "é isso" no palpite copia pra outro campo um dado decidido pelo Jev
-  function responder(respostas: Respostas, etapa: EtapaConfig, valor: string, gerados?: Contexto["gerados"]): Respostas {
-    const efeito = etapa.aoResponder?.find((a) => a.valor === valor);
-    if (efeito && "refazerDesde" in efeito) return refazerDesde(respostas, efeito.refazerDesde);
+  // grava a resposta e aplica os efeitos declarados (todos os que casam com o
+  // valor): "corrigir" refaz o porte; "é isso" no palpite copia pra outro campo
+  // um dado decidido pelo Jev; um chip grava um valor fixo; "sim" na confirmação
+  // copia uma variável (precisa do `ctx`, pra resolver nome sugerido, empresa lida)
+  function responder(respostas: Respostas, etapa: EtapaConfig, valor: string, gerados?: Contexto["gerados"], ctx?: Contexto): Respostas {
+    const efeitos = etapa.aoResponder?.filter((a) => a.valor === valor) ?? [];
+    const refazer = efeitos.find((a) => "refazerDesde" in a);
+    if (refazer && "refazerDesde" in refazer) return refazerDesde(respostas, refazer.refazerDesde);
     const novo: Respostas = { ...respostas, [etapa.id]: valor };
-    if (efeito && "definir" in efeito) {
-      const dado = gerados?.[efeito.definir.deGerado.id]?.dados?.[efeito.definir.deGerado.dado];
-      if (dado) novo[efeito.definir.campo] = dado;
+    for (const efeito of efeitos) {
+      if (!("definir" in efeito)) continue;
+      const d = efeito.definir;
+      if ("deGerado" in d) {
+        const dado = gerados?.[d.deGerado.id]?.dados?.[d.deGerado.dado];
+        if (dado) novo[d.campo] = dado;
+      } else if ("valor" in d) {
+        novo[d.campo] = d.valor;
+      } else if ("deVariavel" in d && ctx) {
+        const v = variavel({ ...ctx, respostas: novo, gerados: gerados ?? ctx.gerados }, d.deVariavel).trim();
+        if (v) novo[d.campo] = v;
+      }
     }
     return novo;
   }
@@ -189,6 +202,7 @@ export function criarMotor(config: ConfigConversa) {
       etapa: e,
       texto: gerado.texto ?? texto(variante?.texto ?? e.texto, ctx),
       opcoes,
+      atalhos: e.tipo === "texto" ? opcoesDe(e.atalhos, ctx) : [],
       placeholder: texto(e.placeholder, ctx),
       prefill: e.prefill ? variavel(ctx, e.prefill) : "",
     };
@@ -201,7 +215,9 @@ export function criarMotor(config: ConfigConversa) {
     if (e.tipo === "texto") {
       const v = valor.trim();
       if (!v && e.pular) return e.pular.rotulo;
-      return v;
+      // respondeu por um chip: mostra o rótulo do chip
+      const chip = e.atalhos ? opcoesDe(e.atalhos, ctx).find((o) => o.valor === v) : undefined;
+      return chip?.rotulo ?? v;
     }
     const opcao = resolver(e, ctx).opcoes.find((o) => o.valor === valor);
     return opcao?.rotulo ?? valor;

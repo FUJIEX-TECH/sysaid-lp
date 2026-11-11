@@ -13,11 +13,16 @@ import type { Motor } from "../motor";
 
 // ==========================================================================
 // conversa-core — v2: a tela cheia. A conversa é a página: cabeçalho fino com
-// progresso, a coluna da conversa rola com a janela, a coluna lateral (desktop)
-// guarda o resumo que se escreve sozinho e os painéis "laterais" (ex.: o mapa
-// que cresce a cada resposta). No celular tudo vira uma coluna e os painéis
-// entram no fluxo depois da etapa que os dispara. Gráficos são gerados por
-// código a partir das respostas (Porte, Mapa, Empresa); textos vêm da config.
+// logo/presença/progresso, a coluna da conversa rola com a janela, a coluna
+// lateral (desktop) guarda o resumo que se escreve sozinho e os painéis
+// "laterais" (ex.: o mapa que cresce a cada resposta). No celular tudo vira
+// uma coluna e os painéis entram no fluxo depois da etapa que os dispara.
+// Gráficos são gerados por código a partir das respostas (Porte, Mapa,
+// Empresa); textos vêm da config.
+// Estilo (config.estilo): "editorial" = fala com filete e título grande na
+// abertura; "chat" = balões, abertura em balões curtos que entram em
+// sequência, chips de resposta rápida, botão de enviar dentro do campo e o
+// erro de validação como fala do bot. Formas pelos tokens --cv-radius-*.
 // ==========================================================================
 
 type Props = {
@@ -62,22 +67,45 @@ function dadosPorte(config: ConfigConversa, ctx: Contexto, motor: Motor) {
   };
 }
 
+// seta pra cima do botão de enviar dentro do campo (estilo chat)
+function IconeEnviar() {
+  return (
+    <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false">
+      <path d="M10 16V4.5M10 4.5 5.5 9M10 4.5 14.5 9" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export default function ConversaTela({ config, persistencia, onEvento, textos }: Props) {
   const c = useConversa({ config, persistencia, onEvento });
   const { motor, ctx, respostas, respondidas, atual, atualResolvida, encerramento, digitando, versao, texto, erro, fim, maisOpcoes, setMaisOpcoes, passoAtual, confirmando, hpRef } = c;
   const largo = useLargo();
   const fluxoRef = useRef<HTMLDivElement>(null);
   const fimRef = useRef<HTMLDivElement>(null);
+  const chat = config.estilo === "chat";
+
+  // estilo chat: a abertura entra balão a balão, com "digitando" entre eles e
+  // antes da primeira pergunta (aberturaN vai até total + 1)
+  const totalAbertura = config.abertura.length;
+  const [aberturaN, setAberturaN] = useState(chat ? 0 : totalAbertura + 1);
+  useEffect(() => {
+    if (aberturaN > totalAbertura) return;
+    const reduzido = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const t = setTimeout(() => setAberturaN((n) => n + 1), reduzido ? 0 : config.aberturaMs ?? 650);
+    return () => clearTimeout(t);
+  }, [aberturaN, totalAbertura, config.aberturaMs]);
+  const aberturaPronta = aberturaN > totalAbertura;
+  const aberturaVisivel = config.abertura.slice(0, Math.min(aberturaN, totalAbertura));
 
   // rola até a pergunta nova e foca a entrada
   useEffect(() => {
     if (digitando && fim) return;
     fimRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
-    if (!digitando) {
+    if (!digitando && aberturaPronta) {
       const foco = fluxoRef.current?.querySelector<HTMLElement>("[data-foco]");
       foco?.focus({ preventScroll: true });
     }
-  }, [digitando, versao, erro, fim]);
+  }, [digitando, versao, erro, fim, aberturaN, aberturaPronta]);
 
   const resolvedor = motor.resolvedor(ctx);
   const paineis = (config.paineis ?? []).filter((p) => avaliar(p.quando, ctx, resolvedor));
@@ -145,13 +173,14 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
   const progresso = cab.progresso ?? "contagem-e-barra";
   const comContagem = progresso === "contagem" || progresso === "contagem-e-barra";
   const comBarra = progresso === "barra" || progresso === "contagem-e-barra";
+  const digitandoAgora = (digitando || !aberturaPronta) && !fim;
   const estado = !cab.estado
     ? ""
     : fim === "enviando"
       ? cab.estado.enviando ?? cab.estado.online
       : fim === "encerrado"
         ? cab.estado.encerrado ?? cab.estado.online
-        : digitando
+        : digitandoAgora
           ? cab.estado.digitando
           : cab.estado.online;
   const frase = cab.frase ? motor.texto(cab.frase, ctx) : "";
@@ -163,9 +192,10 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
     "aria-label": motor.texto(config.textos.passoAria, ctx, { passo: passoAtual, total }),
   };
   const larguraBarra = `${fim === "enviando" ? 100 : pct}%`;
+  const rotuloEnviar = confirmando && atual?.confirmarRotulo ? atual.confirmarRotulo : config.textos.enviar ?? "Enviar";
 
   return (
-    <div className="cvt" data-modo={config.modo ?? "claro"} style={config.tema as React.CSSProperties}>
+    <div className="cvt" data-modo={config.modo ?? "claro"} data-estilo={config.estilo ?? "editorial"} style={config.tema as React.CSSProperties}>
       <header className="cvt__topo">
         <div className="cvt__topo-inner">
           <div className="cvt__topo-linha">
@@ -187,7 +217,7 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
                 </div>
               )}
               {estado && (
-                <span className={`cvt__estado${digitando && !fim ? " cvt__estado--digitando" : ""}`} aria-hidden="true">
+                <span className={`cvt__estado${digitandoAgora ? " cvt__estado--digitando" : ""}`} aria-hidden="true">
                   {estado}
                 </span>
               )}
@@ -218,22 +248,24 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
       <div className="cvt__corpo">
         <main className="cvt__fluxo" ref={fluxoRef} role="log" aria-live="polite" aria-relevant="additions" aria-label={config.marca.rotuloRegiao}>
           <div className="cvt__abertura">
-            {config.abertura.map((t, i) => (
-              <p key={`ab${i}`} className={`cvt__bot ${i === 0 ? "cvt__bot--titulo" : ""}`}>
+            {aberturaVisivel.map((t, i) => (
+              <p key={`ab${i}`} className={`cvt__bot ${!chat && i === 0 ? "cvt__bot--titulo" : ""}`}>
                 {motor.texto(t, ctx)}
               </p>
             ))}
           </div>
 
-          {respondidas.map(par)}
+          {aberturaPronta && respondidas.map(par)}
 
-          {digitando && !fim && (
+          {digitandoAgora && (
             <p className="cvt__bot cvt__digitando" aria-label="Digitando">
-              <span /><span /><span />
+              <span />
+              <span />
+              <span />
             </p>
           )}
 
-          {!digitando && atual && atualResolvida && !fim && (
+          {aberturaPronta && !digitando && atual && atualResolvida && !fim && (
             <div className="cvt__par cvt__par--atual" data-etapa={atual.id}>
               <p className="cvt__bot">{atualResolvida.texto}</p>
               {noFluxo(atual.id).map(painel)}
@@ -254,60 +286,96 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
               )}
 
               {atual.tipo === "texto" && (
-                <form
-                  className="cvt__form"
-                  noValidate
-                  onSubmit={(ev) => {
-                    ev.preventDefault();
-                    c.enviarTexto(atual, texto);
-                  }}
-                >
-                  <label className="cvt__sr" htmlFor={`cvt-${atual.id}`}>
-                    {atualResolvida.texto}
-                  </label>
-                  {atual.input === "textarea" ? (
-                    <textarea
-                      id={`cvt-${atual.id}`}
-                      data-foco=""
-                      rows={3}
-                      value={texto}
-                      placeholder={atualResolvida.placeholder || undefined}
-                      onChange={(ev) => c.mudarTexto(atual, ev.target.value)}
-                      onKeyDown={(ev) => {
-                        if (ev.key === "Enter" && !ev.shiftKey) {
-                          ev.preventDefault();
-                          c.enviarTexto(atual, texto);
-                        }
-                      }}
-                    />
-                  ) : (
-                    <input
-                      id={`cvt-${atual.id}`}
-                      data-foco=""
-                      type={atual.input === "email" ? "email" : atual.input === "tel" ? "tel" : "text"}
-                      inputMode={atual.input === "tel" ? "tel" : atual.input === "email" ? "email" : "text"}
-                      autoComplete={atual.autoComplete ?? (atual.input === "email" ? "email" : atual.input === "tel" ? "tel" : "off")}
-                      value={texto}
-                      placeholder={atualResolvida.placeholder || undefined}
-                      onChange={(ev) => c.mudarTexto(atual, ev.target.value)}
-                    />
+                <>
+                  {/* respostas rápidas: chips da etapa, o "confirmar" do prefill e o "pular" (no estilo chat) */}
+                  {(atualResolvida.atalhos.length > 0 || (chat && ((confirmando && !!atual.confirmarRotulo) || !!atual.pular))) && (
+                    <div className="cvt__opcoes cvt__opcoes--atalhos" role="group" aria-label={atualResolvida.texto}>
+                      {chat && confirmando && atual.confirmarRotulo && (
+                        <button type="button" className="cvt__opcao cvt__opcao--confirmar" onClick={() => c.enviarTexto(atual, texto)}>
+                          {atual.confirmarRotulo}
+                        </button>
+                      )}
+                      {atualResolvida.atalhos.map((o) => (
+                        <button key={o.valor} type="button" className="cvt__opcao" onClick={() => c.responder(atual, o.valor)}>
+                          {o.rotulo}
+                        </button>
+                      ))}
+                      {chat && atual.pular && (
+                        <button type="button" className="cvt__opcao cvt__opcao--mais" onClick={() => c.responder(atual, atual.pular!.valor)}>
+                          {atual.pular.rotulo}
+                        </button>
+                      )}
+                    </div>
                   )}
-                  <div className="cvt__acoes">
-                    <button type="submit" className="cvt__enviar">
-                      {confirmando ? atual.confirmarRotulo : config.textos.enviar ?? "Enviar"}
-                    </button>
-                    {atual.pular && (
-                      <button type="button" className="cvt__pular" onClick={() => c.responder(atual, atual.pular!.valor)}>
-                        {atual.pular.rotulo}
-                      </button>
-                    )}
-                  </div>
-                  {erro && (
-                    <p className="cvt__erro" role="alert">
+                  {chat && erro && (
+                    <p className="cvt__bot cvt__bot--aviso" role="alert">
                       {erro}
                     </p>
                   )}
-                </form>
+                  <form
+                    className="cvt__form"
+                    noValidate
+                    onSubmit={(ev) => {
+                      ev.preventDefault();
+                      c.enviarTexto(atual, texto);
+                    }}
+                  >
+                    <label className="cvt__sr" htmlFor={`cvt-${atual.id}`}>
+                      {atualResolvida.texto}
+                    </label>
+                    <div className={`cvt__campo${atual.input === "textarea" ? " cvt__campo--area" : ""}`}>
+                      {atual.input === "textarea" ? (
+                        <textarea
+                          id={`cvt-${atual.id}`}
+                          data-foco=""
+                          rows={3}
+                          value={texto}
+                          placeholder={atualResolvida.placeholder || undefined}
+                          onChange={(ev) => c.mudarTexto(atual, ev.target.value)}
+                          onKeyDown={(ev) => {
+                            if (ev.key === "Enter" && !ev.shiftKey) {
+                              ev.preventDefault();
+                              c.enviarTexto(atual, texto);
+                            }
+                          }}
+                        />
+                      ) : (
+                        <input
+                          id={`cvt-${atual.id}`}
+                          data-foco=""
+                          type={atual.input === "email" ? "email" : atual.input === "tel" ? "tel" : "text"}
+                          inputMode={atual.input === "tel" ? "tel" : atual.input === "email" ? "email" : "text"}
+                          autoComplete={atual.autoComplete ?? (atual.input === "email" ? "email" : atual.input === "tel" ? "tel" : "off")}
+                          value={texto}
+                          placeholder={atualResolvida.placeholder || undefined}
+                          onChange={(ev) => c.mudarTexto(atual, ev.target.value)}
+                        />
+                      )}
+                      {chat && (
+                        <button type="submit" className="cvt__enviar cvt__enviar--icone" aria-label={rotuloEnviar} title={rotuloEnviar}>
+                          <IconeEnviar />
+                        </button>
+                      )}
+                    </div>
+                    {!chat && (
+                      <div className="cvt__acoes">
+                        <button type="submit" className="cvt__enviar">
+                          {rotuloEnviar}
+                        </button>
+                        {atual.pular && (
+                          <button type="button" className="cvt__pular" onClick={() => c.responder(atual, atual.pular!.valor)}>
+                            {atual.pular.rotulo}
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    {!chat && erro && (
+                      <p className="cvt__erro" role="alert">
+                        {erro}
+                      </p>
+                    )}
+                  </form>
+                </>
               )}
             </div>
           )}

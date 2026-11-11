@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     ferramenta_atual: r.ferramenta === "outra" ? r.ferramenta_outra ?? "outra" : r.ferramenta ?? null,
     cliente_tipo: r.cliente_tipo ?? null,
     dor_escolhida: r.dor ?? null,
-    texto_livre_da_dor: r.dor_texto ?? "",
+    texto_livre_da_dor: r.situacao_texto ?? "",
     aprofundamento: r.aprof ?? null,
     pessoas_atendidas: r.usuarios ?? null,
     tecnicos: r.tecnicos ?? null,
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
 
   const rotulo = escolhaDe(rj.respostas, "rotulo", Object.keys(ROTULOS_JEV), 0.5);
   const coerente = noulDe(rj.respostas, "coerente", 0.4);
-  const dorTexto = (r.dor_texto ?? "").trim().length >= 15 ? escolhaDe(rj.respostas, "dor_texto", Object.keys(DORES_JEV), 0.35) : null;
+  const dorTexto = (r.situacao_texto ?? "").trim().length >= 15 ? escolhaDe(rj.respostas, "dor_texto", Object.keys(DORES_JEV), 0.35) : null;
 
   // "fora" e "cliente" são mais específicos que "incoerente": estudante que
   // chuta o porte continua "fora" (rota própria), não vira "fraco" (30/10/2026)

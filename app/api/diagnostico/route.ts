@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
         diag_situacao = ${r.situacao ?? null},
         diag_ferramenta = ${r.ferramenta === "outra" ? r.ferramenta_outra ?? "outra" : r.ferramenta ?? diag.concorrente ?? null},
         diag_dor = ${r.dor ?? null},
-        diag_dor_texto = ${r.dor_texto ?? null},
+        diag_dor_texto = ${r.situacao_texto ?? r.dor_texto ?? null},
         diag_aprof = ${r.aprof ?? null},
         diag_usuarios = ${r.usuarios ?? null},
         diag_papel = ${r.papel ?? null},

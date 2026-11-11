@@ -61,6 +61,7 @@ export async function POST(req: NextRequest) {
     referrer: nullify(d.referrer),
     user_agent: userAgent,
     ip,
+    notes: nullify(d.notes),
   };
 
   try {

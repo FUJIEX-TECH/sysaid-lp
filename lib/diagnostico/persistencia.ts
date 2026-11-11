@@ -32,10 +32,26 @@ function utmDosSinais(s: Contexto["sinais"] | undefined): Record<string, string>
   return out;
 }
 
+// 11/11/2026: o e-mail chega no passo 3 (SPIN). Quando chega, o que a pessoa já
+// contou vai junto no registro parcial, na coluna `notes` (texto; nunca vai pro
+// RD Station, que só recebe o lead completo). Antes do e-mail nada é gravado.
+function notasSpin(r: Respostas, ctx: Contexto): string {
+  const linhas: string[] = [];
+  if (r.situacao_texto) linhas.push(`Situação: ${r.situacao_texto}`);
+  const implicacao = ctx.gerados?.palpite?.textos?.palpite;
+  if (implicacao && r.palpite) linhas.push(`Implicação (chat): ${implicacao}`);
+  if (r.palpite === "sim") linhas.push("Resposta: é isso");
+  if (r.palpite === "mais") linhas.push(`Resposta: tem mais${r.implicacao_mais ? `: ${r.implicacao_mais}` : ""}`);
+  if (r.situacao) linhas.push(`Situação (chip): ${r.situacao}`);
+  if (r.dor) linhas.push(`Dor: ${r.dor}`);
+  return linhas.join("\n").slice(0, 1900);
+}
+
 export function criarPersistenciaLP(): Persistencia {
   let leadId: number | null = null;
   let utm: Record<string, string> | null = null;
   let salvoEmail = "";
+  let salvoIdent = "";
   let salvoContato = "";
   const ensureUtm = () => (utm ??= getUtm());
 
@@ -60,10 +76,19 @@ export function criarPersistenciaLP(): Persistencia {
   }
 
   return {
-    aoResponder(etapaId: string, r: Respostas) {
+    aoResponder(etapaId: string, r: Respostas, ctx: Contexto) {
       if (etapaId === "email" && r.email && r.email !== salvoEmail) {
         salvoEmail = r.email;
-        salvarParcial({ email: r.email });
+        const notes = notasSpin(r, ctx);
+        salvarParcial(notes ? { email: r.email, notes } : { email: r.email });
+      }
+      // nome e empresa confirmados (ou digitados) entram no parcial logo que existem
+      if ((etapaId === "confirma" || etapaId === "nome" || etapaId === "empresa") && r.nome && r.empresa) {
+        const chave = `${r.nome}|${r.empresa}`;
+        if (chave !== salvoIdent) {
+          salvoIdent = chave;
+          salvarParcial({ name: r.nome, company: r.empresa });
+        }
       }
       if (etapaId === "telefone" && r.nome && r.telefone) {
         const chave = `${r.nome}|${r.telefone}`;

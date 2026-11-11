@@ -147,16 +147,17 @@ export function useConversa({ config, persistencia, onEvento }: UseConversaArgs)
   }
 
   // --- empresa pelo domínio (v2) ---------------------------------------------
-  function pedirEmpresaSePrecisar(etapa: EtapaConfig, valor: string) {
+  function pedirEmpresaSePrecisar(etapa: EtapaConfig, valor: string): Promise<Empresa | null> | null {
     const cfg = config.empresa;
-    if (!cfg?.habilitado || etapa.id !== cfg.campoEmail) return;
+    if (!cfg?.habilitado || etapa.id !== cfg.campoEmail) return null;
     const dominio = dominioDe(valor);
-    if (!dominio || dominio === dominioPedido.current) return;
+    if (!dominio || dominio === dominioPedido.current) return null;
     dominioPedido.current = dominio;
     setEmpresa(undefined);
-    pedirEmpresa(cfg, dominio).then((r) => {
-      if (dominioPedido.current !== dominio) return; // a pessoa corrigiu o e-mail
+    return pedirEmpresa(cfg, dominio).then((r) => {
+      if (dominioPedido.current !== dominio) return null; // a pessoa corrigiu o e-mail
       setEmpresa(r);
+      return r;
     });
   }
 
@@ -199,9 +200,19 @@ export function useConversa({ config, persistencia, onEvento }: UseConversaArgs)
         setGerados(geradosNovos);
       }
     }
-    pedirEmpresaSePrecisar(etapa, valor);
-    const novo = motor.responder(respostas, etapa, valor, geradosNovos);
-    const ctxNovo: Contexto = { ...ctx, respostas: novo, gerados: geradosNovos };
+    // v2 (11/11): com `empresa.esperaMs`, segura a próxima pergunta (mostrando
+    // "digitando") até a empresa lida pelo domínio chegar, pra confirmar nome e
+    // empresa de uma vez; passou o tempo, segue e a empresa entra quando vier
+    let empresaNova: Empresa | null | undefined = empresa;
+    const pedido = pedirEmpresaSePrecisar(etapa, valor);
+    if (pedido && config.empresa?.esperaMs) {
+      setDigitando(true);
+      const r = await comTimeout<Empresa | null | undefined>(pedido, config.empresa.esperaMs, undefined);
+      if (r !== undefined) empresaNova = r;
+    }
+    const ctxBase = motor.contexto(sinais, respostas, undefined, geradosNovos, empresaNova ?? null);
+    const novo = motor.responder(respostas, etapa, valor, geradosNovos, ctxBase);
+    const ctxNovo: Contexto = { ...ctxBase, respostas: novo };
     const proxima = motor.proximaEtapa(ctxNovo);
     setRespostas(novo);
     setTexto(proxima?.prefill ? motor.variavel(ctxNovo, proxima.prefill) : "");

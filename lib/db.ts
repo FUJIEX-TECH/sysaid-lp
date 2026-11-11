@@ -63,6 +63,9 @@ export type PartialLeadFields = {
   referrer?: string | null;
   user_agent?: string | null;
   ip?: string | null;
+  // Qualifica (11/11/2026): o que a pessoa contou antes do e-mail (situação,
+  // implicação) entra no registro parcial aqui; nunca vai pro RD Station
+  notes?: string | null;
 };
 
 export async function insertLead(lead: NewLead): Promise<number> {
@@ -90,13 +93,13 @@ export async function insertPartialLead(fields: PartialLeadFields): Promise<numb
     INSERT INTO leads (
       email, name, phone, company,
       utm_source, utm_medium, utm_campaign, utm_content, utm_term,
-      gclid, page_url, referrer, user_agent, ip, completion
+      gclid, page_url, referrer, user_agent, ip, notes, completion
     ) VALUES (
       ${fields.email ?? null}, ${fields.name ?? null}, ${fields.phone ?? null}, ${fields.company ?? null},
       ${fields.utm_source ?? null}, ${fields.utm_medium ?? null}, ${fields.utm_campaign ?? null},
       ${fields.utm_content ?? null}, ${fields.utm_term ?? null},
       ${fields.gclid ?? null}, ${fields.page_url ?? null}, ${fields.referrer ?? null},
-      ${fields.user_agent ?? null}, ${fields.ip ?? null}, 'partial'
+      ${fields.user_agent ?? null}, ${fields.ip ?? null}, ${fields.notes ?? null}, 'partial'
     )
     RETURNING id
   `;
@@ -112,7 +115,8 @@ export async function updatePartialLead(id: number, fields: PartialLeadFields): 
       email   = COALESCE(${fields.email ?? null}, email),
       name    = COALESCE(${fields.name ?? null}, name),
       phone   = COALESCE(${fields.phone ?? null}, phone),
-      company = COALESCE(${fields.company ?? null}, company)
+      company = COALESCE(${fields.company ?? null}, company),
+      notes   = COALESCE(${fields.notes ?? null}, notes)
     WHERE id = ${id} AND completion = 'partial'
     RETURNING id
   `;

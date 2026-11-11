@@ -88,7 +88,7 @@ export function perguntasDor(): Record<string, PerguntaJev> {
 // preço, sem promessa de produto (decisão 4 do plano: comparativa é frase fixa).
 // --------------------------------------------------------------------------
 export const SAIDA_PALPITE = z.object({
-  palpite: z.string().describe("1 frase de até 20 palavras (máx. 140 caracteres) que devolve o problema com as palavras da pessoa e termina com 'É isso?'"),
+  palpite: z.string().describe("1 ou 2 frases, até 30 palavras (máx. 170 caracteres): a consequência provável do que a pessoa contou (o que isso custa no dia a dia), com as palavras dela, terminando com 'É isso?'"),
   pergunta: z.string().describe("1 pergunta só, curta (até 12 palavras, máx. 90 caracteres), sobre como esse problema acontece no dia a dia"),
   opcoes: z.array(z.string()).describe("exatamente 3 respostas diretas à pergunta, na voz da pessoa, até 40 caracteres cada, diferentes entre si, sem 'outro'"),
 });
@@ -98,17 +98,23 @@ export const SAIDA_PALPITE = z.object({
 // 1ª versão: tamanho em palavras, uma pergunta só, opções que respondem a
 // pergunta, nada de "não é X, e sim Y" inventado, regra pra texto grosseiro ou
 // só de preço, e o público (gestor de TI) explícito.
-export const SYSTEM_PALPITE = `Você escreve as falas de um chat de diagnóstico de atendimento de TI (service desk) num site brasileiro de software B2B. Quem lê é gestor, coordenador ou analista de TI de empresa média ou grande. Português do Brasil, tom de colega experiente: direto, cordial, profissional. Frases curtas. Sem exclamação, sem emoji, sem travessão, sem jargão de IA ou de marketing.
+// 11/11/2026 (Severino, pedido do Fernando; copy a revisar pelo sysaid-growth):
+// o chat virou SPIN. A pessoa conta a SITUAÇÃO (como o atendimento funciona
+// hoje) e o "palpite" passou a ser a IMPLICAÇÃO: o que aquilo provavelmente
+// custa no dia a dia, terminando com "É isso?" (o chat oferece "É isso" e
+// "Tem mais"). A categoria (dor) continua vindo do Jev; a LLM só escreve.
+export const SYSTEM_PALPITE = `Você escreve as falas de um chat de atendimento de TI (service desk) num site brasileiro de software B2B. Quem lê é gestor, coordenador ou analista de TI de empresa média ou grande. Português do Brasil, tom de colega experiente: direto, cordial, profissional. Frases curtas. Sem exclamação, sem emoji, sem travessão, sem jargão de IA ou de marketing.
 
-A categoria do problema já vem decidida por outra camada. Você não classifica, não vende e não aconselha: só escreve três coisas.
+A pessoa contou como o atendimento de TI funciona hoje (a situação). A categoria do problema já vem decidida por outra camada. Você não classifica, não vende e não aconselha: só escreve três coisas.
 
-1. "palpite": uma frase de até 20 palavras que devolve o problema com as palavras da pessoa, reformulado (não copie o texto), terminando com "É isso?". Comece com "Parece que". Use só o que a pessoa escreveu: não acrescente causa, consequência ou detalhe que ela não disse. Só use a forma "não é X, e sim Y" se o próprio texto fizer esse contraste.
+1. "palpite": a implicação. Em 1 ou 2 frases (até 30 palavras no total), arrisque a consequência mais provável daquela situação no dia a dia: o que ela custa em chamado perdido, prazo (SLA) sem controle, retrabalho, hora de técnico, visibilidade pro gestor ou custo. Use as palavras da pessoa e ligue a consequência ao que ela disse ("se X, então Y"). Comece com "Se", "Então" ou "Imagino que". Termine SEMPRE com "É isso?". Uma consequência só, a mais provável; não liste várias. Não invente número, prazo nem detalhe que ela não deu.
 2. "pergunta": UMA pergunta curta (até 12 palavras), com um assunto só, sobre como o problema acontece hoje: quem percebe, por onde chega, com que frequência ou o que é feito à mão. Escolha um desses ângulos, nunca dois (errado: "Quem recebe e por qual canal chega?"). Não comece com "Hoje".
 3. "opcoes": exatamente 3 respostas que respondem essa pergunta de forma direta, escritas como a pessoa responderia (ex.: "Só quando o usuário reclama"), até 40 caracteres cada, diferentes entre si e cobrindo os casos mais comuns.
 
-Exemplos de palpite bom:
-- Texto "o SLA estoura e só fico sabendo quando o diretor reclama" → "Parece que o SLA estoura sem aviso e você só descobre pela cobrança do diretor. É isso?"
-- Texto "monto os indicadores no Excel todo mês" → "Parece que os indicadores do mês saem à mão, montados no Excel. É isso?"
+Exemplos de implicação boa:
+- Situação "os chamados chegam por e-mail e WhatsApp e alguém copia pra planilha depois" → "Se o chamado passa por WhatsApp e planilha, imagino que parte se perde no caminho e ninguém sabe o prazo de cada um. É isso?"
+- Situação "monto os indicadores no Excel todo mês" → "Então o gestor só enxerga o atendimento no fim do mês, e quem monta o Excel perde horas nisso. É isso?"
+- Situação "usamos uma ferramenta, mas o time abre chamado por fora" → "Se o time abre por fora, imagino que a fila oficial não mostra o volume real e o SLA fica sem controle. É isso?"
 
 Regras fixas:
 - Nunca cite nome de produto, marca, empresa ou concorrente, nem a ferramenta que a pessoa usa.
@@ -135,7 +141,7 @@ const limpo = (t: string) => !PROIBIDOS.some((p) => t.toLowerCase().includes(p))
 const DUAS_PERGUNTAS = /,?\s(e|ou)\s+(como|qual|quais|quem|por qual|por onde|onde|quando|quantos?|quantas?|com que)\b/i;
 
 export function travaGerado(v: { palpite: string; pergunta: string; opcoes: string[] }): { palpite: boolean; pergunta: boolean } {
-  const palpite = limpo(v.palpite) && v.palpite.length <= 180 && /é isso\?$/i.test(v.palpite.trim());
+  const palpite = limpo(v.palpite) && v.palpite.length <= 200 && /é isso\?$/i.test(v.palpite.trim());
   const pergunta =
     limpo([v.pergunta, ...v.opcoes].join(" ")) &&
     v.pergunta.length <= 110 &&
