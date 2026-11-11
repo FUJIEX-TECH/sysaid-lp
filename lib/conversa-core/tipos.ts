@@ -380,9 +380,20 @@ export type MapaConfig = {
   passo?: NoMapaConfig;
   // rótulo das ligações
   arestas?: { problema?: string; causa?: string; destino?: string; passo?: string };
+  // v2 (11/11/2026): o mapa "em montagem". Com `vazios`, o nó que ainda não tem
+  // resposta aparece tracejado com este rótulo, desde o começo; `progresso` dá o
+  // texto do cartão enquanto monta e quando completa (a barra é do núcleo)
+  vazios?: { atual?: string; problema?: string; causa?: string; destino?: string; passo?: string };
+  progresso?: { montando: Texto; pronto: Texto };
 };
-export type NoMapa = { id: string; tipo: "atual" | "problema" | "causa" | "destino" | "passo"; texto: string; nota?: string };
-export type Mapa = { nos: NoMapa[]; arestas: { de: string; para: string; rotulo?: string }[] };
+export type NoMapa = { id: string; tipo: "atual" | "problema" | "causa" | "destino" | "passo"; texto: string; nota?: string; vazio?: boolean };
+export type Mapa = {
+  nos: NoMapa[];
+  arestas: { de: string; para: string; rotulo?: string }[];
+  // quantos lugares do mapa já têm resposta (atual, problema, causa, o que resolve, passo)
+  progresso: { cheios: number; total: number };
+  completo: boolean;
+};
 
 export type PorteConfig = {
   pessoas: { campo: string; valores: Record<string, number>; rotulo: Texto };

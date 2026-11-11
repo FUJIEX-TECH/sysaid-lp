@@ -112,6 +112,18 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
   const lateral = largo ? paineis.filter((p) => p.lugar === "lateral") : [];
   const noFluxo = (etapaId: string) => paineis.filter((p) => p.apos === etapaId && (p.lugar !== "lateral" || !largo));
 
+  // mapa em montagem (11/11/2026): textos "montando"/"pronto" da config; no celular
+  // (sem lateral) um selo fixo embaixo mostra a barra e abre o mapa numa folha,
+  // até o cartão entrar na própria conversa (etapa `apos` do painel)
+  const progressoMapa = config.mapa?.progresso ? { montando: motor.texto(config.mapa.progresso.montando, ctx), pronto: motor.texto(config.mapa.progresso.pronto, ctx) } : undefined;
+  const painelMapaLateral = paineis.find((p) => p.tipo === "mapa" && p.lugar === "lateral");
+  const mapaInline = !!painelMapaLateral?.apos && (atual?.id === painelMapaLateral.apos || respostas[painelMapaLateral.apos] !== undefined);
+  const mapaSelo = !largo && painelMapaLateral && !mapaInline && !fim && aberturaPronta ? motor.mapaVisual(ctx) : null;
+  const [seloAberto, setSeloAberto] = useState(false);
+  useEffect(() => {
+    setSeloAberto(false);
+  }, [versao]);
+
   function painel(p: PainelConfig) {
     const titulo = motor.texto(p.titulo, ctx) || undefined;
     if (p.tipo === "porte") {
@@ -120,7 +132,7 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
     }
     if (p.tipo === "mapa") {
       const m = motor.mapaVisual(ctx);
-      return m ? <Mapa key={p.id} mapa={m} titulo={titulo} /> : null;
+      return m ? <Mapa key={p.id} mapa={m} titulo={titulo} progresso={progressoMapa} /> : null;
     }
     if (p.tipo === "empresa") {
       const e = ctx.empresa;
@@ -195,7 +207,7 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
   const rotuloEnviar = confirmando && atual?.confirmarRotulo ? atual.confirmarRotulo : config.textos.enviar ?? "Enviar";
 
   return (
-    <div className="cvt" data-modo={config.modo ?? "claro"} data-estilo={config.estilo ?? "editorial"} style={config.tema as React.CSSProperties}>
+    <div className={`cvt${mapaSelo ? " cvt--com-selo" : ""}`} data-modo={config.modo ?? "claro"} data-estilo={config.estilo ?? "editorial"} style={config.tema as React.CSSProperties}>
       <header className="cvt__topo">
         <div className="cvt__topo-inner">
           <div className="cvt__topo-linha">
@@ -416,6 +428,25 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
           </aside>
         )}
       </div>
+
+      {mapaSelo && painelMapaLateral && (
+        <div className="cvt__selo">
+          {seloAberto && (
+            <div className="cvt__folha" id="cvt-folha-mapa">
+              <Mapa mapa={mapaSelo} titulo={motor.texto(painelMapaLateral.titulo, ctx) || undefined} progresso={progressoMapa} />
+            </div>
+          )}
+          <button type="button" className="cvt__selo-botao" aria-expanded={seloAberto} aria-controls="cvt-folha-mapa" onClick={() => setSeloAberto((v) => !v)}>
+            <span className="cvm__estado">{progressoMapa ? (mapaSelo.completo ? progressoMapa.pronto : progressoMapa.montando) : motor.texto(painelMapaLateral.titulo, ctx)}</span>
+            <span className="cvm__barra" aria-hidden="true">
+              <i style={{ width: `${mapaSelo.progresso.total ? Math.round((mapaSelo.progresso.cheios / mapaSelo.progresso.total) * 100) : 0}%` }} />
+            </span>
+            <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" focusable="false">
+              <path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

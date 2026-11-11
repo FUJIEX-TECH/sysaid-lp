@@ -337,7 +337,8 @@ export const configSysaid: ConfigConversa = {
         { quando: { variavel: "intencao", igual: "preco" }, texto: "Primeiro o que a sua TI precisa, depois o preço." },
       ],
     },
-    progresso: "barra",
+    // a barra fina do cabeçalho saiu em 11/11 (rodada 4): o progresso agora é o do mapa, na lateral e no selo do celular
+    progresso: "nenhum",
   },
   modo: MODO_SYSAID,
   // visual de chat (Fernando, 11/11/2026): balões, abertura em balões curtos em sequência, chips, botão dentro do campo
@@ -802,7 +803,8 @@ export const configSysaid: ConfigConversa = {
     { id: "empresa_confirma", tipo: "empresa", apos: "confirma", quando: { empresaEncontrada: true } },
     { id: "empresa", tipo: "empresa", apos: "empresa", quando: { todas: [{ empresaEncontrada: true }, { nao: { campo: "confirma", definido: true } }] } },
     { id: "porte", tipo: "porte", apos: "usuarios" },
-    { id: "mapa", tipo: "mapa", lugar: "lateral", apos: "mapa", quando: { campo: "dor", definido: true }, titulo: "O mapa do seu caso" },
+    // mapa desde o começo na lateral (em montagem); no celular, selo fixo embaixo que abre o mapa, e o cartão entra na conversa no passo "mapa"
+    { id: "mapa", tipo: "mapa", lugar: "lateral", apos: "mapa", titulo: "O mapa do seu caso" },
   ],
 
   porte: {
@@ -815,8 +817,15 @@ export const configSysaid: ConfigConversa = {
     },
   },
 
+  // 11/11/2026 (rodada 4 do Fernando): o mapa aparece desde o começo "em montagem":
+  // os lugares sem resposta entram tracejados com os rótulos de `vazios`, o
+  // cartão mostra "Montando o seu mapa" + barra e, completo, "Mapa pronto".
+  // O "onde você está" só enche depois da situação (antes, o mapa está todo vazio).
   mapa: {
+    vazios: { atual: "Onde você está", problema: "O problema", causa: "Como acontece hoje", destino: "O que resolve", passo: "Primeiro passo" },
+    progresso: { montando: "Montando o seu mapa", pronto: "Mapa pronto" },
     atual: {
+      quando: { campo: "situacao_texto", definido: true },
       texto: "{{atual_mapa}}",
       nota: { padrao: "onde você está", casos: [{ quando: { campo: "usuarios", definido: true }, texto: "onde você está · {{resumo.usuarios}}" }] },
     },

@@ -353,6 +353,22 @@ a.cvt__logo:focus-visible { outline: 2px solid var(--cv-focus); outline-offset: 
 .cvm__liga { position: relative; height: 26px; display: flex; align-items: center; justify-content: center; }
 .cvm__liga::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--cv-line-forte); }
 .cvm__liga span { position: relative; font-family: var(--cv-font-mono); font-size: 0.66rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--cv-ink-400); background: var(--cv-superficie); padding: 0 6px; }
+/* mapa em montagem (11/11/2026): lugar vazio tracejado; nó cheio entra aceso; a linha até ele "desce" e conecta */
+.cvm__progresso { display: flex; flex-direction: column; gap: 6px; margin: -4px 0 14px; }
+.cvm__estado { font-family: var(--cv-font-mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cv-ink-400); }
+.cvg--mapa-pronto .cvm__estado { color: var(--cv-primary); }
+.cvm__barra { display: block; height: 2px; background: var(--cv-line-forte); }
+.cvm__barra i { display: block; height: 100%; background: var(--cv-primary); transition: width 0.5s ease; }
+.cvm__no--vazio { border-style: dashed; border-color: var(--cv-line-forte); background: transparent; }
+.cvm__no--vazio .cvm__texto { color: var(--cv-ink-400); font-size: 0.88rem; }
+.cvm__no--cheio { animation: cvt-sobe 0.3s ease both, cvm-acende 0.8s ease-out 0.1s both; }
+.cvm__liga--vazia::before { background: none; width: 0; border-left: 1px dashed var(--cv-line-forte); }
+.cvm__liga--vazia span { opacity: 0.7; }
+.cvm__liga--ligada::before { background: var(--cv-primary); transform-origin: top; animation: cvm-desce 0.35s ease both; }
+.cvm__destinos--vazios { border-left-style: dashed; }
+.cvm__destinos--vazios .cvm__no::before { border-top: 1px dashed var(--cv-line-forte); background: none; height: 0; }
+@keyframes cvm-acende { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--cv-primary) 55%, transparent); } 100% { box-shadow: 0 0 0 9px transparent; } }
+@keyframes cvm-desce { from { transform: scaleY(0); } to { transform: scaleY(1); } }
 /* destinos: em coluna (lateral estreita, celular); em linha quando o painel é largo */
 .cvg--mapa { container-type: inline-size; }
 .cvm__grupo { display: flex; flex-direction: column; gap: 6px; }
@@ -442,6 +458,13 @@ a.cvt__logo:focus-visible { outline: 2px solid var(--cv-focus); outline-offset: 
 .cvt[data-estilo="chat"] .cvt__enviar--icone:focus-visible { outline: 2px solid var(--cv-focus); outline-offset: 2px; }
 .cvt[data-estilo="chat"] .cvt__legal { padding-left: 0; }
 .cvt[data-estilo="chat"] .cvg { margin-left: 0; }
+
+/* mapa em montagem: o lugar vazio não antecipa o acento (filete do problema, fundo do passo);
+   na folha do celular o nó não pulsa a cada abertura, só quando enche de verdade */
+.cvt .cvm__no--problema.cvm__no--vazio { border-left-width: 1px; border-left-color: var(--cv-line-forte); }
+.cvt .cvm__no--passo.cvm__no--vazio, .cvt .cvm__no--destino.cvm__no--vazio { background: transparent; border-color: var(--cv-line-forte); }
+.cvt__folha .cvm__no--cheio, .cvt__fluxo .cvm__no--cheio { animation: cvt-sobe 0.3s ease both; }
+.cvt__folha .cvm__liga--ligada::before, .cvt__fluxo .cvm__liga--ligada::before { animation: none; }
 .cvt[data-modo="escuro"] .cve__redes a { border-bottom-color: color-mix(in srgb, var(--cv-primary) 40%, transparent); }
 
 @keyframes cvt-sobe { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
@@ -457,8 +480,39 @@ a.cvt__logo:focus-visible { outline: 2px solid var(--cv-focus); outline-offset: 
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cvt__bot, .cvt__eu, .cvg, .cvm__no, .cvr__linha { animation: none; }
+  .cvt__bot, .cvt__eu, .cvg, .cvm__no, .cvm__no--cheio, .cvm__liga--ligada::before, .cvr__linha { animation: none; }
   .cvg__p { animation: none; opacity: 1; }
+  .cvm__barra i, .cvt__barra i { transition: none; }
+}
+
+/* selo do mapa no celular (sem lateral): barra fixa embaixo que abre o mapa numa folha */
+.cvt__selo { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; padding: 0 16px calc(10px + env(safe-area-inset-bottom, 0px)); pointer-events: none; display: flex; flex-direction: column; gap: 8px; }
+.cvt__selo-botao {
+  pointer-events: auto;
+  display: flex; align-items: center; gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  background: color-mix(in srgb, var(--cv-superficie) 94%, transparent);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--cv-line-forte);
+  border-radius: var(--cv-radius-cartao);
+  color: var(--cv-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.cvt__selo-botao .cvm__estado { flex: none; }
+.cvt__selo-botao .cvm__barra { flex: 1; }
+.cvt__selo-botao svg { flex: none; color: var(--cv-ink-400); transition: transform 0.2s; }
+.cvt__selo-botao[aria-expanded="true"] svg { transform: rotate(180deg); }
+.cvt__selo-botao:focus-visible { outline: 2px solid var(--cv-focus); outline-offset: 2px; }
+.cvt__folha { pointer-events: auto; max-height: 70vh; overflow: auto; border-radius: var(--cv-radius-cartao); box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.35); animation: cvt-sobe 0.25s ease both; }
+.cvt__folha .cvg { margin: 0; }
+.cvt--com-selo .cvt__corpo { padding-bottom: 128px; }
+.cvt--com-selo .cvt__fim { scroll-margin-bottom: 72px; }
+@media (min-width: 960px) {
+  .cvt__selo { display: none; }
+  .cvt--com-selo .cvt__corpo { padding-bottom: 120px; }
 }
 
 /* desktop: conversa à esquerda (estreita), lateral fixa à direita */
