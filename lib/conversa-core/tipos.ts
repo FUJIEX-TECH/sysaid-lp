@@ -176,6 +176,9 @@ export type Validacao =
   | { regra: "email"; mensagem: string }
   | { regra: "minCaracteres"; valor: number; mensagem: string }
   | { regra: "minDigitos"; valor: number; mensagem: string }
+  // 12/11/2026: telefone do Brasil (DDD que existe, fixo 2-5 + 7 dígitos ou celular 9 + 8;
+  // aceita +55 e 0 na frente; recusa número de dígito repetido). `celular`: só celular
+  | { regra: "telefoneBR"; mensagem: string; celular?: boolean }
   | { regra: "custom"; nome: string }; // função em config.validadores
 
 // --------------------------------------------------------------------------
@@ -342,7 +345,11 @@ export type Evento =
   | { tipo: "encerramento"; id: string }
   | { tipo: "classificacao"; classificacao: Classificacao }
   | { tipo: "geracao"; id: string; resultado: "usado" | "fallback" | "descartado"; ms: number }
-  | { tipo: "envio"; ok: boolean };
+  | { tipo: "envio"; ok: boolean }
+  // 12/11/2026: um cartão visual entrou na conversa; o mapa completo foi liberado; baixou o PDF
+  | { tipo: "cartao"; id: string; etapa: string }
+  | { tipo: "entrega"; etapa: string | null }
+  | { tipo: "pdf" };
 
 // medição acumulada da sessão (custo das gerações, pra ficha e pro log)
 export type Medicao = { custoUsd: number; chamadasLlm: number; chamadasJev: number; cacheHits: number; fallbacks: number };
@@ -420,6 +427,111 @@ export type ResumoConfig = {
   linhas: { rotulo: string; texto: Texto; quando?: Condicao }[];
 };
 
+// --------------------------------------------------------------------------
+// 12/11/2026: cartões visuais dentro da conversa. Uma fala do bot que traz um
+// gráfico gerado por código a partir das respostas. A config diz o tipo, depois
+// de qual etapa entra, a condição, os textos e uma função PURA `calcular` que lê
+// o contexto e devolve os dados (ou null = não mostra). O núcleo valida, formata
+// e desenha (cartoes.ts + ui/graficos/Cartao.tsx). Textos com template podem usar
+// os valores calculados ({{valor}}, {{min}}, {{max}}, {{nivel}}...) e o que o
+// servidor escreveu ({{gerado.<id>.<chave>}}, ou a chave `gerado` do cartão).
+// --------------------------------------------------------------------------
+export type FormatoNumero = {
+  estilo?: "decimal" | "moeda"; // moeda = Intl currency (config.idioma)
+  moeda?: string; // padrão "BRL"
+  casas?: number; // casas decimais (padrão 0)
+  prefixo?: string; // ex.: "≈ "
+  sufixo?: string; // ex.: " h"
+};
+
+export type DadosNumero = {
+  valor: number;
+  faixa?: [number, number]; // de quanto a quanto (a estimativa honesta)
+  formato?: FormatoNumero;
+  unidade?: string; // ao lado do número grande (ex.: "h/mês")
+  conta?: string; // a conta por trás, numa linha (ex.: "≈ 320 chamados/mês × 12 min")
+};
+export type DadosBarras = {
+  itens: { rotulo: string; valor: number; destaque?: boolean; nota?: string }[];
+  formato?: FormatoNumero;
+  maximo?: number; // escala (padrão: o maior valor)
+  diferenca?: boolean; // mostra a variação do 1º pro último item
+};
+export type PassoFluxo = { texto: string; marca?: boolean }; // marca: trava (antes) ou ganho (depois)
+export type DadosAntesDepois = {
+  antes: { titulo: string; passos: PassoFluxo[] };
+  depois: { titulo: string; passos: PassoFluxo[] };
+};
+export type DadosLinhaTempo = {
+  etapas: { quando: string; titulo: string; texto?: string }[];
+  atual?: number; // 1 = a primeira etapa em destaque
+};
+export type DadosMedidor = {
+  niveis: { rotulo: string; texto?: string }[]; // do mais baixo pro mais alto
+  atual: number; // 1..n
+  alvo?: number; // atual..n (onde dá pra chegar)
+  rotuloAtual?: string; // ex.: "hoje"
+  rotuloAlvo?: string; // ex.: "dá pra chegar"
+};
+
+export type DadosPorTipoCartao = {
+  numero: DadosNumero;
+  barras: DadosBarras;
+  antesDepois: DadosAntesDepois;
+  linhaTempo: DadosLinhaTempo;
+  medidor: DadosMedidor;
+};
+export type TipoCartao = keyof DadosPorTipoCartao;
+
+type CartaoBase = {
+  id: string;
+  // a etapa depois da qual o cartão entra na conversa (como uma fala do bot)
+  apos: string;
+  quando?: Condicao;
+  fala?: Texto; // balão do bot logo antes do cartão
+  rotulo?: Texto; // linha pequena em mono no topo (ex.: "Estimativa")
+  titulo?: Texto;
+  legenda?: Texto; // nota de rodapé (premissas, fonte)
+  // textos escritos no servidor (chaves de `Gerado.textos`); valem quando a geração
+  // chegou e ainda vale, senão fica o texto da config
+  gerado?: { id: string; fala?: string; rotulo?: string; titulo?: string; legenda?: string };
+  // entra no mapa liberado e no PDF (padrão true)
+  naEntrega?: boolean;
+};
+export type CartaoConfig = { [K in TipoCartao]: CartaoBase & { tipo: K; calcular: (ctx: Contexto) => DadosPorTipoCartao[K] | null } }[TipoCartao];
+
+// --------------------------------------------------------------------------
+// 12/11/2026: o mapa completo liberado depois de uma etapa (padrão: a última
+// etapa de telefone), grande na tela, com resumo, os cartões da conversa e
+// "Baixar em PDF" (impressão do navegador com folha clara; ver entrega.ts e
+// ui/Entrega.tsx). Antes de liberar, a lateral continua montando ao vivo
+// (teaser), e os lugares em `teaser.ocultar` aparecem prontos mas fechados.
+// --------------------------------------------------------------------------
+export type EntregaConfig = {
+  apos?: string; // etapa que destrava (padrão: a última com input "tel"; sem ela, o fim da conversa)
+  quando?: Condicao; // condição a mais
+  fala?: Texto; // balão do bot logo antes do mapa
+  rotulo?: Texto; // linha em mono acima do título (ex.: "Mapa liberado")
+  titulo: Texto;
+  subtitulo?: Texto; // aceita {{hoje}}
+  tituloMapa?: Texto;
+  fecho?: Texto; // o que acontece agora
+  link?: { href: string; rotulo: string }; // ação secundária (ex.: conhecer o site)
+  botaoPdf: string;
+  dicaPdf?: string; // ex.: "Abre a impressão: escolha Salvar como PDF"
+  verCompleto?: string; // botão na lateral depois de liberar (desktop)
+  resumo?: boolean; // inclui o resumo do caso (padrão true)
+  cartoes?: boolean; // inclui os cartões da conversa (padrão true)
+  teaser?: { ocultar?: NoMapa["tipo"][]; rotulo?: string };
+  pdf?: {
+    arquivo?: Texto; // nome sugerido do arquivo (vira o título da página durante a impressão)
+    logo?: { src: string; alt: string; altura?: number }; // logo pra papel claro
+    cabecalho?: Texto; // linha no topo da folha (aceita {{hoje}})
+    rodape?: Texto; // linha no pé da folha
+    tema?: Record<string, string>; // tokens --cv-* da folha (padrão: neutro claro do núcleo)
+  };
+};
+
 export type ConfigConversa = {
   id: string;
   marca: {
@@ -486,6 +598,13 @@ export type ConfigConversa = {
   mapa?: MapaConfig;
   porte?: PorteConfig;
   resumo?: ResumoConfig;
+  // 12/11/2026: cartões visuais na conversa e o mapa liberado (com PDF)
+  cartoes?: CartaoConfig[];
+  // quanto a próxima pergunta espera depois de um cartão (padrão 900 ms), pra ele se desenhar
+  pausaCartaoMs?: number;
+  entrega?: EntregaConfig;
+  // idioma de números e datas (padrão "pt-BR")
+  idioma?: string;
   textos: {
     enviando: string;
     erro: string;

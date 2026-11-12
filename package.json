@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "indexnow": "node scripts/indexnow.mjs"
+    "indexnow": "node scripts/indexnow.mjs",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --disable-warning=ExperimentalWarning --import ./lib/conversa-core/testes/registrar.mjs --test lib/conversa-core/testes/*.test.ts lib/diagnostico/*.test.ts"
   },
   "repository": {
     "type": "git",

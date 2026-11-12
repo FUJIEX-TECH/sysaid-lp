@@ -6,6 +6,8 @@
 // ==========================================================================
 
 import { avaliar, geradoValido, type Resolvedor } from "./condicoes";
+import { resolverCartoes } from "./cartoes";
+import { entregaLiberada } from "./entrega";
 import { montarMapa } from "./mapa";
 import { resolverOrigem, sinaisDoCaminho } from "./origem";
 import { pontuar, rotaDe, rotuloFinal } from "./pontuacao";
@@ -89,6 +91,12 @@ export function criarMotor(config: ConfigConversa) {
         if (!e) return "";
         const v = (e as unknown as Record<string, unknown>)[k];
         return typeof v === "string" ? v : "";
+      }
+      // 12/11/2026: texto escrito no servidor, {{gerado.<id>.<chave>}} (vazio se a geração não vale mais)
+      if (nome.startsWith("gerado.")) {
+        const [id, chave] = nome.slice(7).split(".");
+        if (!id || !chave || !geradoValido(ctx, id)) return "";
+        return ctx.gerados?.[id]?.textos?.[chave] ?? "";
       }
       return undefined;
     };
@@ -246,6 +254,21 @@ export function criarMotor(config: ConfigConversa) {
     return montarMapa(config, ctx, resolvedor(ctx));
   }
 
+  // 12/11/2026: cartões visuais das etapas respondidas (ou só os de uma etapa)
+  function cartoes(ctx: Contexto, soDaEtapa?: string) {
+    const ids = soDaEtapa ? (aplicaRespondida(soDaEtapa, ctx) ? [soDaEtapa] : []) : etapasRespondidas(ctx).map((e) => e.id);
+    return resolverCartoes(config, ctx, ids, resolvedor(ctx));
+  }
+  function aplicaRespondida(id: string, ctx: Contexto): boolean {
+    const e = etapas.find((x) => x.id === id);
+    return !!e && aplica(e, ctx) && ctx.respostas[id] !== undefined;
+  }
+
+  // 12/11/2026: o mapa completo já foi liberado? (entrega.ts)
+  function entregaLiberadaEm(ctx: Contexto, completa?: boolean) {
+    return entregaLiberada(config, ctx, { variavel: resolvedor(ctx), respondidas: etapasRespondidas(ctx).map((e) => e.id), completa });
+  }
+
   return {
     config,
     contexto,
@@ -262,6 +285,8 @@ export function criarMotor(config: ConfigConversa) {
     classificar,
     mapa,
     mapaVisual,
+    cartoes,
+    entregaLiberada: entregaLiberadaEm,
     resolvedor,
   };
 }

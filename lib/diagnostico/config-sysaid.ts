@@ -19,6 +19,8 @@ import type { ConfigConversa, Contexto, Opcao, OrigemRegra } from "@/lib/convers
 import { sugerirEmpresa, sugerirNome, primeiroNome } from "@/lib/conversa-core";
 import { isCorporateEmail } from "@/lib/email-domains";
 import CenaPlaceholder from "@/components/diagnostico/CenaPlaceholder";
+// 12/11/2026: cartões visuais de DEMONSTRAÇÃO (provisórios; o roteiro final é do sysaid-growth)
+import { CARTOES_SYSAID } from "@/lib/diagnostico/cartoes-sysaid";
 
 // Valores possíveis (documentação; o motor trata tudo como string)
 // situacao:  troca | sem | cliente | pesquisa
@@ -762,25 +764,30 @@ export const configSysaid: ConfigConversa = {
       ],
     },
     {
-      // "uau 2" em versão fixa: mapa do catálogo, sem animação (fica pra fatia 2)
+      // 12/11/2026 (Fernando): o mapa não vai mais pelo WhatsApp. Ele fica pronto
+      // na lateral (teaser, com o "primeiro passo" fechado) e é liberado aqui na
+      // tela, grande e com download em PDF, depois que a pessoa dá o WhatsApp.
+      // Copy PROVISÓRIA (o roteiro novo é do sysaid-growth).
       id: "mapa",
       passo: 6,
       tipo: "info",
       quando: NAO_SUPORTE,
-      texto: "Com o que você me contou{{saudacao}}, o caminho fica assim:",
-      resumo: { porValor: { ok: "Quero esse mapa" } },
-      opcoes: [{ valor: "ok", rotulo: "Quero esse mapa" }],
+      texto: "Com o que você me contou{{saudacao}}, o seu mapa ficou pronto. Falta só liberar a versão completa.",
+      resumo: { porValor: { ok: "Quero ver o mapa" } },
+      opcoes: [{ valor: "ok", rotulo: "Quero ver o mapa" }],
     },
     {
+      // obrigatório (sem "pular") e com validação de número do Brasil: é o que destrava o mapa (entrega.apos)
       id: "telefone",
       passo: 7,
       tipo: "texto",
       input: "tel",
+      autoComplete: "tel-national",
       mascara: "telefone_br",
       quando: NAO_SUPORTE,
-      texto: "Qual o seu WhatsApp{{saudacao}}? Pra eu te mandar esse mapa.",
-      placeholder: "(11) 99999-9999",
-      validar: [{ regra: "minDigitos", valor: 10, mensagem: "Informe um telefone com DDD." }],
+      texto: "Qual o seu WhatsApp{{saudacao}}? Com ele eu libero o mapa completo aqui, com download em PDF.",
+      placeholder: "(11) 98765-4321",
+      validar: [{ regra: "telefoneBR", mensagem: "Confere o número? Preciso do DDD e do número, tipo (11) 98765-4321." }],
     },
   ],
 
@@ -803,8 +810,10 @@ export const configSysaid: ConfigConversa = {
     { id: "empresa_confirma", tipo: "empresa", apos: "confirma", quando: { empresaEncontrada: true } },
     { id: "empresa", tipo: "empresa", apos: "empresa", quando: { todas: [{ empresaEncontrada: true }, { nao: { campo: "confirma", definido: true } }] } },
     { id: "porte", tipo: "porte", apos: "usuarios" },
-    // mapa desde o começo na lateral (em montagem); no celular, selo fixo embaixo que abre o mapa, e o cartão entra na conversa no passo "mapa"
-    { id: "mapa", tipo: "mapa", lugar: "lateral", apos: "mapa", titulo: "O mapa do seu caso" },
+    // mapa desde o começo na lateral (em montagem); no celular, selo fixo embaixo que abre o mapa.
+    // 12/11/2026: sem `apos` (o cartão não entra mais na conversa no passo "mapa"): o mapa
+    // completo só aparece grande depois do WhatsApp (`entrega`)
+    { id: "mapa", tipo: "mapa", lugar: "lateral", titulo: "O mapa do seu caso" },
   ],
 
   porte: {
@@ -839,7 +848,7 @@ export const configSysaid: ConfigConversa = {
         casos: [
           { quando: { campo: "situacao", igual: "cliente" }, texto: "Conversa com o seu gerente de conta sobre os módulos acima" },
           { quando: { campo: "prazo", igual: "cota" }, texto: "Orçamento com esse escopo" },
-          { quando: { campo: "prazo", igual: "sem" }, texto: "Esse mapa por e-mail, pra quando fizer sentido" },
+          { quando: { campo: "prazo", igual: "sem" }, texto: "Guardar este mapa e retomar quando fizer sentido" },
         ],
       },
       nota: "primeiro passo",
@@ -864,6 +873,48 @@ export const configSysaid: ConfigConversa = {
       { rotulo: "Prazo", texto: "{{resumo.prazo}}" },
       { rotulo: "Como chegou", texto: "{{canal}}" },
     ],
+  },
+
+  // 12/11/2026: cartões visuais na conversa (DEMONSTRAÇÃO, provisórios: cartoes-sysaid.ts)
+  cartoes: CARTOES_SYSAID,
+  pausaCartaoMs: 1100,
+
+  // 12/11/2026 (Fernando): o mapa completo é liberado na tela depois do WhatsApp,
+  // com download em PDF (impressão do navegador, folha clara com o logo preto).
+  // Nada de "te mandamos pelo WhatsApp". Copy PROVISÓRIA (sysaid-growth revisa).
+  entrega: {
+    apos: "telefone",
+    fala: "Pronto{{saudacao}}. O seu mapa está liberado aqui embaixo.",
+    rotulo: "Mapa liberado",
+    titulo: "O mapa do seu caso",
+    subtitulo: {
+      padrao: "Montado na nossa conversa, em {{hoje}}.",
+      casos: [{ quando: { campo: "empresa", definido: true }, texto: "{{empresa}} · montado na nossa conversa, em {{hoje}}." }],
+    },
+    tituloMapa: "Do problema ao primeiro passo",
+    fecho: "Um especialista da SysAid vai falar com você em breve pra mostrar esse caminho funcionando no seu cenário. Fique de olho no e-mail e no WhatsApp.",
+    link: { href: "https://www.sysaid.com.br", rotulo: "Conhecer a SysAid" },
+    botaoPdf: "Baixar em PDF",
+    dicaPdf: "Abre a janela de impressão: escolha “Salvar como PDF”.",
+    verCompleto: "Ver o mapa completo ↓",
+    // teaser: na lateral, o "primeiro passo" aparece pronto mas fechado até o WhatsApp
+    teaser: { ocultar: ["passo"], rotulo: "Liberado com o seu WhatsApp" },
+    pdf: {
+      arquivo: {
+        padrao: "Mapa do caso - SysAid",
+        casos: [{ quando: { campo: "empresa", definido: true }, texto: "Mapa do caso - {{empresa}} - SysAid" }],
+      },
+      logo: { src: "/logos/logo-black.svg", alt: "SysAid", altura: 24 },
+      cabecalho: "Mapa do caso · {{hoje}}",
+      rodape: "Montado numa conversa com a SysAid Brasil em {{hoje}} · itsm.sysaid.com.br",
+      // folha clara: o verde escuro da marca no lugar da menta (que some no branco)
+      tema: {
+        "--cv-primary": "#175d4a",
+        "--cv-primary-hover": "#175d4a",
+        "--cv-primary-tinta": "rgba(23, 93, 74, 0.08)",
+        "--cv-glifo": "#a8bfb5",
+      },
+    },
   },
 
   encerramentos: [
@@ -974,7 +1025,7 @@ export const configSysaid: ConfigConversa = {
       : [],
 
   textos: {
-    enviando: "Fechado{{saudacao}}. Estou mandando o seu mapa.",
+    enviando: "Fechado{{saudacao}}. Liberando o seu mapa.",
     erro: "Não consegui enviar agora. Confira o e-mail e tente de novo em instantes.",
     tentarDeNovo: "Tentar de novo",
     legal: "Ao continuar, você concorda em ser contatado pela SysAid. Sem spam.",

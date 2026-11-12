@@ -15,17 +15,24 @@ import type { ConfigConversa, Contexto, Empresa, EtapaConfig, Evento, Gerado, Ge
 // empresa pelo domínio do e-mail, envio final com Jev e persistência, eventos.
 // ==========================================================================
 
-export type Fim = null | "enviando" | "encerrado" | "erro";
+// "enviado" (12/11/2026): enviou e ficou na página, porque o mapa completo foi
+// liberado aqui (config.entrega); sem entrega, o envio redireciona como sempre
+export type Fim = null | "enviando" | "enviado" | "encerrado" | "erro";
 
 export type UseConversaArgs = {
   config: ConfigConversa;
   persistencia: Persistencia;
   onEvento?: (e: Evento) => void;
+  // a interface sabe mostrar o mapa liberado (tela cheia); o widget não, então
+  // nele a `entrega` da config é ignorada e o envio redireciona como antes
+  comEntrega?: boolean;
 };
 
-export function useConversa({ config, persistencia, onEvento }: UseConversaArgs) {
+export function useConversa({ config, persistencia, onEvento, comEntrega = false }: UseConversaArgs) {
   const motor = useMemo(() => criarMotor(config), [config]);
   const DIGITANDO_MS = config.digitandoMs ?? 300;
+  // depois de um cartão visual, a próxima pergunta espera ele se desenhar
+  const pausaCartao = useRef(0);
 
   const [respostas, setRespostas] = useState<Respostas>({});
   const [versao, setVersao] = useState(0); // muda a cada resposta/correção: reanima o "digitando"
@@ -173,7 +180,9 @@ export function useConversa({ config, persistencia, onEvento }: UseConversaArgs)
 
   useEffect(() => {
     setDigitando(true);
-    const t = setTimeout(() => setDigitando(false), DIGITANDO_MS);
+    const extra = pausaCartao.current;
+    pausaCartao.current = 0;
+    const t = setTimeout(() => setDigitando(false), DIGITANDO_MS + extra);
     return () => clearTimeout(t);
   }, [versao, DIGITANDO_MS]);
 
@@ -214,6 +223,9 @@ export function useConversa({ config, persistencia, onEvento }: UseConversaArgs)
     const novo = motor.responder(respostas, etapa, valor, geradosNovos, ctxBase);
     const ctxNovo: Contexto = { ...ctxBase, respostas: novo };
     const proxima = motor.proximaEtapa(ctxNovo);
+    // cartões visuais que entram depois desta resposta: avisa e dá tempo de desenhar
+    const cartoesNovos = motor.cartoes(ctxNovo, etapa.id);
+    if (cartoesNovos.length) pausaCartao.current = config.pausaCartaoMs ?? 900;
     setRespostas(novo);
     setTexto(proxima?.prefill ? motor.variavel(ctxNovo, proxima.prefill) : "");
     setErro(null);
@@ -222,6 +234,7 @@ export function useConversa({ config, persistencia, onEvento }: UseConversaArgs)
     emitir({ tipo: "resposta", etapa: etapa.id, passo: etapa.passo, segundosNaEtapa: Math.round((Date.now() - inicioEtapa.current) / 1000) });
     inicioEtapa.current = Date.now();
     persistencia.aoResponder?.(etapa.id, novo, ctxNovo);
+    for (const cartao of cartoesNovos) emitir({ tipo: "cartao", id: cartao.id, etapa: etapa.id });
   }
 
   function corrigir(etapa: EtapaConfig) {
@@ -254,6 +267,10 @@ export function useConversa({ config, persistencia, onEvento }: UseConversaArgs)
   // --- envio final ------------------------------------------------------------
   const enviouRef = useRef(false);
 
+  // 12/11/2026: com o mapa liberado aqui (config.entrega), o envio não tira a
+  // pessoa da página: grava, fica "enviado" e o mapa completo aparece
+  const entregaAqui = useCallback((c: Contexto) => comEntrega && !!config.entrega && motor.entregaLiberada(c, motor.proximaEtapa(c) === null), [comEntrega, config.entrega, motor]);
+
   const enviar = useCallback(async () => {
     enviouRef.current = true;
     setFim("enviando");
@@ -272,13 +289,14 @@ export function useConversa({ config, persistencia, onEvento }: UseConversaArgs)
         setFim("erro");
         return;
       }
-      if (r.redirecionar) window.location.href = r.redirecionar;
+      if (entregaAqui(ctxFinal)) setFim("enviado");
+      else if (r.redirecionar) window.location.href = r.redirecionar;
     } catch {
       emitir({ tipo: "envio", ok: false });
       enviouRef.current = false;
       setFim("erro");
     }
-  }, [config.jev, ctx, emitir, motor, persistencia, respostas]);
+  }, [config.jev, ctx, emitir, motor, persistencia, respostas, entregaAqui]);
 
   useEffect(() => {
     if (fim || digitando || enviouRef.current) return;
@@ -314,6 +332,7 @@ export function useConversa({ config, persistencia, onEvento }: UseConversaArgs)
     passoAtual,
     confirmando,
     hpRef,
+    emitir,
     responder,
     corrigir,
     enviarTexto,

@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import "./tela.css";
 import { useConversa } from "./useConversa";
 import { avaliar } from "../condicoes";
+import { dataHoje, etapaDaEntrega } from "../entrega";
 import Resumo from "./Resumo";
+import Entrega from "./Entrega";
 import Porte from "./graficos/Porte";
 import Mapa from "./graficos/Mapa";
 import Empresa from "./graficos/Empresa";
+import Cartao from "./graficos/Cartao";
 import type { ConfigConversa, Contexto, EtapaConfig, Evento, PainelConfig, Persistencia } from "../tipos";
 import type { Motor } from "../motor";
 
@@ -23,6 +26,11 @@ import type { Motor } from "../motor";
 // abertura; "chat" = balões, abertura em balões curtos que entram em
 // sequência, chips de resposta rápida, botão de enviar dentro do campo e o
 // erro de validação como fala do bot. Formas pelos tokens --cv-radius-*.
+// 12/11/2026: cartões visuais (config.cartoes) entram na conversa depois da
+// etapa que os dispara; e o mapa liberado (config.entrega): depois da etapa que
+// destrava (padrão: o telefone), uma seção larga embaixo da conversa com o mapa
+// completo, o resumo, os cartões e "Baixar em PDF" (impressão do navegador,
+// folha clara pelo @media print do tela.css). Até lá a lateral é o teaser.
 // ==========================================================================
 
 type Props = {
@@ -77,7 +85,7 @@ function IconeEnviar() {
 }
 
 export default function ConversaTela({ config, persistencia, onEvento, textos }: Props) {
-  const c = useConversa({ config, persistencia, onEvento });
+  const c = useConversa({ config, persistencia, onEvento, comEntrega: true });
   const { motor, ctx, respostas, respondidas, atual, atualResolvida, encerramento, digitando, versao, texto, erro, fim, maisOpcoes, setMaisOpcoes, passoAtual, confirmando, hpRef } = c;
   const largo = useLargo();
   const fluxoRef = useRef<HTMLDivElement>(null);
@@ -97,15 +105,57 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
   const aberturaPronta = aberturaN > totalAbertura;
   const aberturaVisivel = config.abertura.slice(0, Math.min(aberturaN, totalAbertura));
 
-  // rola até a pergunta nova e foca a entrada
+  // rola até a pergunta nova e foca a entrada (com o mapa liberado no fim, quem rola é a entrega)
   useEffect(() => {
-    if (digitando && fim) return;
+    if ((digitando && fim) || fim === "enviado") return;
     fimRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
     if (!digitando && aberturaPronta) {
       const foco = fluxoRef.current?.querySelector<HTMLElement>("[data-foco]");
       foco?.focus({ preventScroll: true });
     }
   }, [digitando, versao, erro, fim, aberturaN, aberturaPronta]);
+
+  // cartões visuais das etapas respondidas (funções puras da config, validadas no núcleo)
+  const cartoes = useMemo(() => motor.cartoes(ctx), [motor, ctx]);
+  const cartoesDe = (etapaId: string) => cartoes.filter((k) => k.apos === etapaId);
+
+  // mapa liberado: só depois da etapa que destrava; no fim da conversa, só
+  // depois de gravar (enviado), pra não piscar enquanto envia
+  const entrega = config.entrega;
+  const liberada = !!entrega && motor.entregaLiberada(ctx, atual === null && !encerramento);
+  const mostrarEntrega = liberada && (fim === "enviado" || (fim === null && atual !== null));
+  const [hoje] = useState(() => dataHoje(config.idioma));
+  const entregaRef = useRef<HTMLHeadingElement>(null);
+  const entregaAvisada = useRef(false);
+  useEffect(() => {
+    if (!mostrarEntrega) return;
+    const t = setTimeout(() => {
+      entregaRef.current?.closest("section")?.scrollIntoView({ block: "start", behavior: "smooth" });
+      entregaRef.current?.focus({ preventScroll: true });
+    }, 120);
+    if (!entregaAvisada.current) {
+      entregaAvisada.current = true;
+      c.emitir({ tipo: "entrega", etapa: etapaDaEntrega(config) });
+    }
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mostrarEntrega]);
+
+  function baixarPdf() {
+    c.emitir({ tipo: "pdf" });
+    const anterior = document.title;
+    const nome = motor.texto(entrega?.pdf?.arquivo, ctx, { hoje }).trim();
+    let voltou = false;
+    const volta = () => {
+      if (voltou) return;
+      voltou = true;
+      document.title = anterior;
+      window.removeEventListener("afterprint", volta);
+    };
+    if (nome) document.title = nome; // vira o nome sugerido do arquivo no "Salvar como PDF"
+    window.addEventListener("afterprint", volta);
+    window.print();
+  }
 
   const resolvedor = motor.resolvedor(ctx);
   const paineis = (config.paineis ?? []).filter((p) => avaliar(p.quando, ctx, resolvedor));
@@ -118,7 +168,9 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
   const progressoMapa = config.mapa?.progresso ? { montando: motor.texto(config.mapa.progresso.montando, ctx), pronto: motor.texto(config.mapa.progresso.pronto, ctx) } : undefined;
   const painelMapaLateral = paineis.find((p) => p.tipo === "mapa" && p.lugar === "lateral");
   const mapaInline = !!painelMapaLateral?.apos && (atual?.id === painelMapaLateral.apos || respostas[painelMapaLateral.apos] !== undefined);
-  const mapaSelo = !largo && painelMapaLateral && !mapaInline && !fim && aberturaPronta ? motor.mapaVisual(ctx) : null;
+  const mapaSelo = !largo && painelMapaLateral && !mapaInline && !fim && !liberada && aberturaPronta ? motor.mapaVisual(ctx) : null;
+  // teaser: antes de liberar, os lugares em `entrega.teaser.ocultar` aparecem prontos mas fechados
+  const fechados = entrega?.teaser?.ocultar?.length && !liberada ? { tipos: entrega.teaser.ocultar, rotulo: entrega.teaser.rotulo ?? "" } : undefined;
   const [seloAberto, setSeloAberto] = useState(false);
   useEffect(() => {
     setSeloAberto(false);
@@ -132,7 +184,18 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
     }
     if (p.tipo === "mapa") {
       const m = motor.mapaVisual(ctx);
-      return m ? <Mapa key={p.id} mapa={m} titulo={titulo} progresso={progressoMapa} /> : null;
+      if (!m) return null;
+      const lateralLiberada = mostrarEntrega && p.lugar === "lateral" && largo && entrega?.verCompleto;
+      return (
+        <Fragment key={p.id}>
+          <Mapa mapa={m} titulo={titulo} progresso={progressoMapa} fechados={fechados} />
+          {lateralLiberada && (
+            <button type="button" className="cvt__ver-completo" onClick={() => entregaRef.current?.closest("section")?.scrollIntoView({ block: "start", behavior: "smooth" })}>
+              {entrega!.verCompleto}
+            </button>
+          )}
+        </Fragment>
+      );
     }
     if (p.tipo === "empresa") {
       const e = ctx.empresa;
@@ -163,6 +226,14 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
           {r}
         </button>
         {noFluxo(e.id).map(painel)}
+        {cartoesDe(e.id).map((k) => (
+          <Fragment key={k.id}>
+            {k.fala && <p className="cvt__bot">{k.fala}</p>}
+            <Cartao cartao={k} />
+          </Fragment>
+        ))}
+        {/* entrega no meio da conversa (a etapa que destrava não é a última): a fala fica aqui */}
+        {mostrarEntrega && fim === null && entrega?.fala && e.id === etapaDaEntrega(config) && <p className="cvt__bot">{motor.texto(entrega.fala, ctx, { hoje })}</p>}
       </div>
     );
   }
@@ -207,7 +278,7 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
   const rotuloEnviar = confirmando && atual?.confirmarRotulo ? atual.confirmarRotulo : config.textos.enviar ?? "Enviar";
 
   return (
-    <div className={`cvt${mapaSelo ? " cvt--com-selo" : ""}`} data-modo={config.modo ?? "claro"} data-estilo={config.estilo ?? "editorial"} style={config.tema as React.CSSProperties}>
+    <div className={`cvt${mapaSelo ? " cvt--com-selo" : ""}${mostrarEntrega ? " cvt--entregue" : ""}`} data-modo={config.modo ?? "claro"} data-estilo={config.estilo ?? "editorial"} style={config.tema as React.CSSProperties}>
       <header className="cvt__topo">
         <div className="cvt__topo-inner">
           <div className="cvt__topo-linha">
@@ -392,7 +463,8 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
             </div>
           )}
 
-          {fim === "enviando" && <p className="cvt__bot">{motor.texto(config.textos.enviando, ctx)}</p>}
+          {(fim === "enviando" || (fim === "enviado" && mostrarEntrega)) && <p className="cvt__bot">{motor.texto(config.textos.enviando, ctx)}</p>}
+          {mostrarEntrega && fim === "enviado" && entrega?.fala && <p className="cvt__bot">{motor.texto(entrega.fala, ctx, { hoje })}</p>}
           {fim === "erro" && (
             <p className="cvt__bot cvt__erro" role="alert">
               {motor.texto(config.textos.erro, ctx)}{" "}
@@ -429,11 +501,18 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
         )}
       </div>
 
+      {/* fora do corpo: a lateral sticky não pode descer por cima do mapa liberado */}
+      {mostrarEntrega && (
+        <div className="cvt__entrega">
+          <Entrega ref={entregaRef} config={config} motor={motor} ctx={ctx} mapa={motor.mapaVisual(ctx)} cartoes={cartoes} hoje={hoje} onPdf={baixarPdf} />
+        </div>
+      )}
+
       {mapaSelo && painelMapaLateral && (
         <div className="cvt__selo">
           {seloAberto && (
             <div className="cvt__folha" id="cvt-folha-mapa">
-              <Mapa mapa={mapaSelo} titulo={motor.texto(painelMapaLateral.titulo, ctx) || undefined} progresso={progressoMapa} />
+              <Mapa mapa={mapaSelo} titulo={motor.texto(painelMapaLateral.titulo, ctx) || undefined} progresso={progressoMapa} fechados={fechados} />
             </div>
           )}
           <button type="button" className="cvt__selo-botao" aria-expanded={seloAberto} aria-controls="cvt-folha-mapa" onClick={() => setSeloAberto((v) => !v)}>
