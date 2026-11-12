@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
+import QuantoCusta from "@/components/QuantoCusta";
 import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
 import { altCliente, altSelo } from "@/lib/marcas";
@@ -85,6 +86,10 @@ const FAQ = [
   {
     q: "Já uso o Freshdesk para a TI. Por que trocar?",
     a: "Porque help desk de atendimento e ITSM resolvem problemas diferentes. O Freshdesk organiza conversas com clientes; uma plataforma ITSM gerencia o serviço de TI inteiro: incidentes ligados a ativos, mudanças com aprovação, problemas com causa raiz e SLA de operação. Se a sua TI usa uma ferramenta de CX, ela está preenchendo essa lacuna manualmente.",
+  },
+  {
+    q: "Quanto custa o SysAid?",
+    a: "O SysAid é cotado pelo número de administradores (quem atende os chamados), em três planos, Básico, Completo e Enterprise, com assinatura anual ou licença perpétua, na nuvem ou no seu servidor. A SysAid Brasil não publica tabela de preço: a proposta sai do tamanho do time e dos módulos que entram, e dá para testar todas as funcionalidades por 30 dias sem custo antes de decidir.",
   },
   {
     q: "E comparado ao Freshservice, que é o ITSM da mesma suíte?",
@@ -348,6 +353,12 @@ export default function FreshdeskPage() {
             </div>
           </div>
         </section>
+
+        {/* QUANTO CUSTA */}
+        <QuantoCusta
+          concorrente="Freshdesk"
+          nota="No lugar da IA cobrada à parte por agente, Copilot, gestão de ativos e workflows fazem parte da plataforma, sem add-on. A proposta sai do número de administradores e dos módulos da primeira onda, e dá para testar tudo por 30 dias sem custo antes."
+        />
 
         {/* FAQ */}
         <section className="section">
