@@ -95,8 +95,8 @@ const FAQ = [
     a: "Não. O SysAid inclui funcionalidades críticas como gestão de ativos de TI, automação com IA e integrações, sem taxas surpresa ou add-ons caros. No Jira, muitos recursos importantes exigem a compra de apps adicionais no Atlassian Marketplace, aumentando o custo total.",
   },
   {
-    q: "Quão avançada é a IA do SysAid em comparação com a do Jira?",
-    a: "O SysAid oferece mais de 100 agentes de IA prontos para tarefas de ITSM e um AI Builder no-code para personalização. O Copilot entende o chamado, responde o usuário e executa a resolução sozinho, incluído na plataforma, sem pacote de créditos.",
+    q: "O SysAid é um service desk com IA agêntica, que resolve chamados sozinho?",
+    a: "Sim. O SysAid Copilot é IA agêntica: não se limita a sugerir texto, ele entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho, até 90% antes de virar chamado. A plataforma traz mais de 100 agentes de IA prontos para tarefas de ITSM e um AI Builder no-code para criar novos; o Copilot está incluído na plataforma, sem pacote de créditos. No Jira Service Management, a IA varia por plano e consome créditos.",
   },
   {
     q: "E se o time de desenvolvimento continuar no Jira Software?",

@@ -106,6 +106,10 @@ const FAQ = [
     q: "É difícil migrar do ServiceNow para a SysAid?",
     a: "Depende de quanto a sua instância foi customizada. Chamados, usuários, categorias e itens do CMDB migram; fluxos escritos sob medida são refeitos como automações por configuração na SysAid. O diagnóstico inicial mapeia isso e define o prazo antes de começar.",
   },
+  {
+    q: "O SysAid é um service desk com IA agêntica, que resolve chamados sozinho?",
+    a: "Sim. O SysAid Copilot é IA agêntica: não se limita a sugerir texto, ele entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho, até 90% antes de virar chamado. A plataforma traz mais de 100 agentes de IA prontos para tarefas de ITSM e um AI Builder no-code para criar novos; o Copilot está incluído na plataforma, sem pacote de créditos. No ServiceNow, a IA generativa (Now Assist) fica nos pacotes superiores.",
+  },
 ];
 
 const faqSchema = {

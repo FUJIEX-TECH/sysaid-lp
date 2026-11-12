@@ -95,8 +95,8 @@ const FAQ = [
     a: "Sim. Os tickets saem do Freshdesk pela API, com conversas, notas privadas, tags e campos personalizados, e entram no SysAid com o número original num campo de referência. Se parte da TI já usa o Freshservice, os ativos de lá vêm na mesma carga. O diagnóstico define o recorte do histórico e o que acontece com o que estiver aberto no dia da virada.",
   },
   {
-    q: "Qual é a diferença prática da IA do SysAid?",
-    a: "O SysAid Copilot não se limita a sugerir texto. Ele entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho, além de sugerir respostas ao agente no que chega ao time. E está incluído na plataforma, sem pacote de créditos.",
+    q: "O SysAid é um service desk com IA agêntica, que resolve chamados sozinho?",
+    a: "Sim. O SysAid Copilot é IA agêntica: não se limita a sugerir texto, ele entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho, até 90% antes de virar chamado. A plataforma traz mais de 100 agentes de IA prontos para tarefas de ITSM e um AI Builder no-code para criar novos; o Copilot está incluído na plataforma, sem pacote de créditos. No Freshservice, o Freddy AI Copilot é um adicional de US$ 29 por agente ao mês.",
   },
   {
     q: "Quanto tempo leva a implantação?",
