@@ -355,8 +355,9 @@ export default function ServiceNowPage() {
               Pra montar a sua régua de avaliação: os processos do ITIL 4 no
               guia de <a href="/gestao-de-servicos-de-ti">gestão de serviços de TI</a>,
               o papel do <a href="/service-desk">service desk</a> na operação e,
-              na mesma faixa de mercado, <a href="/topdesk">SysAid x TOPdesk</a> e{" "}
-              <a href="/jira">SysAid x Jira Service Management</a>.
+              na mesma faixa de mercado, <a href="/topdesk">SysAid x TOPdesk</a>,{" "}
+              <a href="/jira">SysAid x Jira Service Management</a> e{" "}
+              <a href="/manageengine">SysAid x ManageEngine ServiceDesk Plus</a>.
             </p>
           </div>
         </section>

@@ -336,9 +336,12 @@ export default function Home() {
               cotações: <a href="/glpi">SysAid x GLPI</a>,{" "}
               <a href="/movidesk">SysAid x Movidesk</a>,{" "}
               <a href="/topdesk">SysAid x TOPdesk</a>,{" "}
-              <a href="/freshdesk">SysAid x Freshdesk e Freshservice</a>,{" "}
-              <a href="/zendesk">SysAid x Zendesk</a> e{" "}
-              <a href="/jira">SysAid x Jira Service Management</a>.
+              <a href="/freshdesk">SysAid x Freshdesk</a>,{" "}
+              <a href="/freshservice">SysAid x Freshservice</a>,{" "}
+              <a href="/zendesk">SysAid x Zendesk</a>,{" "}
+              <a href="/jira">SysAid x Jira Service Management</a>,{" "}
+              <a href="/servicenow">SysAid x ServiceNow</a> e{" "}
+              <a href="/manageengine">SysAid x ManageEngine ServiceDesk Plus</a>.
             </p>
           </div>
         </section>
