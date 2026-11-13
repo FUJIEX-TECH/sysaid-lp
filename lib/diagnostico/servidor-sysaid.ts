@@ -196,3 +196,215 @@ export const EMPRESA_SYSAID: EmpresaServidorConfig = {
   iconeFallback: "https://www.google.com/s2/favicons?domain={dominio}&sz=128",
   cnpjUrl: "https://brasilapi.com.br/api/cnpj/v1/{cnpj}",
 };
+
+// ==========================================================================
+// 13/11/2026 · BUSCA GENÉRICA (Severino; textos e travas da seção 2.18 do
+// _growth/qualifica-fluxo-generico-conteudo-2026-11-13.md, do sysaid-growth).
+// Rotas: /api/qualifica/gerar (implicacao, comentario, releitura, principal,
+// leitura) e /api/qualifica/rotular. Contrato de sempre: o Jev decide, o Haiku
+// só escreve, o código roteia; trava reprovou = reserva fixa da config.
+// ==========================================================================
+
+// os leads de Qualifica NÃO vão pro RD Station no piloto (decisão do Fernando,
+// 13/11/2026): o comercial vê tudo no /admin/qualifica. Pra ligar: QUALIFICA_RD_STATION=true
+export const QUALIFICA_ENVIA_RD = process.env.QUALIFICA_RD_STATION === "true";
+
+export const DORES_JEV_GENERICA: Record<string, string> = {
+  perda: "o pedido chega por WhatsApp, e-mail, telefone, pessoalmente ou planilha e se perde; não tem uma fila única nem rastreio",
+  complexidade:
+    "já usa uma ferramenta, mas ela dá mais trabalho do que resolve: difícil de configurar, ninguém sabe mexer, plugin, atualização, trava, demora pra mudar, qualquer ajuste vira projeto",
+  sla: "o prazo (SLA) do chamado estoura e ninguém é avisado antes; falta alerta ou escalonamento; descobrem pelo usuário",
+  relatorio: "falta o número, indicador ou relatório que a diretoria ou o gestor pede; monta planilha à mão no fim do mês",
+  ativos: "não sabe qual máquina está com quem, licenças vencendo, inventário, histórico de equipamento",
+  automacao: "trabalho manual e repetitivo: reset de senha, acesso, cadastro, aprovação feitos à mão",
+  custo: "a conta da ferramenta só sobe; módulos, IA ou itens cobrados à parte; plano de cima",
+  ia: "quer IA no atendimento; muita pergunta repetida que não precisava virar chamado",
+  esm: "outras áreas (RH, Facilities, Financeiro) também recebem pedidos e atendem cada uma do seu jeito",
+  vaga: "o texto não descreve um problema claro de atendimento de TI, ou não dá pra saber",
+};
+export const SITUACAO_JEV_GENERICA: Record<string, string> = {
+  tem_ferramenta: "a pessoa diz que usa uma ferramenta, sistema ou software de chamados hoje",
+  sem_fila: "a pessoa atende sem ferramenta: WhatsApp, e-mail, telefone, pessoalmente ou planilha",
+  cliente: "a pessoa diz que já usa SysAid",
+  nao_sabe: "o texto não diz se usa ferramenta",
+};
+export const CONSEQUENCIA_JEV: Record<string, string> = {
+  reclama: "o usuário reclama, escala ou a diretoria cobra por causa do problema",
+  incendio: "o time vive apagando incêndio, correndo atrás, sobrecarregado no dia a dia",
+  prazo: "já perderam um prazo importante por causa disso",
+  mostrar: "não conseguem mostrar o que o time entrega nem defender equipe ou orçamento",
+  contratar: "o time não dá conta sem contratar mais gente",
+  nenhuma: "o texto só descreve o problema e não diz o que ele causa",
+};
+const OUTRA_DOR_JEV: Record<string, string> = {
+  ...Object.fromEntries(Object.entries(DORES_JEV_GENERICA).filter(([k]) => k !== "vaga")),
+  nenhuma: "o texto não traz outro problema além de confirmar ou detalhar o que já foi dito",
+};
+
+export function perguntasImplicacao(): Record<string, PerguntaJev> {
+  return {
+    dor: { type: "choice", criteria: DORES_JEV_GENERICA },
+    situacao: { type: "choice", criteria: SITUACAO_JEV_GENERICA },
+    consequencia: { type: "choice", criteria: CONSEQUENCIA_JEV },
+  };
+}
+export function perguntasComentario(): Record<string, PerguntaJev> {
+  return { consequencia: { type: "choice", criteria: CONSEQUENCIA_JEV }, outra_dor: { type: "choice", criteria: OUTRA_DOR_JEV } };
+}
+export function perguntasReleitura(): Record<string, PerguntaJev> {
+  return { dor: { type: "choice", criteria: DORES_JEV_GENERICA }, consequencia: { type: "choice", criteria: CONSEQUENCIA_JEV } };
+}
+// mais de uma dor: qual, resolvida, traz mais valor pra essa pessoa (pela consequência que ela ligou)
+export function perguntasPrincipal(dores: string[]): Record<string, PerguntaJev> {
+  const criteria = Object.fromEntries(dores.filter((d) => DORES_JEV_GENERICA[d]).map((d) => [d, `o que mais pesa pra essa pessoa, e o que mais ligado às consequências que ela marcou, é: ${DORES_JEV_GENERICA[d]}`]));
+  return { principal: { type: "choice", criteria } };
+}
+
+// nome de ferramenta citado no texto (pro passo 6 não perguntar de novo; nunca vai pro desenho)
+const FERRAMENTAS_TEXTO: [RegExp, string][] = [
+  [/\bglpi\b/i, "GLPI"],
+  [/\bmovidesk\b/i, "Movidesk"],
+  [/\bjira\b/i, "Jira"],
+  [/\btop ?desk\b/i, "TOPdesk"],
+  [/\bfresh ?service\b/i, "Freshservice"],
+  [/\bfresh ?desk\b/i, "Freshdesk"],
+  [/\bzendesk\b/i, "Zendesk"],
+  [/\bservice ?now\b/i, "ServiceNow"],
+  [/\bmilvus\b/i, "Milvus"],
+  [/\bqualitor\b/i, "Qualitor"],
+  [/\bcitsmart\b/i, "CITSmart"],
+  [/\boctadesk\b/i, "Octadesk"],
+  [/\bivanti\b/i, "Ivanti"],
+  [/\bmanage ?engine\b/i, "ManageEngine"],
+  [/\botrs\b/i, "OTRS"],
+  [/\btomticket\b/i, "TomTicket"],
+  [/\bdesk ?manager\b/i, "Desk Manager"],
+  [/\bsysaid\b/i, "SysAid"],
+];
+export function ferramentaNoTexto(t: string): string | null {
+  return FERRAMENTAS_TEXTO.find(([re]) => re.test(t))?.[1] ?? null;
+}
+const MARCAS_TODAS = new RegExp(FERRAMENTAS_TEXTO.map(([re]) => re.source).join("|"), "gi");
+const mascarar = (t: string) => t.replace(MARCAS_TODAS, "a ferramenta");
+
+// --------------------------------------------------------------------------
+// Haiku · chamada 1: implicação afirmada + 2 ou 3 rótulos da cena
+// --------------------------------------------------------------------------
+export const SAIDA_IMPLICACAO = z.object({
+  implicacao: z.string().describe("1 ou 2 frases afirmativas, até 30 palavras e 200 caracteres: a consequência mais provável, com as palavras da pessoa, começando com Se, Então ou Imagino que"),
+  anotacoes: z.array(z.string()).describe("2 ou 3 rótulos curtos (até 28 caracteres, minúsculas, sem ponto final) que reaproveitam palavras do texto da pessoa: 1º onde o pedido chega ou começa, 2º quem sente ou o que trava, 3º onde quebra"),
+});
+
+export const SYSTEM_IMPLICACAO = `Você escreve uma fala de um chat de atendimento de TI (service desk) num site brasileiro de software B2B. Quem lê é gestor, coordenador ou analista de TI. Português do Brasil, tom de colega experiente: direto, cordial, profissional. Frases curtas. Sem exclamação, sem emoji, sem travessão, sem jargão de IA ou de marketing.
+
+A pessoa contou o maior problema do atendimento de TI hoje. A categoria do problema já vem decidida por outra camada. Você não classifica, não vende e não aconselha. Escreve duas coisas.
+
+1. "implicacao": 1 ou 2 frases afirmativas (até 30 palavras no total) com a consequência mais provável daquilo no dia a dia, com as palavras da pessoa. Comece com "Se", "Então" ou "Imagino que". Uma consequência só, da categoria decidida. É o problema crescendo, nunca a solução. Não termine com pergunta. Não use número. Não invente detalhe que ela não deu.
+2. "anotacoes": 2 ou 3 rótulos curtos (até 28 caracteres cada, em minúsculas, sem ponto final) que vão por cima de um desenho do atendimento dela, nesta ordem: o 1º é onde ou como o pedido chega ou começa; o 2º é quem sente ou o que trava; o 3º é onde quebra. Cada rótulo reaproveita pelo menos uma palavra que ela usou.
+
+Exemplos:
+- Categoria fila invisível, texto "o pessoal pede no zap, manda e-mail e ainda aparece na minha mesa" → implicacao "Se o pedido vem pelo zap, por e-mail e na sua mesa, imagino que parte do dia vai em procurar e repassar, e o mais urgente fura a fila." · anotacoes ["pede no zap", "aparece na minha mesa", "e-mail que ninguém viu"]
+- Categoria ferramenta que virou projeto, texto "a ferramenta é cheia de plugin e só o fulano sabe atualizar" → implicacao "Se só uma pessoa sabe atualizar a ferramenta, imagino que cada ajuste espera por ela, e o time contorna com o que dá." · anotacoes ["cheia de plugin", "só o fulano sabe", "atualizar fica parado"]
+- Categoria prazo sem alarme, texto "chamado vence e eu só fico sabendo quando o usuário liga bravo" → implicacao "Se o chamado vence sem ninguém avisar, imagino que o atraso aparece pela ligação do usuário, e o dia vira correr atrás." · anotacoes ["chamado vence", "usuário liga bravo", "só fico sabendo depois"]
+- Categoria gestão pelo retrovisor, texto "todo fechamento eu passo dias juntando planilha pro diretor" → implicacao "Então o número do diretor só sai depois de juntar planilha à mão, e no fechamento o time para pra montar relatório." · anotacoes ["pro diretor", "juntando planilha", "todo fechamento"]
+
+Regras fixas:
+- Nunca cite nome de produto, marca, empresa ou concorrente, nem a ferramenta que a pessoa usa.
+- Não fale de dinheiro (R$, reais, custo, preço, valor), a não ser na categoria custo por fora.
+- Nunca prometa recurso, resultado ou prazo. Não use "resolve", "solução", "recomendo", "garant", "melhor", "você precisa", "Entendi", "Ótimo", "Claro".
+- Não avalie a pessoa nem a ferramenta dela.
+- Se o texto for grosseiro, irônico ou vago, não espelhe o tom: escreva a partir da categoria, sem inventar detalhe.`;
+
+export const IMPLICACAO_PROMPT = (a: { nome: string; descricao: string; texto: string }) =>
+  `Categoria decidida: ${a.nome} (${a.descricao}).\nTexto da pessoa: """${mascarar(a.texto.slice(0, 600))}"""`;
+
+const PROIBIDOS_GEN = [...PROIBIDOS, "copilot", "whatsapp business"];
+const SOLUCAO = /\b(resolv\w*|solu[çc][ãa]o|ferramenta certa|recomend\w*|garant\w*|melhor\w*)\b/i;
+const DINHEIRO = /r\$|\breais\b|\bcusto\b|\bpre[çc]o\b|\bvalor\b/i;
+const FRASES_PROIBIDAS = /você precisa|\bentendi\b|\bótimo\b|\bclaro\b/i;
+const normal = (t: string) => t.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+export function travaImplicacao(t: string, dor: string): boolean {
+  const x = t.trim();
+  return (
+    x.length > 0 &&
+    x.length <= 220 &&
+    !/\?\s*$/.test(x) &&
+    !/\d/.test(x) &&
+    !PROIBIDOS_GEN.some((p) => x.toLowerCase().includes(p)) &&
+    !SOLUCAO.test(x) &&
+    (dor === "custo" || !DINHEIRO.test(x)) &&
+    !/[!—–]/.test(x) &&
+    !FRASES_PROIBIDAS.test(x) &&
+    !AVALIA.test(x)
+  );
+}
+
+// rótulo vale se: até 28 caracteres, sem marca, sem "?", sem dígito que não está no texto,
+// e reaproveita pelo menos uma palavra de 4 letras ou mais do texto da pessoa
+export function travaAnotacao(rotulo: string, texto: string): boolean {
+  const r = rotulo.trim();
+  if (!r || r.length > 28 || r.includes("?") || PROIBIDOS_GEN.some((p) => r.toLowerCase().includes(p))) return false;
+  const digitos = r.match(/\d+/g) ?? [];
+  if (digitos.some((d) => !texto.includes(d))) return false;
+  const palavras = new Set(normal(texto).match(/[a-z]{4,}/g) ?? []);
+  return (normal(r).match(/[a-z]{4,}/g) ?? []).some((p) => palavras.has(p));
+}
+
+// --------------------------------------------------------------------------
+// Haiku · chamada 2: a leitura do caso pro documento (3 frases)
+// --------------------------------------------------------------------------
+export const SAIDA_LEITURA = z.object({
+  leitura: z.string().describe("exatamente 3 frases, até 70 palavras no total"),
+});
+
+export const SYSTEM_LEITURA = `Você escreve a "leitura do especialista" de um documento que um gestor de TI leva pra dentro da empresa dele. Português do Brasil, tom de consultor experiente: direto, sóbrio, sem marketing. Frases curtas. Sem exclamação, sem emoji, sem travessão.
+
+Você recebe o que a pessoa contou numa conversa: o problema principal (e outros, se houver), a implicação, o que isso causa, o que a equipe quer, o tempo que o time perde (já em texto, com os números) e o porte. Escreva "leitura": EXATAMENTE 3 frases (três pontos finais, nem mais nem menos), até 65 palavras no total.
+1. O que pesa e como aparece no dia a dia (junte o problema e a consequência numa frase só).
+2. Quanto isso custa ao time, usando só os números que vieram na entrada, escritos do mesmo jeito; o porte só entra se couber nesta mesma frase. Se a entrada diz que ninguém mede, diga isso sem número.
+3. Onde a equipe quer chegar, nas palavras da entrada.
+
+Formato (exemplo de outro caso, não copie as palavras): "Na empresa, pedido que chega por e-mail e pessoalmente se perde no caminho, e o time passa o dia procurando e repassando. Pela conta da própria equipe, isso consome até 26 dias de trabalho por ano. A equipe quer que o pedido caia num lugar só e que o time dê conta sem contratar."
+
+Regras fixas:
+- A empresa é sempre "a empresa".
+- Não cite marca nenhuma (nem a do fornecedor), produto, canal (WhatsApp, Teams, e-mail como recurso) nem integração.
+- Não prometa nada: nada de garantir, "vai resolver", prazo em dias ou semanas, "100%", "até".
+- Não fale de preço, plano, valor nem desconto.
+- Não invente número, detalhe ou consequência que não esteja na entrada.`;
+
+// promessa = prazo ("em 30 dias", "em até 2 semanas"), garantia, 100%; "52 dias de trabalho" é a conta dele, não prazo
+const PROMESSA = /garant|vai resolver|\bem\s+(até\s+)?\d+\s*(dias?|semanas?|meses)\b|100\s*%/i;
+const CANAL = /whatsapp|integra[çc][ãa]o com|\bteams\b/i;
+const PRECO = /pre[çc]o|\bplano\b|\bvalor\b|desconto|r\$/i;
+export function travaLeitura(t: string, entrada: string): boolean {
+  const x = t.trim();
+  if (!x || x.length > 560 || /[!—–]/.test(x)) return false;
+  if (PROIBIDOS_GEN.some((p) => x.toLowerCase().includes(p)) || CANAL.test(x) || PRECO.test(x) || PROMESSA.test(x)) return false;
+  // "até N" só se a entrada já disser "até N" (é a conta dele: "até 26 dias")
+  const ates = x.match(/\baté\s+\d+/gi) ?? [];
+  if (ates.some((a) => !entrada.toLowerCase().includes(a.toLowerCase()))) return false;
+  const numeros = x.match(/\d+(?:[.,]\d+)?/g) ?? [];
+  if (numeros.some((n) => !entrada.includes(n))) return false;
+  const frases = x.split(/(?<=[.])\s+/).filter((f) => f.trim());
+  return frases.length >= 2 && frases.length <= 3;
+}
+export const LEITURA_PROMPT = (entrada: Record<string, string>) =>
+  Object.entries(entrada)
+    .filter(([, v]) => v && v.trim())
+    .map(([k, v]) => `${k}: ${mascarar(v.slice(0, 400))}`)
+    .join("\n");
+
+// rótulos do Jev no fim (mesmos critérios de sempre)
+export function perguntasRotuloGenerica(): Record<string, PerguntaJev> {
+  return {
+    rotulo: { type: "choice", criteria: ROTULOS_JEV },
+    coerente: {
+      type: "noul",
+      instructions:
+        "As respostas batem entre si (o problema contado, as consequências, o porte, o número de técnicos, o tempo que o time perde, o papel na decisão e o próximo passo) e parecem de uma pessoa real preenchendo com atenção? Querer orçamento, preferir WhatsApp ou escrever de forma curta NÃO é incoerência.",
+      criteria: { true: "coerente, parece real", false: "respostas que se contradizem, cliques aleatórios ou texto sem sentido" },
+    },
+  };
+}

@@ -7,6 +7,9 @@ import { avaliar } from "../condicoes";
 import { dataHoje, etapaDaEntrega } from "../entrega";
 import Resumo from "./Resumo";
 import Entrega from "./Entrega";
+import Documento from "./Documento";
+import Montagem from "./Montagem";
+import { diasDisponiveis, formatarDia, formatarHora, horasDisponiveis, type Horario } from "../horarios";
 import Porte from "./graficos/Porte";
 import Mapa from "./graficos/Mapa";
 import Empresa from "./graficos/Empresa";
@@ -84,11 +87,39 @@ function IconeEnviar() {
   );
 }
 
+// 13/11/2026: balão do bot com rótulo pequeno em mono em cima (ex.: "Pelo que você contou")
+function Bot({ rotulo, children, classe = "" }: { rotulo?: string; children: React.ReactNode; classe?: string }) {
+  return (
+    <p className={`cvt__bot${rotulo ? " cvt__bot--rotulado" : ""}${classe ? ` ${classe}` : ""}`}>
+      {rotulo && <span className="cvt__bot-rotulo">{rotulo}</span>}
+      {children}
+    </p>
+  );
+}
+
 export default function ConversaTela({ config, persistencia, onEvento, textos }: Props) {
   const c = useConversa({ config, persistencia, onEvento, comEntrega: true });
   const { motor, ctx, respostas, respondidas, atual, atualResolvida, encerramento, digitando, versao, texto, erro, fim, maisOpcoes, setMaisOpcoes, passoAtual, confirmando, hpRef } = c;
   const largo = useLargo();
   const fluxoRef = useRef<HTMLDivElement>(null);
+  // 13/11/2026: o que está marcado na múltipla escolha e nos horários da etapa atual
+  const [marcados, setMarcados] = useState<string[]>([]);
+  const [livre, setLivre] = useState("");
+  const [horarios, setHorarios] = useState<Horario[]>([]);
+  useEffect(() => {
+    setMarcados([]);
+    setLivre("");
+    setHorarios([]);
+  }, [atual?.id, versao]);
+  const opcoesHorario = useMemo(() => {
+    const h = atual?.tipo === "horarios" ? atual.horarios : undefined;
+    if (!h) return null;
+    const idioma = config.idioma ?? "pt-BR";
+    return {
+      dias: diasDisponiveis(h, new Date()).map((d) => ({ valor: d, rotulo: formatarDia(d, idioma) })),
+      horas: horasDisponiveis(h).map((x) => ({ valor: x, rotulo: formatarHora(x, idioma) })),
+    };
+  }, [atual, config.idioma]);
   const fimRef = useRef<HTMLDivElement>(null);
   const chat = config.estilo === "chat";
 
@@ -117,7 +148,9 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
 
   // cartões visuais das etapas respondidas (funções puras da config, validadas no núcleo)
   const cartoes = useMemo(() => motor.cartoes(ctx), [motor, ctx]);
-  const cartoesDe = (etapaId: string) => cartoes.filter((k) => k.apos === etapaId);
+  const cartoesDe = (etapaId: string) => cartoes.filter((k) => k.apos === etapaId && !k.soNaEntrega);
+  // 13/11/2026: "montando o seu documento" depois da etapa da montagem
+  const montagem = config.entrega?.montagem;
 
   // mapa liberado: só depois da etapa que destrava; no fim da conversa, só
   // depois de gravar (enviado), pra não piscar enquanto envia
@@ -170,7 +203,8 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
   const mapaInline = !!painelMapaLateral?.apos && (atual?.id === painelMapaLateral.apos || respostas[painelMapaLateral.apos] !== undefined);
   const mapaSelo = !largo && painelMapaLateral && !mapaInline && !fim && !liberada && aberturaPronta ? motor.mapaVisual(ctx) : null;
   // teaser: antes de liberar, os lugares em `entrega.teaser.ocultar` aparecem prontos mas fechados
-  const fechados = entrega?.teaser?.ocultar?.length && !liberada ? { tipos: entrega.teaser.ocultar, rotulo: entrega.teaser.rotulo ?? "" } : undefined;
+  const fechados =
+    entrega?.teaser?.ocultar?.length && !liberada && !(entrega.teaser.ateMontagem && c.montando) ? { tipos: entrega.teaser.ocultar, rotulo: entrega.teaser.rotulo ?? "" } : undefined;
   const [seloAberto, setSeloAberto] = useState(false);
   useEffect(() => {
     setSeloAberto(false);
@@ -211,9 +245,15 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
   function par(e: EtapaConfig) {
     const valor = respostas[e.id] ?? "";
     const r = motor.resumo(e, valor, ctx);
+    const res = motor.resolver(e, ctx);
     return (
       <div key={e.id} className="cvt__par">
-        <p className="cvt__bot">{motor.resolver(e, ctx).texto}</p>
+        {res.falas.map((f, i) => (
+          <Bot key={`f${i}`} rotulo={f.rotulo}>
+            {f.texto}
+          </Bot>
+        ))}
+        <Bot rotulo={res.rotulo || undefined}>{res.texto}</Bot>
         <button
           type="button"
           className="cvt__eu"
@@ -232,6 +272,15 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
             <Cartao cartao={k} />
           </Fragment>
         ))}
+        {montagem && e.id === montagem.apos && (
+          <Montagem
+            rotulo={motor.texto(montagem.rotulo, ctx)}
+            pronto={motor.texto(montagem.pronto, ctx)}
+            itens={(montagem.itens ?? []).map((x) => motor.texto(x, ctx)).filter(Boolean)}
+            duracaoMs={montagem.duracaoMs}
+            concluido={mostrarEntrega && fim === "enviado"}
+          />
+        )}
         {/* entrega no meio da conversa (a etapa que destrava não é a última): a fala fica aqui */}
         {mostrarEntrega && fim === null && entrega?.fala && e.id === etapaDaEntrega(config) && <p className="cvt__bot">{motor.texto(entrega.fala, ctx, { hoje })}</p>}
       </div>
@@ -350,10 +399,145 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
 
           {aberturaPronta && !digitando && atual && atualResolvida && !fim && (
             <div className="cvt__par cvt__par--atual" data-etapa={atual.id}>
-              <p className="cvt__bot">{atualResolvida.texto}</p>
+              {atualResolvida.falas.map((f, i) => (
+                <Bot key={`f${i}`} rotulo={f.rotulo}>
+                  {f.texto}
+                </Bot>
+              ))}
+              <Bot rotulo={atualResolvida.rotulo || undefined}>{atualResolvida.texto}</Bot>
               {noFluxo(atual.id).map(painel)}
 
-              {atual.tipo !== "texto" && atualResolvida.opcoes.length > 0 && (
+              {/* 13/11/2026: múltipla escolha (chips que marcam e desmarcam, texto livre opcional, continuar) */}
+              {atual.tipo === "multipla" && (
+                <div className="cvt__multipla">
+                  <div className="cvt__opcoes cvt__opcoes--multipla" role="group" aria-label={atualResolvida.texto}>
+                    {atualResolvida.opcoes.map((o, i) => {
+                      const on = marcados.includes(o.valor);
+                      return (
+                        <button
+                          key={o.valor}
+                          type="button"
+                          className="cvt__opcao cvt__opcao--marca"
+                          aria-pressed={on}
+                          data-foco={i === 0 ? "" : undefined}
+                          onClick={() => {
+                            c.setErro(null);
+                            setMarcados((m) => (on ? m.filter((x) => x !== o.valor) : atual.multipla?.max && m.length >= atual.multipla.max ? m : [...m, o.valor]));
+                          }}
+                        >
+                          <span className="cvt__marca" aria-hidden="true" />
+                          {o.rotulo}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {atual.multipla?.texto && (
+                    <div className="cvt__form">
+                      <label className="cvt__sr" htmlFor={`cvt-${atual.id}-livre`}>
+                        {atual.multipla.texto.rotulo ?? atualResolvida.texto}
+                      </label>
+                      <div className="cvt__campo">
+                        <input
+                          id={`cvt-${atual.id}-livre`}
+                          type="text"
+                          autoComplete="off"
+                          value={livre}
+                          placeholder={motor.texto(atual.multipla.texto.placeholder, ctx) || undefined}
+                          onChange={(ev) => {
+                            c.setErro(null);
+                            setLivre(ev.target.value);
+                          }}
+                          onKeyDown={(ev) => {
+                            if (ev.key === "Enter") {
+                              ev.preventDefault();
+                              c.enviarMultipla(atual, marcados, livre);
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  {erro && (
+                    <p className="cvt__bot cvt__bot--aviso" role="alert">
+                      {erro}
+                    </p>
+                  )}
+                  <button
+                    type="button"
+                    className="cvt__continuar"
+                    disabled={marcados.length + (livre.trim() ? 1 : 0) < (atual.multipla?.min ?? 1)}
+                    onClick={() => c.enviarMultipla(atual, marcados, livre)}
+                  >
+                    {atual.multipla?.confirmar ?? config.textos.enviar ?? "Enviar"}
+                  </button>
+                </div>
+              )}
+
+              {/* 13/11/2026: horários com regras (dias úteis, janela), validados de novo no envio */}
+              {atual.tipo === "horarios" && atual.horarios && opcoesHorario && (
+                <div className="cvt__horarios">
+                  {Array.from({ length: atual.horarios.quantidade }).map((_, i) => {
+                    const h = horarios[i] ?? { data: "", hora: "" };
+                    const muda = (campo: keyof Horario, v: string) => {
+                      c.setErro(null);
+                      setHorarios((lista) => {
+                        const nova = Array.from({ length: atual.horarios!.quantidade }, (_, k) => lista[k] ?? { data: "", hora: "" });
+                        nova[i] = { ...nova[i], [campo]: v };
+                        return nova;
+                      });
+                    };
+                    const legenda = atual.horarios!.rotulos.opcao.replace(/\{\{\s*n\s*\}\}/g, String(i + 1));
+                    return (
+                      <fieldset key={i} className="cvt__horario">
+                        <legend>{legenda}</legend>
+                        <label className="cvt__seletor">
+                          <span className="cvt__sr">{`${legenda}: ${atual.horarios!.rotulos.dia}`}</span>
+                          <select value={h.data} data-foco={i === 0 ? "" : undefined} onChange={(ev) => muda("data", ev.target.value)}>
+                            <option value="">{atual.horarios!.rotulos.dia}</option>
+                            {opcoesHorario.dias.map((d) => (
+                              <option key={d.valor} value={d.valor}>
+                                {d.rotulo}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <label className="cvt__seletor">
+                          <span className="cvt__sr">{`${legenda}: ${atual.horarios!.rotulos.hora}`}</span>
+                          <select value={h.hora} onChange={(ev) => muda("hora", ev.target.value)}>
+                            <option value="">{atual.horarios!.rotulos.hora}</option>
+                            {opcoesHorario.horas.map((x) => (
+                              <option key={x.valor} value={x.valor}>
+                                {x.rotulo}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      </fieldset>
+                    );
+                  })}
+                  {atualResolvida.nota && <p className="cvt__nota cvt__nota--horarios">{atualResolvida.nota}</p>}
+                  {erro && (
+                    <p className="cvt__bot cvt__bot--aviso" role="alert">
+                      {erro}
+                    </p>
+                  )}
+                  <button type="button" className="cvt__continuar" onClick={() => c.enviarHorarios(atual, Array.from({ length: atual.horarios!.quantidade }, (_, k) => horarios[k] ?? { data: "", hora: "" }))}>
+                    {atual.horarios.rotulos.confirmar}
+                  </button>
+                  {atualResolvida.atalhos.length > 0 && (
+                    <div className="cvt__opcoes cvt__opcoes--atalhos cvt__opcoes--alternativas" role="group" aria-label={atualResolvida.texto}>
+                      {atualResolvida.atalhos.map((o) => (
+                        <button key={o.valor} type="button" className="cvt__opcao cvt__opcao--mais" onClick={() => c.responder(atual, o.valor)}>
+                          {o.rotulo}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+              {atual.tipo === "multipla" && atualResolvida.nota && <p className="cvt__nota">{atualResolvida.nota}</p>}
+
+              {(atual.tipo === "escolha" || atual.tipo === "info") && atualResolvida.opcoes.length > 0 && (
                 <div className="cvt__opcoes" role="group" aria-label={atualResolvida.texto}>
                   {(atual.mostrarPrimeiro && !maisOpcoes ? atualResolvida.opcoes.slice(0, atual.mostrarPrimeiro.quantidade) : atualResolvida.opcoes).map((o, i) => (
                     <button key={o.valor} type="button" className="cvt__opcao" data-foco={i === 0 ? "" : undefined} onClick={() => c.responder(atual, o.valor)}>
@@ -457,6 +641,7 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
                         {erro}
                       </p>
                     )}
+                    {atualResolvida.nota && <p className="cvt__nota">{atualResolvida.nota}</p>}
                   </form>
                 </>
               )}
@@ -504,7 +689,11 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
       {/* fora do corpo: a lateral sticky não pode descer por cima do mapa liberado */}
       {mostrarEntrega && (
         <div className="cvt__entrega">
-          <Entrega ref={entregaRef} config={config} motor={motor} ctx={ctx} mapa={motor.mapaVisual(ctx)} cartoes={cartoes} hoje={hoje} onPdf={baixarPdf} />
+          {entrega?.documento ? (
+            <Documento ref={entregaRef} config={config} motor={motor} ctx={ctx} cartoes={cartoes} hoje={hoje} onPdf={baixarPdf} />
+          ) : (
+            <Entrega ref={entregaRef} config={config} motor={motor} ctx={ctx} mapa={motor.mapaVisual(ctx)} cartoes={cartoes} hoje={hoje} onPdf={baixarPdf} />
+          )}
         </div>
       )}
 

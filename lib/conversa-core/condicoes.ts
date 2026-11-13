@@ -1,4 +1,5 @@
 // conversa-core — avaliador de condicionais declarativas (tipos.ts, `Condicao`).
+import { incluiValor } from "./selecao";
 import type { Condicao, Contexto } from "./tipos";
 
 export type Resolvedor = (nome: string) => string | null | undefined;
@@ -35,8 +36,17 @@ export function avaliar(c: Condicao | undefined, ctx: Contexto, variavel?: Resol
     return s >= c.tempoTotalEntre[0] && s <= c.tempoTotalEntre[1];
   }
   if ("gerado" in c) return geradoValido(ctx, c.gerado) === c.disponivel;
+  // 13/11/2026: decisão que veio do servidor numa geração (ex.: o Jev leu a consequência no texto)
+  if ("decisao" in c) {
+    const v = geradoValido(ctx, c.decisao) ? ctx.gerados?.[c.decisao]?.dados?.[c.dado] : undefined;
+    if (c.igual !== undefined) return v === c.igual;
+    if (c.em) return v !== undefined && c.em.includes(v);
+    if (c.definido !== undefined) return (v !== undefined && v !== "") === c.definido;
+    return v !== undefined && v !== "";
+  }
   if ("empresaEncontrada" in c) return (!!ctx.empresa && ctx.empresa.origem !== "fallback") === c.empresaEncontrada;
   const valor = ctx.respostas[c.campo];
+  if ("inclui" in c) return incluiValor(valor, c.inclui);
   if ("igual" in c) return valor === c.igual;
   if ("diferente" in c) return valor !== c.diferente;
   if ("em" in c) return valor !== undefined && c.em.includes(valor);

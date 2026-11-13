@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment } from "react";
 import type { Mapa as MapaDados, NoMapa } from "../../tipos";
 
 // conversa-core — v2: o mapa do caso como fluxograma vertical, montado por
@@ -17,7 +18,8 @@ type Props = {
   mapa: MapaDados;
   titulo?: string;
   progresso?: { montando: string; pronto: string };
-  fechados?: { tipos: NoMapa["tipo"][]; rotulo: string };
+  // tipo do nó ou id do lugar (mapa linear, 13/11/2026)
+  fechados?: { tipos: string[]; rotulo: string };
   escalonado?: boolean;
 };
 
@@ -71,7 +73,7 @@ export default function Mapa({ mapa, titulo, progresso, fechados, escalonado }: 
   const { cheios, total } = mapa.progresso;
   const pct = total ? Math.round((cheios / total) * 100) : 0;
   const estado = progresso ? (mapa.completo ? progresso.pronto : progresso.montando) : "";
-  const fecha = (n?: NoMapa) => (n && fechados?.tipos.includes(n.tipo) ? fechados.rotulo : undefined);
+  const fecha = (n?: NoMapa) => (n && (fechados?.tipos.includes(n.tipo) || fechados?.tipos.includes(n.id)) ? fechados.rotulo : undefined);
   let k = 0;
   const ordem = () => (escalonado ? k++ : undefined);
   // fechados: os destinos viram um lugar só, com cadeado
@@ -88,6 +90,17 @@ export default function Mapa({ mapa, titulo, progresso, fechados, escalonado }: 
           </span>
         </div>
       )}
+      {mapa.linear ? (
+        // 13/11/2026: uma linha de N lugares, na ordem da config
+        <div className="cvm cvm--linear">
+          {mapa.nos.map((n, i) => (
+            <Fragment key={n.id}>
+              {i > 0 && <Liga rotulo={rotulo(n.id)} ligada={cheio(mapa.nos[i - 1]) && cheio(n)} />}
+              <No no={n} fechado={fecha(n)} i={ordem()} />
+            </Fragment>
+          ))}
+        </div>
+      ) : (
       <div className="cvm">
         {atual && <No no={atual} fechado={fecha(atual)} i={ordem()} />}
         {problema && (
@@ -122,6 +135,7 @@ export default function Mapa({ mapa, titulo, progresso, fechados, escalonado }: 
           </>
         )}
       </div>
+      )}
     </figure>
   );
 }

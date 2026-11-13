@@ -10,11 +10,32 @@
 import { avaliar, type Resolvedor } from "./condicoes";
 import { recomendar } from "./recomendacao";
 import { renderTexto } from "./texto";
-import type { ConfigConversa, Contexto, Mapa, NoMapa, NoMapaConfig } from "./tipos";
+import type { ConfigConversa, Contexto, LugarMapa, Mapa, NoMapa, NoMapaConfig } from "./tipos";
+
+// 13/11/2026: o mapa como uma linha de N lugares (`config.mapa.lugares`), na ordem.
+// Cada lugar enche quando o `quando` dele vale e o texto não sai vazio; senão
+// fica vazio (tracejado) com o rótulo do lugar. Sem dependência entre lugares.
+function montarLinear(lugares: LugarMapa[], ctx: Contexto, variavel: Resolvedor): Mapa {
+  const nos: NoMapa[] = [];
+  const arestas: Mapa["arestas"] = [];
+  let cheios = 0;
+  for (const l of lugares) {
+    const pode = avaliar(l.quando, ctx, variavel);
+    const texto = pode ? renderTexto(l.texto, ctx, variavel).trim() : "";
+    const nota = renderTexto(l.nota, ctx, variavel).trim() || undefined;
+    const no: NoMapa = texto ? { id: l.id, tipo: l.tipo, texto, nota } : { id: l.id, tipo: l.tipo, texto: l.vazio, vazio: true };
+    if (texto) cheios += 1;
+    const anterior = nos[nos.length - 1];
+    if (anterior) arestas.push({ de: anterior.id, para: no.id, rotulo: l.aresta });
+    nos.push(no);
+  }
+  return { nos, arestas, progresso: { cheios, total: lugares.length }, completo: lugares.length > 0 && cheios === lugares.length, linear: true };
+}
 
 export function montarMapa(config: ConfigConversa, ctx: Contexto, variavel: Resolvedor): Mapa | null {
   const cfg = config.mapa;
   if (!cfg) return null;
+  if (cfg.lugares?.length) return montarLinear(cfg.lugares, ctx, variavel);
   const nos: NoMapa[] = [];
   const arestas: Mapa["arestas"] = [];
   const vazios = cfg.vazios ?? {};

@@ -12,6 +12,7 @@ import type { ConfigConversa, Contexto } from "./tipos";
 export function etapaDaEntrega(config: ConfigConversa): string | null {
   const e = config.entrega;
   if (!e) return null;
+  if (e.noFim) return null; // 13/11/2026: só no fim da conversa
   if (e.apos) return e.apos;
   const tel = [...config.etapas].reverse().find((x) => x.input === "tel");
   return tel?.id ?? null;
@@ -40,4 +41,10 @@ export function entregaLiberada(
 // data de hoje no idioma da config ("12/11/2026"), pros textos da entrega ({{hoje}})
 export function dataHoje(idioma = "pt-BR", d: Date = new Date()): string {
   return new Intl.DateTimeFormat(idioma, { day: "2-digit", month: "2-digit", year: "numeric" }).format(d);
+}
+
+// 13/11/2026: o documento já começou a ser montado? (a etapa da montagem foi respondida)
+export function montagemIniciada(config: ConfigConversa, respondidas: string[]): boolean {
+  const m = config.entrega?.montagem;
+  return !!m && respondidas.includes(m.apos);
 }

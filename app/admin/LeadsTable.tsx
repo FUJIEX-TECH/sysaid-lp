@@ -131,7 +131,10 @@ export default function LeadsTable({
             {completeCount} completos · {partialCount} parciais · {thisMonth} neste mês
           </p>
         </div>
-        <button className="admin__logout" onClick={logout}>Sair</button>
+        <div className="admin__acoes">
+          <a className="admin__link" href="/admin/qualifica">Leads do Qualifica (conversa inteira) →</a>
+          <button className="admin__logout" onClick={logout}>Sair</button>
+        </div>
       </header>
 
       {dbError && (

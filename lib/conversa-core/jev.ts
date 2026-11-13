@@ -61,7 +61,16 @@ export async function rotularComJev(cfg: JevConfig, sessao: string, ctx: Context
 // está sendo digitado). O servidor devolve `para` dizendo pra quais respostas o
 // texto vale; o motor descarta se a pessoa mudar o texto depois.
 export async function pedirGeracao(g: GeracaoConfig, sessao: string, ctx: Contexto, respostasParciais: Respostas): Promise<Gerado | null> {
-  const data = await post<Partial<Gerado>>(g.endpoint, { id: g.id, ...pedido(sessao, ctx, respostasParciais) }, g.timeoutMs);
+  // 13/11/2026: `omitir` tira campos (dado pessoal) do que vai; `incluir` manda dados calculados aqui
+  const respostas: Respostas = { ...respostasParciais };
+  for (const k of g.omitir ?? []) delete respostas[k];
+  let extras: Record<string, string> | undefined;
+  try {
+    extras = g.incluir?.({ ...ctx, respostas: respostasParciais });
+  } catch {
+    extras = undefined;
+  }
+  const data = await post<Partial<Gerado>>(g.endpoint, { id: g.id, ...pedido(sessao, ctx, respostas), ...(extras ? { extras } : {}) }, g.timeoutMs);
   if (!data || !data.para || !data.textos) return null;
   return {
     id: g.id,

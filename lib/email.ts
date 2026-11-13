@@ -22,6 +22,7 @@ const FORM_LABEL: Record<string, string> = {
   demo: "site sysaid.com.br · Agende uma demonstração",
   trial: "site sysaid.com.br · Testar grátis",
   contato: "site sysaid.com.br · Contato",
+  qualifica: "Qualifica (chat) · conversa inteira em /admin/qualifica",
 };
 
 export async function notifyNewLead(lead: NotifyLead): Promise<{ ok: boolean; detail: string }> {

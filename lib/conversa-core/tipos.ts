@@ -130,11 +130,20 @@ export type GeracaoConfig = {
   id: string;
   endpoint: string; // POST {id, sessao, respostas, origem, variaveis}
   // dispara enquanto a pessoa digita este campo (debounce), a partir de N caracteres;
-  // depois, só pede de novo quando o texto cresceu `passoCaracteres` (padrão 20)
-  gatilho: { campo: string; minCaracteres: number; debounceMs: number; passoCaracteres?: number };
+  // depois, só pede de novo quando o texto cresceu `passoCaracteres` (padrão 20).
+  // `ignorarAtalhos` (13/11/2026): resposta por chip não pede nada (o texto é fixo).
+  // 13/11/2026: ou dispara quando uma destas etapas é respondida (`aoResponder`),
+  // sem a conversa esperar; o que chegar vale enquanto o `para` bater.
+  gatilho:
+    | { campo: string; minCaracteres: number; debounceMs: number; passoCaracteres?: number; ignorarAtalhos?: boolean }
+    | { aoResponder: string[]; quando?: Condicao };
   // quanto o motor espera no Enter por uma geração ainda em andamento (depois: fallback)
   esperaMs: number;
   timeoutMs: number;
+  // 13/11/2026: campos que NÃO vão pro servidor nesta geração (ex.: e-mail, nome, telefone)
+  omitir?: string[];
+  // 13/11/2026: dados calculados no navegador que vão junto (`extras` no corpo), função PURA da config
+  incluir?: (ctx: Contexto) => Record<string, string>;
 };
 
 // --------------------------------------------------------------------------
@@ -154,6 +163,12 @@ export type Condicao =
   | { tempoTotalEntre: [number, number] } // segundos, só na classificação
   | { gerado: string; disponivel: boolean } // geração do servidor chegou e ainda vale (`para` bate)
   | { empresaEncontrada: boolean } // v2: a empresa pelo domínio chegou (com dado do site ou do CNPJ)
+  // 13/11/2026: resposta de múltipla escolha (valores separados por "|") inclui este valor
+  | { campo: string; inclui: string }
+  // 13/11/2026: decisão do Jev (ou de outra camada do servidor) que veio numa geração e ainda
+  // vale: `dados[dado]` igual a / em / definido. É o "pular passo por decisão do Jev"
+  // (ex.: a etapa da consequência some se o Jev leu a consequência no texto livre)
+  | { decisao: string; dado: string; igual?: string; em?: string[]; definido?: boolean }
   | { todas: Condicao[] }
   | { alguma: Condicao[] }
   | { nao: Condicao };
@@ -165,7 +180,8 @@ export type Texto = string | { padrao: string; casos: { quando: Condicao; texto:
 
 export type Opcao = { valor: string; rotulo: string };
 
-export type ListaOpcoes = Opcao[] | { catalogo: string };
+// 13/11/2026: ou calculada por uma função PURA da config (ex.: chips na ordem do que a pessoa marcou antes)
+export type ListaOpcoes = Opcao[] | { catalogo: string } | { calcular: (ctx: Contexto) => Opcao[] };
 
 export type Opcoes = ListaOpcoes | { padrao: ListaOpcoes; casos: { quando: Condicao; opcoes: ListaOpcoes }[] };
 
@@ -182,15 +198,65 @@ export type Validacao =
   | { regra: "custom"; nome: string }; // função em config.validadores
 
 // --------------------------------------------------------------------------
+// 13/11/2026: múltipla escolha. A resposta guarda os valores marcados separados
+// por "|" (o texto livre, se houver, entra como mais um item, sem "|"). Ler com
+// `valoresMultipla`/`textoMultipla` (selecao.ts); condição `{ campo, inclui }`.
+// --------------------------------------------------------------------------
+export type MultiplaConfig = {
+  confirmar: string; // botão que envia o que está marcado (ex.: "Continuar")
+  min?: number; // quantos marcar no mínimo (padrão 1; o texto livre conta como 1)
+  max?: number;
+  minMensagem?: string; // aviso quando falta marcar (padrão: nada acontece)
+  // campo "ou escreve do seu jeito" junto dos chips
+  texto?: { placeholder?: Texto; rotulo?: string };
+};
+
+// --------------------------------------------------------------------------
+// 13/11/2026: horários. N campos de dia + hora, só com os dias e horas que as
+// regras deixam (dias úteis, feriados, janela, a partir do próximo dia útil),
+// validados de novo no envio (horarios.ts, no navegador e no servidor). A
+// resposta guarda "AAAA-MM-DDTHH:MM|AAAA-MM-DDTHH:MM", no fuso da config.
+// --------------------------------------------------------------------------
+export type RegrasHorario = {
+  quantidade: number; // quantos horários escolher (ex.: 2)
+  dias: number; // quantos dias oferecer, contando do primeiro permitido
+  diasUteis?: boolean; // só segunda a sexta (padrão true)
+  janela: { inicio: string; fim: string }; // "09:00" e "18:00": o último horário começa antes do fim
+  intervaloMin?: number; // de quanto em quanto (padrão 30)
+  aPartirDe?: "proximoDiaUtil" | "amanha" | "hoje"; // padrão "proximoDiaUtil"
+  feriados?: string[]; // "AAAA-MM-DD", não entram
+  fuso?: string; // padrão "America/Sao_Paulo"
+};
+export type HorariosConfig = RegrasHorario & {
+  rotulos: { opcao: string; dia: string; hora: string; confirmar: string }; // opcao aceita {{n}}
+  mensagens: { incompleto: string; invalido: string; repetido: string };
+};
+
+export type Fala = { rotulo?: Texto; texto: Texto; quando?: Condicao };
+
+// --------------------------------------------------------------------------
 // Etapa
 // --------------------------------------------------------------------------
 export type EtapaConfig = {
   id: string;
   // número mostrado no contador ("3/7"); etapas auxiliares repetem o da mãe
   passo: number;
-  tipo: "texto" | "escolha" | "info";
+  // 13/11/2026: "multipla" (chips que marcam e desmarcam + "continuar", com campo de
+  // texto opcional) e "horarios" (N campos de dia e hora com regras: dias úteis, janela)
+  tipo: "texto" | "escolha" | "info" | "multipla" | "horarios";
   quando?: Condicao; // ausente = sempre
+  // 13/11/2026: balões do bot antes da pergunta (ex.: um resumo, uma revelação), cada um
+  // com um rótulo pequeno opcional em cima ("O nome disso", "Resumindo")
+  falas?: (Texto | Fala)[];
+  // 13/11/2026: rótulo pequeno em mono em cima da pergunta (ex.: "Pelo que você contou")
+  rotulo?: Texto;
   texto: Texto;
+  // 13/11/2026: linha pequena embaixo do campo (ex.: consentimento do WhatsApp)
+  nota?: Texto;
+  // tipo "multipla"
+  multipla?: MultiplaConfig;
+  // tipo "horarios"
+  horarios?: HorariosConfig;
   // escolha/info
   opcoes?: Opcoes;
   // mostra só as N primeiras e um botão pra abrir o resto
@@ -221,7 +287,9 @@ export type EtapaConfig = {
   // `seIgual`: só usa o gerado se a resposta do campo for igual ao dado do Jev
   // (ex.: a pergunta gerada pra dor "sla" não serve se a pessoa escolheu "custo")
   gerado?: { id: string; texto?: string; opcoes?: string; seIgual?: { campo: string; dado: string } };
-  // efeitos colaterais de uma resposta (todos os que casam com o valor valem):
+  // efeitos colaterais de uma resposta (todos os que casam com o valor valem;
+  // 13/11/2026: `valor: "*"` casa com qualquer resposta, ex.: copiar um dado do Jev
+  // quando a pessoa escreveu texto livre; `deGerado` só copia se a geração ainda vale):
   // "corrigir" na coerência refaz o porte; "é isso" no palpite grava noutro
   // campo um dado decidido pelo Jev; um chip grava um valor fixo noutro campo
   // (ex.: a situação por trás da frase); "sim" na confirmação copia uma
@@ -349,7 +417,9 @@ export type Evento =
   // 12/11/2026: um cartão visual entrou na conversa; o mapa completo foi liberado; baixou o PDF
   | { tipo: "cartao"; id: string; etapa: string }
   | { tipo: "entrega"; etapa: string | null }
-  | { tipo: "pdf" };
+  | { tipo: "pdf" }
+  // 13/11/2026: o documento começou a ser montado (depois da etapa da montagem)
+  | { tipo: "montagem"; etapa: string };
 
 // medição acumulada da sessão (custo das gerações, pra ficha e pro log)
 export type Medicao = { custoUsd: number; chamadasLlm: number; chamadasJev: number; cacheHits: number; fallbacks: number };
@@ -357,9 +427,24 @@ export type Medicao = { custoUsd: number; chamadasLlm: number; chamadasJev: numb
 // --------------------------------------------------------------------------
 // Persistência: o núcleo não sabe gravar; o cliente entrega um adaptador
 // --------------------------------------------------------------------------
+// 13/11/2026: a conversa como aconteceu (falas, respostas, chips oferecidos, cartões),
+// montada pelo motor (motor.transcricao) pro registro do cliente (ex.: /admin)
+export type Turno = {
+  quem: "bot" | "pessoa";
+  tipo: "abertura" | "fala" | "pergunta" | "resposta" | "cartao" | "painel" | "entrega";
+  etapa?: string;
+  texto: string;
+  valor?: string; // a resposta crua (valor do chip, texto, horários)
+  via?: "opcao" | "chip" | "texto" | "multipla" | "horarios" | "pular";
+  oferecidas?: string[]; // rótulos das opções/chips que a pessoa viu
+  cartao?: { id: string; tipo: string; titulo?: string; rotulo?: string; detalhe?: string };
+  em?: string; // ISO, quando a pessoa respondeu
+};
+
 export type Persistencia = {
-  // chamada a cada resposta (gravação parcial, se o cliente quiser)
-  aoResponder?: (etapaId: string, respostas: Respostas, ctx: Contexto) => void;
+  // chamada a cada resposta (gravação parcial, se o cliente quiser). `extras` (13/11/2026):
+  // a sessão (id aleatório da conversa) e a transcrição até aqui
+  aoResponder?: (etapaId: string, respostas: Respostas, ctx: Contexto, extras?: { sessao: string; transcricao: Turno[] }) => void;
   // envio final; devolve pra onde redirecionar (ou nada)
   enviar: (args: {
     respostas: Respostas;
@@ -367,6 +452,9 @@ export type Persistencia = {
     classificacao: Classificacao;
     honeypot: string;
     medicao: Medicao;
+    // 13/11/2026
+    sessao?: string;
+    transcricao?: Turno[];
   }) => Promise<{ ok: boolean; redirecionar?: string }>;
 };
 
@@ -378,8 +466,12 @@ export type Persistencia = {
 // mapa declarativo. Tudo que é texto vem da configuração; a forma é do núcleo.
 // --------------------------------------------------------------------------
 export type NoMapaConfig = { quando?: Condicao; texto: Texto; nota?: Texto };
+// 13/11/2026: o mapa como uma linha de N lugares (no lugar dos 5 fixos). Cada lugar tem o
+// estilo de um dos tipos de nó, o rótulo de quando está vazio e a ligação que chega nele
+export type LugarMapa = { id: string; tipo: NoMapa["tipo"]; vazio: string; texto: Texto; nota?: Texto; quando?: Condicao; aresta?: string };
 export type MapaConfig = {
-  atual: NoMapaConfig; // onde a pessoa está (sempre)
+  lugares?: LugarMapa[]; // com isto, os campos abaixo (atual, problema...) não valem
+  atual?: NoMapaConfig; // onde a pessoa está (sempre)
   problema?: NoMapaConfig;
   causa?: NoMapaConfig;
   // nós do catálogo escolhidos pela recomendação (recomendacao.ts)
@@ -400,6 +492,7 @@ export type Mapa = {
   // quantos lugares do mapa já têm resposta (atual, problema, causa, o que resolve, passo)
   progresso: { cheios: number; total: number };
   completo: boolean;
+  linear?: boolean; // 13/11/2026: montado por `lugares` (uma linha de nós, na ordem)
 };
 
 export type PorteConfig = {
@@ -450,6 +543,9 @@ export type DadosNumero = {
   formato?: FormatoNumero;
   unidade?: string; // ao lado do número grande (ex.: "h/mês")
   conta?: string; // a conta por trás, numa linha (ex.: "≈ 320 chamados/mês × 12 min")
+  // 13/11/2026: o que aparece no lugar do número (ex.: "26 a 52", "?"); sem contagem
+  texto?: string;
+  regua?: boolean; // padrão true; false tira a régua (ex.: quando não há número)
 };
 export type DadosBarras = {
   itens: { rotulo: string; valor: number; destaque?: boolean; nota?: string }[];
@@ -474,12 +570,45 @@ export type DadosMedidor = {
   rotuloAlvo?: string; // ex.: "dá pra chegar"
 };
 
+// 13/11/2026: cena desenhada. O desenho (SVG pronto, da config, nunca gerado na hora)
+// + 2 ou 3 rótulos por cima, nas palavras da pessoa, posicionados em % do desenho,
+// + logo e nome opcionais (ex.: "o atendimento da Empresa hoje"). O núcleo confere o
+// SVG (sem script, sem evento, sem link externo) e limita os rótulos.
+export type RotuloCena = {
+  texto: string;
+  x: number; // 0 a 100 (% da largura do desenho)
+  y: number; // 0 a 100 (% da altura)
+  lado?: "esquerda" | "direita" | "centro"; // de que lado do ponto o rótulo cresce (padrão "direita")
+  alerta?: boolean; // o ponto de quebra (cor de alerta)
+  // "anotacao" (padrão): as palavras da pessoa, em etiqueta; "bloco": o nome de um elemento
+  // do desenho (ex.: "time de TI"), sem moldura. Texto da pessoa nunca entra no SVG: vem aqui
+  tipo?: "anotacao" | "bloco";
+};
+// o mesmo desenho recomposto pra outra proporção (ex.: 4:3 no celular), com os rótulos no lugar
+// `legenda` (13/11/2026): as anotações viram marcadores numerados no desenho e a lista com as
+// palavras logo abaixo (pra composição estreita, onde 3 rótulos de 28 caracteres cruzariam linha)
+export type LayoutCena = { svg: string; proporcao: number; rotulos?: RotuloCena[]; placa?: { x: number; y: number }; legenda?: boolean };
+export type DadosCena = {
+  svg: string; // marcação <svg ...>...</svg>, com viewBox
+  proporcao?: number; // largura / altura (padrão 16/9)
+  descricao: string; // texto alternativo do desenho (leitor de tela)
+  rotulos?: RotuloCena[];
+  logo?: { src: string; alt: string } | null;
+  nome?: string; // nome ao lado do logo (ou sozinho, sem logo)
+  placa?: { x: number; y: number }; // onde fica a placa de logo + nome (padrão canto de cima, à esquerda)
+  // 13/11/2026: faixa no topo com logo (ou nome) e uma linha em mono (ex.: "atendimento da X hoje")
+  faixa?: { texto: string };
+  // a composição pro cartão estreito (abaixo de ~480 px de largura do cartão)
+  estreito?: LayoutCena;
+};
+
 export type DadosPorTipoCartao = {
   numero: DadosNumero;
   barras: DadosBarras;
   antesDepois: DadosAntesDepois;
   linhaTempo: DadosLinhaTempo;
   medidor: DadosMedidor;
+  cena: DadosCena;
 };
 export type TipoCartao = keyof DadosPorTipoCartao;
 
@@ -497,6 +626,8 @@ type CartaoBase = {
   gerado?: { id: string; fala?: string; rotulo?: string; titulo?: string; legenda?: string };
   // entra no mapa liberado e no PDF (padrão true)
   naEntrega?: boolean;
+  // 13/11/2026: só no documento/PDF, nunca na conversa (ex.: maturidade e etapas)
+  soNaEntrega?: boolean;
 };
 export type CartaoConfig = { [K in TipoCartao]: CartaoBase & { tipo: K; calcular: (ctx: Contexto) => DadosPorTipoCartao[K] | null } }[TipoCartao];
 
@@ -507,8 +638,40 @@ export type CartaoConfig = { [K in TipoCartao]: CartaoBase & { tipo: K; calcular
 // ui/Entrega.tsx). Antes de liberar, a lateral continua montando ao vivo
 // (teaser), e os lugares em `teaser.ocultar` aparecem prontos mas fechados.
 // --------------------------------------------------------------------------
+// 13/11/2026: o documento (no lugar do mapa liberado padrão). Seções em ordem,
+// cada uma com `quando` (é assim que o PDF muda pelo papel da pessoa: a página
+// "pra levar pra diretoria" é uma seção com quando) e `novaPagina` (folha nova no PDF).
+export type ItemDocumento = { titulo: string; texto?: string; nota?: string };
+export type SecaoDocumento = {
+  id: string;
+  tipo: "mapa" | "cartoes" | "itens" | "texto" | "resumo";
+  quando?: Condicao;
+  novaPagina?: boolean | Condicao; // folha nova no PDF (sempre, ou só quando a condição vale)
+  rotulo?: Texto; // linha em mono acima do título
+  titulo?: Texto;
+  texto?: Texto;
+  paragrafos?: Texto[];
+  cartoes?: string[]; // tipo "cartoes": ids dos cartões, nesta ordem (inclui os soNaEntrega)
+  itens?: (ctx: Contexto) => ItemDocumento[]; // tipo "itens": função PURA da config
+  colunas?: [string, string]; // tipo "itens": cabeçalho das duas colunas (ex.: "O que vocês precisam", "Como resolve")
+  destaque?: boolean; // caixa com fundo (ex.: contato)
+};
+export type DocumentoConfig = {
+  preparadoPara?: Texto; // "Preparado para a {{empresa}}"
+  cliente?: Texto; // nome da empresa da pessoa, ao lado do logo dela (ex.: "{{empresa}}")
+  logoCliente?: boolean; // logo da empresa lida pelo e-mail ao lado do logo da marca (sem logo: só o nome)
+  secoes: SecaoDocumento[];
+};
+
 export type EntregaConfig = {
   apos?: string; // etapa que destrava (padrão: a última com input "tel"; sem ela, o fim da conversa)
+  // 13/11/2026: libera só no fim da conversa (ignora `apos` e o telefone)
+  noFim?: boolean;
+  // 13/11/2026: o documento "começa a ser montado" depois desta etapa: um cartão na conversa
+  // com a barra e o que está sendo montado, que fecha quando a entrega libera
+  montagem?: { apos: string; rotulo: Texto; pronto: Texto; itens?: Texto[]; duracaoMs?: number };
+  // 13/11/2026: documento por seções (com isto, a entrega vira o documento)
+  documento?: DocumentoConfig;
   quando?: Condicao; // condição a mais
   fala?: Texto; // balão do bot logo antes do mapa
   rotulo?: Texto; // linha em mono acima do título (ex.: "Mapa liberado")
@@ -522,7 +685,8 @@ export type EntregaConfig = {
   verCompleto?: string; // botão na lateral depois de liberar (desktop)
   resumo?: boolean; // inclui o resumo do caso (padrão true)
   cartoes?: boolean; // inclui os cartões da conversa (padrão true)
-  teaser?: { ocultar?: NoMapa["tipo"][]; rotulo?: string };
+  // 13/11: tipo do nó ou id do lugar; `ateMontagem`: abre quando o documento começa a ser montado
+  teaser?: { ocultar?: (NoMapa["tipo"] | string)[]; rotulo?: string; ateMontagem?: boolean };
   pdf?: {
     arquivo?: Texto; // nome sugerido do arquivo (vira o título da página durante a impressão)
     logo?: { src: string; alt: string; altura?: number }; // logo pra papel claro

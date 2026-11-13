@@ -5,6 +5,7 @@ import { sendToRdStation } from "@/lib/rdstation";
 import { notifyNewLead } from "@/lib/email";
 import { jsonWithCors, preflight } from "@/lib/cors";
 import { detectTestEnvironment } from "@/lib/ambiente";
+import { QUALIFICA_ENVIA_RD } from "@/lib/diagnostico/servidor-sysaid";
 
 export const runtime = "nodejs";
 
@@ -107,8 +108,14 @@ export async function POST(req: NextRequest) {
     return jsonWithCors(origin, { ok: true, id, teste: hostDeTeste });
   }
 
-  const rd = await sendToRdStation({ ...lead, form });
-  await markRdStation(id, rd.ok ? "sent" : "failed", rd.detail).catch(() => {});
+  // Qualifica v2 no piloto (decisão do Fernando, 13/11/2026): não vai pro RD Station;
+  // o comercial vê a conversa inteira no /admin/qualifica. Chave: QUALIFICA_RD_STATION=true
+  if (form === "qualifica" && !QUALIFICA_ENVIA_RD) {
+    await markRdStation(id, "failed", "pulado (Qualifica no piloto: RD Station desligado; ver /admin/qualifica)").catch(() => {});
+  } else {
+    const rd = await sendToRdStation({ ...lead, form });
+    await markRdStation(id, rd.ok ? "sent" : "failed", rd.detail).catch(() => {});
+  }
 
   notifyNewLead({
     id,

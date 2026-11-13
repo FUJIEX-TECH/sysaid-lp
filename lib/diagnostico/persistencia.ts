@@ -8,7 +8,7 @@
 // migração lib/migrations/2026-10-28-diagnostico.sql NÃO aplicada em produção).
 // ==========================================================================
 
-import type { Contexto, Persistencia, Respostas } from "@/lib/conversa-core";
+import type { Classificacao, Contexto, Medicao, Persistencia, Respostas, Turno } from "@/lib/conversa-core";
 
 const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "gclid"] as const;
 
@@ -48,13 +48,70 @@ function notasSpin(r: Respostas, ctx: Contexto): string {
   return linhas.join("\n").slice(0, 1900);
 }
 
-export function criarPersistenciaLP(): Persistencia {
+// 13/11/2026: opções por fluxo. `fluxo` = id da config (vai pro registro da conversa);
+// `notas` = o que entra em `notes` no parcial; `derivados` = o que a config leu da
+// conversa (dor principal, conta, pedido...), pra ficha do /admin/qualifica.
+export type OpcoesPersistencia = {
+  fluxo?: string;
+  notas?: (r: Respostas, ctx: Contexto) => string;
+  derivados?: (ctx: Contexto) => Record<string, unknown>;
+};
+
+export function criarPersistenciaLP(opcoes: OpcoesPersistencia = {}): Persistencia {
   let leadId: number | null = null;
   let utm: Record<string, string> | null = null;
   let salvoEmail = "";
   let salvoIdent = "";
   let salvoContato = "";
+  let seq = 0;
+  let parcial: Promise<void> = Promise.resolve();
   const ensureUtm = () => (utm ??= getUtm());
+  const notas = opcoes.notas ?? notasSpin;
+  // 13/11/2026: as gravações parciais saem em fila: nome/empresa e WhatsApp só depois de o
+  // e-mail ter criado a linha (senão viram INSERT sem e-mail, que o banco recusa)
+  const fila = (campos: Record<string, string>) => {
+    parcial = parcial.then(() => salvarParcial(campos));
+    return parcial;
+  };
+
+  // 13/11/2026: a conversa inteira, pro /admin/qualifica (best-effort, nunca segura a conversa)
+  async function salvarConversa(args: { sessao?: string; transcricao?: Turno[]; respostas: Respostas; ctx: Contexto; completo: boolean; classificacao?: Classificacao; medicao?: Medicao; honeypot?: string }) {
+    if (!leadId || !args.sessao || !args.respostas.email) return;
+    seq += 1;
+    const c = args.ctx;
+    let derivados: Record<string, unknown> | undefined;
+    try {
+      derivados = opcoes.derivados?.(c);
+    } catch {
+      derivados = undefined;
+    }
+    const corpo = {
+      sessao: args.sessao,
+      lead_id: leadId,
+      email: args.respostas.email,
+      seq,
+      fluxo: opcoes.fluxo ?? "sysaid-diagnostico-itsm",
+      origem: c.origem,
+      completo: args.completo,
+      website: args.honeypot || undefined,
+      conversa: args.transcricao ?? [],
+      dados: {
+        respostas: args.respostas,
+        derivados,
+        gerados: c.gerados,
+        empresa: c.empresa ?? null,
+        sinais: c.sinais ?? null,
+        variaveis: c.variaveis,
+        classificacao: args.classificacao,
+        medicao: args.medicao,
+      },
+    };
+    try {
+      await fetch("/api/qualifica/conversa", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(corpo), keepalive: !args.completo });
+    } catch {
+      // enfeite: nunca segura a conversa
+    }
+  }
 
   async function salvarParcial(campos: Record<string, string>) {
     try {
@@ -77,30 +134,33 @@ export function criarPersistenciaLP(): Persistencia {
   }
 
   return {
-    aoResponder(etapaId: string, r: Respostas, ctx: Contexto) {
+    aoResponder(etapaId: string, r: Respostas, ctx: Contexto, extras) {
       if (etapaId === "email" && r.email && r.email !== salvoEmail) {
         salvoEmail = r.email;
-        const notes = notasSpin(r, ctx);
-        salvarParcial(notes ? { email: r.email, notes } : { email: r.email });
+        const notes = notas(r, ctx);
+        fila(notes ? { email: r.email, notes } : { email: r.email });
       }
       // nome e empresa confirmados (ou digitados) entram no parcial logo que existem
       if ((etapaId === "confirma" || etapaId === "nome" || etapaId === "empresa") && r.nome && r.empresa) {
         const chave = `${r.nome}|${r.empresa}`;
         if (chave !== salvoIdent) {
           salvoIdent = chave;
-          salvarParcial({ name: r.nome, company: r.empresa });
+          fila({ name: r.nome, company: r.empresa });
         }
       }
       if (etapaId === "telefone" && r.nome && r.telefone) {
         const chave = `${r.nome}|${r.telefone}`;
         if (chave !== salvoContato) {
           salvoContato = chave;
-          salvarParcial({ name: r.nome, phone: r.telefone });
+          fila({ name: r.nome, phone: r.telefone });
         }
       }
+      // a conversa até aqui, a partir do e-mail (depois que o parcial ganhou id)
+      if (r.email) parcial.then(() => salvarConversa({ sessao: extras?.sessao, transcricao: extras?.transcricao, respostas: r, ctx, completo: false }));
     },
 
-    async enviar({ respostas, ctx, classificacao, honeypot, medicao }) {
+    async enviar({ respostas, ctx, classificacao, honeypot, medicao, sessao, transcricao }) {
+      await parcial; // o id do parcial, se ainda estava chegando
       const s = ctx.sinais;
       const diag = {
         variante: "b",
@@ -135,6 +195,8 @@ export function criarPersistenciaLP(): Persistencia {
         company: respostas.empresa ?? "",
         num_admins: respostas.tecnicos ?? "",
         website: honeypot,
+        // 13/11/2026: o chat do Qualifica; no piloto não vai pro RD Station (o comercial vê no /admin/qualifica)
+        form: "qualifica",
         page_url: window.location.href,
         referrer: document.referrer,
         // UTMs da URL atual; se não tem, os lembrados da 1ª página (sinais)
@@ -150,6 +212,7 @@ export function criarPersistenciaLP(): Persistencia {
       if (!res.ok || !data.ok) return { ok: false };
 
       if (data.id && !data.hp) {
+        leadId = Number(data.id);
         try {
           await fetch("/api/diagnostico", {
             method: "POST",
@@ -159,6 +222,7 @@ export function criarPersistenciaLP(): Persistencia {
         } catch {
           // enfeite: nunca segura o redirect
         }
+        await salvarConversa({ sessao, transcricao, respostas, ctx, completo: true, classificacao, medicao, honeypot });
       }
       // mesma regra da LP: envio descartado pelo honeypot não vira conversão
       if (!data.hp) sessionStorage.setItem("sysaid_lead", "1");

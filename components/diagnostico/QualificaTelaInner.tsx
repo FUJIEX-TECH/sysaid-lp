@@ -3,9 +3,12 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import ConversaTela from "@/lib/conversa-core/ui/ConversaTela";
 import ConversionPing from "@/components/ConversionPing";
+import { lerSinais, type Evento } from "@/lib/conversa-core";
 import { configSysaid } from "@/lib/diagnostico/config-sysaid";
+import { configSysaidGenerica } from "@/lib/diagnostico/config-sysaid-generica";
+import { escolherConfig } from "@/lib/diagnostico/escolher-config";
+import { derivados, notasGenerica } from "@/lib/diagnostico/generica-sysaid";
 import { criarPersistenciaLP } from "@/lib/diagnostico/persistencia";
-import type { Evento } from "@/lib/conversa-core";
 
 const TEXTOS = {
   // sem linha de fonte no cartão da empresa: o chat não anuncia de onde tirou o dado (regra do Fernando, 11/11/2026)
@@ -18,8 +21,18 @@ const TEXTOS = {
 // trava: só existe a marca "sysaid_lead" no sessionStorage se o envio gravou e
 // não caiu no honeypot (persistencia.ts). Monta só quando o envio deu certo E o
 // mapa foi liberado; se um dia o envio redirecionar, a /obrigado cuida.
+// 13/11/2026: a configuração sai da origem (escolher-config.ts): busca genérica
+// = fluxo novo com documento; comparativa, marca e preço = fluxo de sempre.
+// A conversa inteira vai pro /admin/qualifica (persistência).
 export default function QualificaTelaInner() {
-  const persistencia = useMemo(() => criarPersistenciaLP(), []);
+  const config = useMemo(() => escolherConfig(lerSinais(configSysaid.origens.lembrar)), []);
+  const persistencia = useMemo(
+    () =>
+      config.id === configSysaidGenerica.id
+        ? criarPersistenciaLP({ fluxo: config.id, notas: (_r, ctx) => notasGenerica(ctx), derivados })
+        : criarPersistenciaLP({ fluxo: config.id }),
+    [config]
+  );
   const [converter, setConverter] = useState(false);
   const marcas = useRef({ envio: false, entrega: false });
   const onEvento = useCallback((e: Evento) => {
@@ -30,7 +43,7 @@ export default function QualificaTelaInner() {
   }, []);
   return (
     <>
-      <ConversaTela config={configSysaid} persistencia={persistencia} onEvento={onEvento} textos={TEXTOS} />
+      <ConversaTela config={config} persistencia={persistencia} onEvento={onEvento} textos={TEXTOS} />
       {converter && <ConversionPing />}
     </>
   );

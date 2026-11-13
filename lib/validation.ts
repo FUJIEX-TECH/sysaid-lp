@@ -5,7 +5,8 @@ import { isCorporateEmail, CORPORATE_EMAIL_ERROR } from "./email-domains";
 // email (gatilho, obrigatorio), nome e telefone obrigatorios, empresa opcional,
 // numero de administradores (select). UTMs + gclid capturados da URL.
 // Formularios que caem neste funil. "lp" = formulario da propria LP (padrao).
-export const FORM_IDS = z.enum(["lp", "demo", "trial", "contato"]);
+// "qualifica" (13/11/2026): o chat do Qualifica v2; no piloto não vai pro RD Station (servidor-sysaid.ts, QUALIFICA_ENVIA_RD)
+export const FORM_IDS = z.enum(["lp", "demo", "trial", "contato", "qualifica"]);
 export type FormId = z.infer<typeof FORM_IDS>;
 
 export const leadSchema = z.object({

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type CSSProperties } from "react";
-import { formatarNumero, type CartaoPronto, type VistaAntesDepois, type VistaBarras, type VistaLinhaTempo, type VistaMedidor, type VistaNumero } from "../../cartoes";
+import { formatarNumero, type CartaoPronto, type LayoutCenaPronto, type VistaAntesDepois, type VistaBarras, type VistaCena, type VistaLinhaTempo, type VistaMedidor, type VistaNumero } from "../../cartoes";
 
 // ==========================================================================
 // conversa-core — 12/11/2026: o cartão visual da conversa. Recebe a "vista"
@@ -43,8 +43,8 @@ function useContagem(alvo: number, animar: boolean, ms = 1000): number {
 }
 
 function Numero({ v, idioma, animar }: { v: VistaNumero; idioma: string; animar: boolean }) {
-  const atual = useContagem(v.valor, animar);
-  const mostrado = atual === v.valor ? v.texto : formatarNumero(atual, v.formato, idioma);
+  const atual = useContagem(v.valor, animar && !v.fixo);
+  const mostrado = v.fixo || atual === v.valor ? v.texto : formatarNumero(atual, v.formato, idioma);
   return (
     <div className="cvc-n">
       <p className="cvc-n__valor">
@@ -56,11 +56,13 @@ function Numero({ v, idioma, animar }: { v: VistaNumero; idioma: string; animar:
         )}
         <span className="cvt__sr">{`${v.texto}${v.unidade ? ` ${v.unidade}` : ""}`}</span>
       </p>
-      <div className="cvc-n__regua" aria-hidden="true">
-        {v.faixa && <span className="cvc-n__faixa" style={{ left: `${v.faixa.inicio}%`, width: `${Math.max(1.5, v.faixa.fim - v.faixa.inicio)}%` }} />}
-        <span className="cvc-n__marca" style={{ left: `${v.marca}%` }} />
-      </div>
-      {v.faixa && (
+      {v.regua && (
+        <div className="cvc-n__regua" aria-hidden="true">
+          {v.faixa && <span className="cvc-n__faixa" style={{ left: `${v.faixa.inicio}%`, width: `${Math.max(1.5, v.faixa.fim - v.faixa.inicio)}%` }} />}
+          <span className="cvc-n__marca" style={{ left: `${v.marca}%` }} />
+        </div>
+      )}
+      {v.regua && v.faixa && !v.fixo && (
         <p className="cvc-n__faixa-texto">
           <span>{v.faixa.textoMin}</span>
           <i aria-hidden="true" />
@@ -178,6 +180,74 @@ function Medidor({ v }: { v: VistaMedidor }) {
   );
 }
 
+// 13/11/2026: cena desenhada. O SVG é da config (conferido no núcleo, sem script nem
+// link); os rótulos são HTML por cima, em % do desenho (o texto da pessoa nunca entra
+// no SVG). Com `estreito`, a composição 4:3 aparece quando o cartão é estreito
+// (container query) e a larga some. Logo e nome numa faixa no topo; logo que falha
+// ao carregar cai no nome.
+function LayoutCena({ l, classe }: { l: LayoutCenaPronto; classe: string }) {
+  const anot = l.rotulos.filter((r) => r.tipo === "anotacao");
+  return (
+    <div className={`cvc-cena__layout ${classe}`}>
+      <div className="cvc-cena__quadro" style={{ aspectRatio: String(l.proporcao) }}>
+        <div className="cvc-cena__desenho" aria-hidden="true" dangerouslySetInnerHTML={{ __html: l.svg }} />
+        {l.rotulos.map((r, i) =>
+          l.legenda && r.tipo === "anotacao" ? (
+            // marcador numerado no desenho; a palavra vai na legenda embaixo
+            <span key={`${i}-${r.texto}`} className={`cvc-cena__marcador${r.alerta ? " cvc-cena__marcador--alerta" : ""}`} style={{ left: `${r.x}%`, top: `${r.y}%`, "--i": i } as Var} aria-hidden="true">
+              {anot.indexOf(r) + 1}
+            </span>
+          ) : (
+            <span
+              key={`${i}-${r.texto}`}
+              className={`cvc-cena__rotulo cvc-cena__rotulo--${r.lado} cvc-cena__rotulo--${r.tipo}${r.alerta ? " cvc-cena__rotulo--alerta" : ""}`}
+              style={{ left: `${r.x}%`, top: `${r.y}%`, "--i": i } as Var}
+            >
+              {r.texto}
+            </span>
+          )
+        )}
+      </div>
+      {l.legenda && anot.length > 0 && (
+        <ol className="cvc-cena__legenda">
+          {anot.map((r, i) => (
+            <li key={`${i}-${r.texto}`} className={r.alerta ? "cvc-cena__legenda-item cvc-cena__legenda-item--alerta" : "cvc-cena__legenda-item"} style={{ "--i": i } as Var}>
+              <span className="cvc-cena__marcador cvc-cena__marcador--lista" aria-hidden="true">
+                {i + 1}
+              </span>
+              {r.texto}
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
+  );
+}
+
+function Cena({ v }: { v: VistaCena }) {
+  const [logoFalhou, setLogoFalhou] = useState(false);
+  const comLogo = !!v.logo && !logoFalhou;
+  return (
+    <div className="cvc-cena" role="img" aria-label={[v.descricao, ...v.rotulos.filter((r) => r.tipo === "anotacao").map((r) => r.texto)].join(". ")}>
+      {(v.faixa || v.logo || v.nome) && (
+        <div className="cvc-cena__faixa">
+          <span className="cvc-cena__marca">
+            {comLogo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={v.logo!.src} alt={v.logo!.alt || v.nome || ""} onError={() => setLogoFalhou(true)} />
+            ) : (
+              v.nome && <span className="cvc-cena__nome">{v.nome}</span>
+            )}
+          </span>
+          {v.faixa && <span className="cvc-cena__faixa-texto">{v.faixa.texto}</span>}
+        </div>
+      )}
+      <LayoutCena l={v} classe={v.estreito ? "cvc-cena__quadro--largo" : ""} />
+      {v.estreito && <LayoutCena l={v.estreito} classe="cvc-cena__quadro--estreito" />}
+    </div>
+  );
+}
+
 export default function Cartao({ cartao, estatico }: Props) {
   let corpo: React.ReactNode = null;
   if (cartao.tipo === "numero") corpo = <Numero v={cartao.vista} idioma={cartao.idioma} animar={!estatico} />;
@@ -185,6 +255,7 @@ export default function Cartao({ cartao, estatico }: Props) {
   else if (cartao.tipo === "antesDepois") corpo = <AntesDepois v={cartao.vista} />;
   else if (cartao.tipo === "linhaTempo") corpo = <LinhaTempo v={cartao.vista} />;
   else if (cartao.tipo === "medidor") corpo = <Medidor v={cartao.vista} />;
+  else if (cartao.tipo === "cena") corpo = <Cena v={cartao.vista} />;
   return (
     <figure className={`cvg cvc cvc--${cartao.tipo}${estatico ? " cvc--estatico" : ""}`} data-cartao={cartao.id} aria-label={cartao.titulo ?? cartao.rotulo}>
       {(cartao.rotulo || cartao.titulo) && (

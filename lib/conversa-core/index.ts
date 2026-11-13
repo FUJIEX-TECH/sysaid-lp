@@ -21,11 +21,34 @@ export {
   vistaAntesDepois,
   vistaLinhaTempo,
   vistaMedidor,
+  vistaCena,
+  svgSeguro,
+  resumoCartao,
   extrasDoCartao,
   type CartaoPronto,
   type VistaPorTipo,
 } from "./cartoes";
-export { etapaDaEntrega, entregaLiberada, dataHoje } from "./entrega";
+export { etapaDaEntrega, entregaLiberada, dataHoje, montagemIniciada } from "./entrega";
+// 13/11/2026: múltipla escolha, horários com regras e o documento por seções
+export { juntarMultipla, partesMultipla, valoresMultipla, textoMultipla, incluiValor, listaNatural } from "./selecao";
+export {
+  agoraNoFuso,
+  somarDias,
+  diaDaSemana,
+  diaPermitido,
+  primeiroDia,
+  diasDisponiveis,
+  horasDisponiveis,
+  lerHorarios,
+  juntarHorarios,
+  validarHorarios,
+  formatarDia,
+  formatarHora,
+  formatarHorario,
+  type Horario,
+  type ValidacaoHorarios,
+} from "./horarios";
+export { resolverDocumento, type DocumentoPronto, type SecaoPronta } from "./documento";
 export { dominioDe, pedirEmpresa } from "./enriquecimento";
 export { comTimeout, rotularComJev, pedirGeracao, novaSessao } from "./jev";
 // o lado do servidor (LLM, Jev, custo) fica em "./servidor" e só entra em rota de API

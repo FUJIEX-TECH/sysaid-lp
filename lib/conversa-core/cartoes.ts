@@ -16,6 +16,7 @@ import type {
   Contexto,
   DadosAntesDepois,
   DadosBarras,
+  DadosCena,
   DadosLinhaTempo,
   DadosMedidor,
   DadosNumero,
@@ -67,6 +68,8 @@ const limpo = (s: unknown): string => (typeof s === "string" ? s.trim() : "");
 export type VistaNumero = {
   valor: number;
   texto: string;
+  fixo: boolean; // 13/11/2026: o texto vem da config (ex.: "26 a 52", "?"): sem contagem
+  regua: boolean;
   formato: FormatoNumero;
   unidade?: string;
   conta?: string;
@@ -88,16 +91,26 @@ export type VistaMedidor = {
   rotuloAtual?: string;
   rotuloAlvo?: string;
 };
+export type RotuloCenaPronto = { texto: string; x: number; y: number; lado: "esquerda" | "direita" | "centro"; alerta: boolean; tipo: "anotacao" | "bloco" };
+export type LayoutCenaPronto = { svg: string; proporcao: number; rotulos: RotuloCenaPronto[]; placa: { x: number; y: number }; legenda: boolean };
+export type VistaCena = LayoutCenaPronto & {
+  descricao: string;
+  logo: { src: string; alt: string } | null;
+  nome?: string;
+  faixa?: { texto: string };
+  estreito?: LayoutCenaPronto;
+};
 export type VistaPorTipo = {
   numero: VistaNumero;
   barras: VistaBarras;
   antesDepois: VistaAntesDepois;
   linhaTempo: VistaLinhaTempo;
   medidor: VistaMedidor;
+  cena: VistaCena;
 };
 
 export function vistaNumero(d: DadosNumero, idioma = "pt-BR"): VistaNumero | null {
-  if (!d || !finito(d.valor)) return null;
+  if (!d || !finito(d.valor) || (d.texto !== undefined && !limpo(d.texto))) return null;
   const formato = d.formato ?? {};
   let faixa: VistaNumero["faixa"];
   let topo = Math.abs(d.valor);
@@ -112,9 +125,12 @@ export function vistaNumero(d: DadosNumero, idioma = "pt-BR"): VistaNumero | nul
     faixa.inicio = pct(Math.max(0, faixa.min), escala);
     faixa.fim = pct(faixa.max, escala);
   }
+  const fixo = !!limpo(d.texto);
   return {
     valor: d.valor,
-    texto: formatarNumero(d.valor, formato, idioma),
+    texto: fixo ? limpo(d.texto).slice(0, 24) : formatarNumero(d.valor, formato, idioma),
+    fixo,
+    regua: d.regua !== false,
     formato,
     unidade: limpo(d.unidade) || undefined,
     conta: limpo(d.conta) || undefined,
@@ -177,6 +193,50 @@ export function vistaMedidor(d: DadosMedidor): VistaMedidor | null {
   };
 }
 
+// 13/11/2026: cena desenhada. O SVG vem da config (desenho pronto, nunca gerado
+// na hora), mas o núcleo confere mesmo assim: tem que ser um <svg> com viewBox,
+// sem script, sem atributo de evento, sem link externo nem objeto estrangeiro.
+// Rótulos: até 4, até 48 caracteres, posição presa entre 0 e 100.
+const SVG_PROIBIDO = /<\s*(script|foreignObject|iframe|object|embed|image|use)\b|\son\w+\s*=|javascript:|href\s*=|url\s*\(\s*['"]?\s*(https?:|\/\/)/i;
+const prende = (n: number) => Math.max(0, Math.min(100, n));
+export function svgSeguro(svg: unknown): svg is string {
+  if (typeof svg !== "string") return false;
+  const t = svg.trim();
+  return /^<svg\b[^>]*\bviewBox=/i.test(t) && /<\/svg>$/i.test(t) && !SVG_PROIBIDO.test(t) && t.length <= 60000;
+}
+function rotulosCena(l: DadosCena["rotulos"]): RotuloCenaPronto[] {
+  const todos = (l ?? []).filter((r) => limpo(r?.texto) && finito(r.x) && finito(r.y));
+  // até 4 anotações (as palavras da pessoa) e até 6 nomes de bloco
+  const anot = todos.filter((r) => r.tipo !== "bloco").slice(0, 4);
+  const blocos = todos.filter((r) => r.tipo === "bloco").slice(0, 6);
+  return [...blocos, ...anot].map((r) => ({ texto: r.texto.trim().slice(0, 48), x: prende(r.x), y: prende(r.y), lado: r.lado ?? "direita", alerta: !!r.alerta, tipo: r.tipo === "bloco" ? "bloco" : "anotacao" }));
+}
+function proporcaoDe(p: unknown, padrao: number): number {
+  return finito(p) && p > 0.5 && p < 4 ? p : padrao;
+}
+function placaDe(p: { x: number; y: number } | undefined): { x: number; y: number } {
+  return p && finito(p.x) && finito(p.y) ? { x: prende(p.x), y: prende(p.y) } : { x: 3, y: 4 };
+}
+export function vistaCena(d: DadosCena): VistaCena | null {
+  if (!d || !svgSeguro(d.svg)) return null;
+  const logo = d.logo && limpo(d.logo.src) && /^(https:\/\/|\/)/.test(d.logo.src) ? { src: d.logo.src.trim(), alt: limpo(d.logo.alt) } : null;
+  const e = d.estreito;
+  const estreito: LayoutCenaPronto | undefined =
+    e && svgSeguro(e.svg) ? { svg: e.svg.trim(), proporcao: proporcaoDe(e.proporcao, 4 / 3), rotulos: rotulosCena(e.rotulos), placa: placaDe(e.placa), legenda: !!e.legenda } : undefined;
+  return {
+    svg: d.svg.trim(),
+    proporcao: proporcaoDe(d.proporcao, 16 / 9),
+    descricao: limpo(d.descricao) || "Desenho",
+    rotulos: rotulosCena(d.rotulos),
+    logo,
+    nome: limpo(d.nome) || undefined,
+    faixa: d.faixa && limpo(d.faixa.texto) ? { texto: limpo(d.faixa.texto).slice(0, 80) } : undefined,
+    placa: placaDe(d.placa),
+    legenda: false,
+    estreito,
+  };
+}
+
 // valores calculados que os textos do cartão podem usar como {{chave}}
 export function extrasDoCartao<K extends TipoCartao>(tipo: K, v: VistaPorTipo[K]): Record<string, string | number> {
   if (tipo === "numero") {
@@ -192,14 +252,40 @@ export function extrasDoCartao<K extends TipoCartao>(tipo: K, v: VistaPorTipo[K]
     return { nivel: x.atual, nivelRotulo: x.niveis[x.atual - 1].rotulo, alvo: x.alvo ?? "", alvoRotulo: x.alvo ? x.niveis[x.alvo - 1].rotulo : "", total: x.niveis.length };
   }
   if (tipo === "linhaTempo") return { etapas: (v as VistaLinhaTempo).etapas.length };
+  if (tipo === "cena") return { nome: (v as VistaCena).nome ?? "" };
   return {};
+}
+
+// 13/11/2026: o cartão numa linha de texto (transcrição, registro, ficha)
+export function resumoCartao(c: CartaoPronto): string {
+  switch (c.tipo) {
+    case "numero": {
+      const v = c.vista;
+      const faixa = v.faixa ? ` (${v.faixa.textoMin} a ${v.faixa.textoMax})` : "";
+      return `${v.texto}${v.unidade ? ` ${v.unidade}` : ""}${faixa}${v.conta ? ` · ${v.conta}` : ""}`;
+    }
+    case "barras":
+      return c.vista.itens.map((i) => `${i.rotulo}: ${i.texto}`).join(" · ");
+    case "antesDepois":
+      return `${c.vista.antes.titulo}: ${c.vista.antes.passos.map((p) => p.texto).join(" → ")} | ${c.vista.depois.titulo}: ${c.vista.depois.passos.map((p) => p.texto).join(" → ")}`;
+    case "linhaTempo":
+      return c.vista.etapas.map((e) => `${e.quando ? `${e.quando}: ` : ""}${e.titulo}`).join(" · ");
+    case "medidor": {
+      const v = c.vista;
+      return `nível ${v.atual} de ${v.niveis.length} (${v.niveis[v.atual - 1].rotulo})${v.alvo ? ` → ${v.alvo} (${v.niveis[v.alvo - 1].rotulo})` : ""}`;
+    }
+    case "cena":
+      return `${c.vista.descricao}${c.vista.rotulos.some((r) => r.tipo === "anotacao") ? ` · rótulos: ${c.vista.rotulos.filter((r) => r.tipo === "anotacao").map((r) => `“${r.texto}”`).join(", ")}` : ""}${c.vista.nome ? ` · ${c.vista.nome}` : ""}`;
+    default:
+      return "";
+  }
 }
 
 // --------------------------------------------------------------------------
 // resolver: config + contexto → cartões prontos pra desenhar
 // --------------------------------------------------------------------------
 type Textos = { fala?: string; rotulo?: string; titulo?: string; legenda?: string };
-export type CartaoPronto = { [K in TipoCartao]: { id: string; tipo: K; apos: string; naEntrega: boolean; idioma: string; vista: VistaPorTipo[K] } & Textos }[TipoCartao];
+export type CartaoPronto = { [K in TipoCartao]: { id: string; tipo: K; apos: string; naEntrega: boolean; soNaEntrega: boolean; idioma: string; vista: VistaPorTipo[K] } & Textos }[TipoCartao];
 
 function vistaDe(c: CartaoConfig, ctx: Contexto, idioma: string): VistaPorTipo[TipoCartao] | null {
   let d: unknown;
@@ -220,6 +306,8 @@ function vistaDe(c: CartaoConfig, ctx: Contexto, idioma: string): VistaPorTipo[T
       return vistaLinhaTempo(d as DadosLinhaTempo);
     case "medidor":
       return vistaMedidor(d as DadosMedidor);
+    case "cena":
+      return vistaCena(d as DadosCena);
     default:
       return null;
   }
@@ -244,7 +332,8 @@ export function resolverCartao(c: CartaoConfig, ctx: Contexto, variavel?: Resolv
     id: c.id,
     tipo: c.tipo,
     apos: c.apos,
-    naEntrega: c.naEntrega !== false,
+    naEntrega: c.naEntrega !== false || !!c.soNaEntrega,
+    soNaEntrega: !!c.soNaEntrega,
     idioma,
     vista,
     fala: texto("fala"),

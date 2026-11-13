@@ -793,3 +793,225 @@ a.cvt__logo:focus-visible { outline: 2px solid var(--cv-focus); outline-offset: 
   .cven__fecho { font-size: 1.05rem; }
   .cven .cvg__p { opacity: 1; }
 }
+
+/* ==========================================================================
+   13/11/2026: rótulo de fala, múltipla escolha, horários, nota do campo
+   ========================================================================== */
+.cvt__bot-rotulo { display: block; margin: 0 0 5px; font-family: var(--cv-font-mono); font-size: 0.66rem; font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; color: var(--cv-primary); }
+.cvt__nota { margin: 2px 0 0; font-size: 0.76rem; line-height: 1.45; color: var(--cv-ink-400); }
+.cvt[data-estilo="chat"] .cvt__nota { padding-left: 6px; }
+.cvt__nota--horarios { margin-top: -4px; }
+
+.cvt__multipla, .cvt__horarios { display: flex; flex-direction: column; gap: 12px; padding-left: 14px; }
+.cvt[data-estilo="chat"] .cvt__multipla, .cvt[data-estilo="chat"] .cvt__horarios { padding-left: 0; }
+.cvt__opcao--marca { display: inline-flex; align-items: center; gap: 9px; text-align: left; }
+.cvt__marca { flex: none; width: 13px; height: 13px; border: 1px solid var(--cv-mais-borda); border-radius: 3px; position: relative; transition: background 0.12s, border-color 0.12s; }
+.cvt__opcao--marca[aria-pressed="true"] { background: var(--cv-opcao-hover-bg); border-color: var(--cv-primary); color: var(--cv-ink); }
+.cvt__opcao--marca[aria-pressed="true"] .cvt__marca { background: var(--cv-primary); border-color: var(--cv-primary); }
+.cvt__opcao--marca[aria-pressed="true"] .cvt__marca::after { content: ""; position: absolute; left: 4px; top: 1px; width: 3px; height: 7px; border: solid var(--cv-primary-contrast); border-width: 0 1.6px 1.6px 0; transform: rotate(45deg); }
+.cvt__multipla .cvt__form, .cvt__multipla .cvt__form input { padding-left: 0; }
+.cvt[data-estilo="chat"] .cvt__multipla .cvt__form input { padding: 12px 18px; }
+.cvt__continuar {
+  align-self: flex-start;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 22px;
+  font: inherit; font-weight: 600; font-size: 0.94rem; line-height: 1;
+  color: var(--cv-primary-contrast); background: var(--cv-primary);
+  border: 0; border-radius: var(--cv-radius-campo, 4px); cursor: pointer;
+  transition: background 0.12s ease, opacity 0.12s ease;
+}
+.cvt__continuar:hover:not(:disabled) { background: var(--cv-primary-hover); }
+.cvt__continuar:focus-visible { outline: 2px solid var(--cv-focus); outline-offset: 3px; }
+.cvt__continuar:disabled { opacity: 0.38; cursor: default; }
+
+.cvt__horario { margin: 0; padding: 0; border: 0; display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 8px; min-width: 0; }
+.cvt__horario legend { grid-column: 1 / -1; padding: 0 0 6px; font-family: var(--cv-font-mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cv-ink-400); }
+.cvt__seletor { position: relative; display: block; min-width: 0; }
+.cvt__seletor::after { content: ""; position: absolute; right: 16px; top: 50%; width: 7px; height: 7px; margin-top: -5px; border: solid var(--cv-ink-400); border-width: 0 1.4px 1.4px 0; transform: rotate(45deg); pointer-events: none; }
+.cvt__seletor select {
+  width: 100%; appearance: none; -webkit-appearance: none;
+  padding: 12px 36px 12px 16px;
+  font: inherit; font-size: 0.95rem; color: var(--cv-ink);
+  background: var(--cv-superficie-2, var(--cv-superficie)); border: 1px solid var(--cv-input-borda);
+  border-radius: var(--cv-radius-campo, 4px); cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+.cvt__seletor select:focus { outline: none; border-color: var(--cv-accent); box-shadow: 0 0 0 1px var(--cv-accent); }
+.cvt__seletor select:invalid, .cvt__seletor select option[value=""] { color: var(--cv-ink-400); }
+.cvt__opcoes--alternativas { margin-top: 2px; padding-top: 12px; border-top: 1px solid var(--cv-line); }
+
+/* ==========================================================================
+   13/11/2026: cena desenhada (graficos/Cartao.tsx, tipo "cena"). O SVG vem da
+   config e usa as classes cs-* abaixo, então segue o tema (escuro na tela,
+   claro no papel). Rótulos são HTML por cima, em %; a composição estreita
+   (4:3) troca a larga pela largura do próprio cartão.
+   ========================================================================== */
+.cvc--cena { padding: 14px 14px 13px; }
+.cvc--cena .cvc__cabeca { margin-bottom: 10px; }
+.cvc-cena { display: flex; flex-direction: column; gap: 10px; }
+.cvc-cena__quadro { position: relative; width: 100%; }
+.cvc-cena__layout { display: flex; flex-direction: column; gap: 10px; }
+.cvc-cena__quadro--estreito { display: none; }
+@container (max-width: 479px) {
+  .cvc-cena__quadro--largo { display: none; }
+  .cvc-cena__quadro--estreito { display: flex; }
+}
+.cvc-cena__desenho, .cvc-cena__desenho svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: visible; }
+.cvc-cena__rotulo {
+  position: absolute; z-index: 1;
+  width: max-content; max-width: 46%;
+  font-family: var(--cv-font-mono); font-size: 0.7rem; line-height: 1.25; letter-spacing: 0.01em;
+  text-transform: lowercase; text-wrap: balance;
+  /* só opacidade: o transform do rótulo é a posição (um cvt-sobe terminaria em transform: none) */
+  animation: cvc-cena-entra 0.35s ease calc(0.7s + var(--i, 0) * 0.12s) both;
+}
+.cvc-cena__rotulo--direita { transform: translate(0, -50%); }
+.cvc-cena__rotulo--esquerda { transform: translate(-100%, -50%); text-align: right; }
+.cvc-cena__rotulo--centro { transform: translate(-50%, -50%); text-align: center; }
+.cvc-cena__rotulo--anotacao { padding: 3px 7px 4px; color: var(--cv-ink); background: var(--cv-bg); border: 1px solid var(--cv-line-forte); border-radius: 3px; }
+.cvc-cena__rotulo--alerta { border-color: color-mix(in srgb, var(--cv-alerta) 70%, transparent); box-shadow: inset 2px 0 0 var(--cv-alerta); }
+.cvc-cena__rotulo--bloco { max-width: 60%; padding: 0; font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cv-ink-400); }
+/* marcadores numerados + legenda (composição estreita) */
+.cvc-cena__marcador {
+  position: absolute; z-index: 1; transform: translate(-50%, -50%);
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 19px; height: 19px; border-radius: 50%;
+  font-family: var(--cv-font-mono); font-size: 0.66rem; font-weight: 600; line-height: 1;
+  color: var(--cv-bg); background: var(--cv-ink-700);
+  animation: cvc-cena-entra 0.35s ease calc(0.7s + var(--i, 0) * 0.12s) both;
+}
+.cvc-cena__marcador--alerta { background: var(--cv-alerta); }
+.cvc-cena__marcador--lista { position: static; transform: none; flex: none; animation: none; margin-top: 1px; }
+.cvc-cena__legenda { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.cvc-cena__legenda-item { display: flex; align-items: flex-start; gap: 9px; font-family: var(--cv-font-mono); font-size: 0.74rem; line-height: 1.35; text-transform: lowercase; color: var(--cv-ink); animation: cvt-sobe 0.3s ease calc(0.8s + var(--i, 0) * 0.12s) both; }
+.cvc--estatico .cvc-cena__marcador, .cvc--estatico .cvc-cena__legenda-item { animation: none; }
+.cvc-cena__faixa { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 32px; padding-bottom: 10px; border-bottom: 1px solid var(--cv-line); }
+.cvc-cena__marca { display: inline-flex; align-items: center; min-width: 0; }
+.cvc-cena__marca img { display: block; height: 32px; width: auto; max-width: 140px; object-fit: contain; padding: 4px 8px; background: var(--cv-logo-caixa, #fff); border-radius: 4px; box-sizing: border-box; }
+.cvc-cena__nome { font-family: var(--cv-font-titulo); font-style: italic; font-size: 1.15rem; line-height: 1.1; color: var(--cv-ink); overflow-wrap: anywhere; }
+.cvc-cena__faixa-texto { font-family: var(--cv-font-mono); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: lowercase; color: var(--cv-ink-400); text-align: right; }
+@container (max-width: 359px) {
+  .cvc-cena__rotulo { font-size: 0.64rem; padding: 2px 5px 3px; }
+  .cvc-cena__rotulo--bloco { font-size: 0.56rem; padding: 0; }
+}
+
+/* traço do desenho */
+.cvc-cena svg * { vector-effect: non-scaling-stroke; }
+.cvc-cena svg .cs-fundo { fill: var(--cv-bg); stroke: none; }
+.cvc-cena svg .cs-grade { stroke: var(--cv-line); stroke-width: 1; fill: none; opacity: 0.38; }
+.cvc-cena svg .cs-l { stroke: var(--cv-ink-400); stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.cvc-cena svg .cs-f { stroke: var(--cv-line-forte); stroke-width: 1; fill: none; stroke-linecap: round; }
+.cvc-cena svg .cs-s { fill: var(--cv-superficie); stroke: var(--cv-ink-400); stroke-width: 1.5; stroke-linejoin: round; }
+.cvc-cena svg .cs-s2 { fill: var(--cv-bg); stroke: var(--cv-line-forte); stroke-width: 1; }
+.cvc-cena svg .cs-p { fill: var(--cv-ink-400); stroke: none; }
+.cvc-cena svg .cs-pf { fill: var(--cv-line-forte); stroke: none; }
+.cvc-cena svg .cs-a { stroke: var(--cv-primary); stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.cvc-cena svg .cs-af { fill: var(--cv-primary); stroke: none; }
+.cvc-cena svg .cs-at { fill: var(--cv-primary-tinta); stroke: var(--cv-primary); stroke-width: 1.5; }
+.cvc-cena svg .cs-x { stroke: var(--cv-alerta); stroke-width: 1.8; fill: none; stroke-linecap: round; }
+.cvc-cena svg .cs-xf { fill: var(--cv-alerta); stroke: none; }
+.cvc-cena svg .cs-tr { stroke-dasharray: 4 5; }
+.cvc-cena svg .cs-tr2 { stroke-dasharray: 2 4; }
+.cvc-cena svg .cs-tx { fill: var(--cv-ink-400); font-family: var(--cv-font-mono); font-size: 11px; letter-spacing: 0.04em; }
+.cvc-cena svg .cs-tx-a { fill: var(--cv-primary); }
+.cvc-cena svg .cs-tx-x { fill: var(--cv-alerta); }
+.cvc-cena svg .cs-tx-q { font-size: 15px; fill: var(--cv-ink-700); }
+/* entrada sóbria: os grupos do desenho aparecem em sequência, os rótulos depois */
+.cvc-cena svg > g { animation: cvc-cena-entra 0.5s ease both; }
+.cvc-cena svg > g:nth-of-type(2) { animation-delay: 0.08s; }
+.cvc-cena svg > g:nth-of-type(3) { animation-delay: 0.16s; }
+.cvc-cena svg > g:nth-of-type(4) { animation-delay: 0.24s; }
+.cvc-cena svg > g:nth-of-type(5) { animation-delay: 0.32s; }
+.cvc-cena svg > g:nth-of-type(6) { animation-delay: 0.4s; }
+.cvc-cena svg > g:nth-of-type(n + 7) { animation-delay: 0.48s; }
+@keyframes cvc-cena-entra { from { opacity: 0; } to { opacity: 1; } }
+.cvc--estatico .cvc-cena svg > g, .cvc--estatico .cvc-cena__rotulo { animation: none; }
+
+/* ==========================================================================
+   13/11/2026: "montando o seu documento" (ui/Montagem.tsx)
+   ========================================================================== */
+.cvmo { padding: 14px 16px 13px; display: flex; flex-direction: column; gap: 9px; }
+.cvmo__topo { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.cvmo__estado { font-family: var(--cv-font-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cv-ink-700); }
+.cvmo--pronto .cvmo__estado { color: var(--cv-primary); }
+.cvmo__pct { font-family: var(--cv-font-mono); font-size: 0.74rem; color: var(--cv-ink-400); font-variant-numeric: tabular-nums; }
+.cvmo__barra { display: block; height: 2px; background: var(--cv-line-forte); overflow: hidden; }
+.cvmo__barra i { display: block; height: 100%; background: var(--cv-primary); transition: width 0.25s linear; }
+.cvmo__itens { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.cvmo__item { display: flex; align-items: center; gap: 10px; font-size: 0.86rem; line-height: 1.3; color: var(--cv-ink-400); }
+.cvmo__marca { flex: none; width: 9px; height: 9px; border-radius: 50%; border: 1px solid var(--cv-line-forte); }
+.cvmo__item--agora { color: var(--cv-ink-700); }
+.cvmo__item--agora .cvmo__marca { border-color: var(--cv-primary); animation: cvt-pisca 0.9s infinite ease-in-out; }
+.cvmo__item--feito { color: var(--cv-ink); }
+.cvmo__item--feito .cvmo__marca { background: var(--cv-primary); border-color: var(--cv-primary); }
+
+/* mapa em linha (lugares da config): o mesmo nó, ligações mais curtas */
+.cvm--linear .cvm__liga { height: 18px; }
+.cvm--linear .cvm__liga span { font-size: 0.6rem; }
+.cvt__lateral .cvm--linear .cvm__no { padding-top: 7px; padding-bottom: 7px; }
+.cvt__lateral .cvm--linear .cvm__texto { font-size: 0.88rem; }
+
+/* ==========================================================================
+   13/11/2026: o documento (ui/Documento.tsx). Mesma seção larga do mapa
+   liberado (.cven), com capa de logos e seções; no PDF cada seção com
+   `novaPagina` começa numa folha nova.
+   ========================================================================== */
+.cvd__capa { display: flex; flex-direction: column; gap: 20px; }
+.cvd__logos { display: flex; align-items: center; gap: 14px; min-height: 36px; }
+.cvd__logo-cliente img { display: block; height: 36px; width: auto; max-width: 160px; object-fit: contain; padding: 5px 9px; background: var(--cv-logo-caixa, #fff); border-radius: 4px; box-sizing: border-box; }
+.cvd__nome-cliente { font-family: var(--cv-font-titulo); font-style: italic; font-size: 1.3rem; line-height: 1.1; color: var(--cv-ink); }
+.cvd__e { width: 1px; height: 26px; background: var(--cv-line-forte); }
+.cvd__logo-marca img { display: block; height: 22px; width: auto; }
+.cvd__logo-papel { display: none !important; }
+.cvd__secao { display: flex; flex-direction: column; gap: 12px; padding-top: 22px; border-top: 1px solid var(--cv-line); min-width: 0; }
+.cvd__secao-cabeca { display: flex; flex-direction: column; gap: 4px; }
+.cvd__rotulo { margin: 0; font-family: var(--cv-font-mono); font-size: 0.68rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--cv-primary); }
+.cvd__titulo { margin: 0; font-family: var(--cv-font-titulo); font-weight: 400; font-style: italic; font-size: clamp(1.35rem, 3vw, 1.7rem); line-height: 1.15; color: var(--cv-ink); text-wrap: balance; }
+.cvd__texto { margin: 0; max-width: 68ch; font-size: 0.98rem; line-height: 1.55; color: var(--cv-ink-700); text-wrap: pretty; }
+.cvd__secao--destaque { padding: 18px 20px; border: 1px solid var(--cv-line-forte); border-radius: var(--cv-radius-cartao); background: var(--cv-primary-tinta); }
+.cvd__cartoes { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
+.cvd__cartoes .cvg { margin: 0; }
+.cvd__secao .cvg--mapa { margin: 0; }
+.cvd__tabela { display: flex; flex-direction: column; }
+.cvd__linha { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px 28px; padding: 13px 0; border-top: 1px solid var(--cv-line); }
+.cvd__linha--cabeca { display: none; }
+.cvd__linha strong { font-weight: 500; font-size: 0.98rem; line-height: 1.35; color: var(--cv-ink); }
+.cvd__linha > span { font-size: 0.92rem; line-height: 1.5; color: var(--cv-ink-700); }
+.cvd__nota { display: block; margin-top: 6px; font-family: var(--cv-font-mono); font-size: 0.7rem; letter-spacing: 0.02em; color: var(--cv-ink-400); }
+.cvd__lista { margin: 0; display: flex; flex-direction: column; }
+.cvd__item { padding: 11px 0; border-top: 1px solid var(--cv-line); }
+.cvd__item:first-child { border-top: 0; padding-top: 0; }
+.cvd__item dt { font-weight: 500; font-size: 0.98rem; color: var(--cv-ink); }
+.cvd__item dd { margin: 3px 0 0; font-size: 0.92rem; line-height: 1.5; color: var(--cv-ink-700); }
+.cvd__item dd.cvd__nota { margin-top: 6px; font-family: inherit; font-size: 0.86rem; font-style: italic; letter-spacing: 0; color: var(--cv-ink-700); }
+@media (min-width: 720px) {
+  .cvd__linha { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.6fr); }
+  .cvd__linha--cabeca { display: grid; padding: 0 0 8px; border-top: 0; font-family: var(--cv-font-mono); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cv-ink-400); }
+  .cvd__cartoes--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media print {
+  .cven--doc { gap: 10px; }
+  .cven--doc .cvd__capa { gap: 10px; padding-bottom: 6px; }
+  .cven--doc .cven__papel-topo--so-texto { justify-content: flex-end; }
+  .cven--doc .cvd__logo-tela { display: none !important; }
+  .cven--doc .cvd__logo-papel { display: block !important; }
+  .cven--doc .cvd__logo-cliente img { height: 30px; border: 1px solid var(--cv-line); }
+  .cven--doc .cven__titulo { font-size: 1.85rem; }
+  .cven--doc .cvd__secao { gap: 7px; padding-top: 10px; break-inside: auto; }
+  .cven--doc .cvd__secao--pagina { break-before: page; border-top: 0; padding-top: 0; }
+  .cven--doc .cvd__secao-cabeca, .cven--doc .cvd__linha, .cven--doc .cvd__item, .cven--doc .cvc, .cven--doc .cvg { break-inside: avoid; }
+  .cven--doc .cvd__titulo { font-size: 1.3rem; }
+  .cven--doc .cvd__texto { font-size: 0.92rem; line-height: 1.45; max-width: none; }
+  .cven--doc .cvd__linha { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.7fr); padding: 7px 0; }
+  .cven--doc .cvd__linha--cabeca { display: grid; padding: 0 0 4px; border-top: 0; font-family: var(--cv-font-mono); font-size: 0.64rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cv-ink-400); }
+  .cven--doc .cvd__linha strong { font-size: 0.92rem; }
+  .cven--doc .cvd__linha > span, .cven--doc .cvd__item dd { font-size: 0.86rem; line-height: 1.42; }
+  .cven--doc .cvd__cartoes { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .cven--doc .cvd__cartoes--1 { grid-template-columns: minmax(0, 1fr); }
+  .cven--doc .cvd__secao--destaque { padding: 10px 12px; background: #f4f6f5; border-color: var(--cv-line-forte); }
+  .cven--doc .cvc-cena__rotulo--anotacao { background: #fff; }
+  .cven--doc .cvd__secao .cvg--mapa { padding: 12px 14px; }
+  .cven--doc .cvm--linear .cvm__liga { height: 12px; }
+  .cven--doc .cvm--linear .cvm__no { padding: 5px 9px; }
+}
