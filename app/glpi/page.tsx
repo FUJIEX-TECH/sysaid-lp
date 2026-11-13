@@ -88,6 +88,10 @@ const FAQ = [
     a: "A licença é gratuita, a operação não. Somando servidor, atualizações de versão, compatibilidade de plugins e as horas da sua equipe mantendo a ferramenta, existe um custo real que não aparece na fatura. A conta que importa é o custo total: quanto a sua TI gasta para manter a ferramenta de pé, e quanto ela deixa de resolver enquanto faz isso.",
   },
   {
+    q: "O GLPI 10 ainda tem suporte?",
+    a: "Não. A versão 10.0.28, de 30/09/2026, foi anunciada pelo projeto GLPI como a última da linha 10.0, que deixa de receber correções. O GLPI 12.0.0 saiu em 07/10/2026 e as correções seguem só nas linhas 11 e 12 (as versões 11.0.13 e 12.0.2 saíram em 12/11/2026, sem equivalente para o 10). Quem está no GLPI 10 precisa escolher entre migrar para o 11 ou o 12, revalidando servidor e plugins, ou aproveitar a migração obrigatória para avaliar outra plataforma.",
+  },
+  {
     q: "Dá para migrar o histórico de chamados e o inventário?",
     a: "Sim. Chamados, categorias, usuários e ativos são importados na migração. O diagnóstico inicial define exatamente o que vem, em que formato e em qual ordem, para o go live não perder rastreabilidade.",
   },
@@ -290,6 +294,41 @@ export default function GlpiPage() {
             </p>
             <p className="section-head__sub" style={{ marginTop: 32 }}>
               O GLPI nasceu como inventário e virou help desk; a pergunta de fundo é se a sua TI precisa de um sistema de chamados ou de uma plataforma de ITSM. O guia <a href="/o-que-e-itsm">o que é ITSM</a> separa as duas coisas, e o de <a href="/gestao-de-servicos-de-ti">processos de gestão de serviços de TI</a> mostra o que muda na operação. Se a cotação também tem ferramenta paga, veja <a href="/movidesk">SysAid x Movidesk</a> e <a href="/topdesk">SysAid x TOPdesk</a>.
+            </p>
+          </div>
+        </section>
+
+        {/* FIM DO GLPI 10 */}
+        <section className="section">
+          <div className="container">
+            <div className="section-head">
+              <p className="eyebrow">Fim do GLPI 10</p>
+              <h2>O GLPI 10 parou de receber correções. A migração já é obrigatória</h2>
+              <p className="section-head__sub">
+                Em 30/09/2026 o projeto GLPI publicou a versão 10.0.28 e
+                avisou que ela é a última da linha 10.0. Em 07/10/2026 saiu o
+                GLPI 12, e desde então as correções de segurança chegam só nas
+                linhas 11 e 12. Quem segue no 10 roda sem patch.
+              </p>
+            </div>
+            <div className="grid-3">
+              <div className="card">
+                <h3>Ficar no GLPI 10</h3>
+                <p>Nenhuma correção nova, nem de segurança. Cada falha publicada daqui para frente fica aberta no seu servidor.</p>
+              </div>
+              <div className="card">
+                <h3>Subir para o 11 ou o 12</h3>
+                <p>É um projeto de upgrade: requisitos novos de servidor, plugins revalidados um a um, teste e janela de parada. E daqui a uma versão, o ciclo se repete.</p>
+              </div>
+              <div className="card">
+                <h3>Trocar de plataforma</h3>
+                <p>Se a migração é obrigatória de qualquer jeito, ela pode levar a TI para um ITSM em nuvem, com IA nativa e suporte em português, sem upgrade para manter.</p>
+              </div>
+            </div>
+            <p className="ctable__note">
+              Fontes: anúncio da versão 10.0.28 no blog oficial do GLPI
+              (glpi-project.org, 30/09/2026) e histórico de versões do
+              repositório oficial no GitHub, consultado em 13/11/2026.
             </p>
           </div>
         </section>
