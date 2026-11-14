@@ -104,7 +104,7 @@ const SINAIS = [
 const CRITERIOS = [
   {
     t: "Abertura por todos os canais na mesma fila",
-    d: "Portal, e-mail, Teams e WhatsApp caindo num lugar só. Se cada canal vira uma caixa separada, o chamado se perde antes de começar.",
+    d: "Portal, e-mail e Teams caindo num lugar só, e o pedido de telefone ou WhatsApp registrado ali pelo analista. Se cada canal vira uma caixa separada, o chamado se perde antes de começar.",
   },
   {
     t: "Base de conhecimento ligada ao atendimento",

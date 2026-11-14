@@ -55,7 +55,7 @@ const DORES = [
 const RECURSOS = [
   {
     t: "Abertura por onde o usuário já está",
-    d: "Portal, e-mail, Microsoft Teams ou WhatsApp. Tudo cai na mesma fila, com categoria, responsável e prioridade definidos por regra.",
+    d: "Portal, e-mail ou Microsoft Teams. Tudo cai na mesma fila, com categoria, responsável e prioridade definidos por regra, e o que ainda chega por telefone ou WhatsApp o analista registra ali mesmo.",
   },
   {
     t: "Portal de autoatendimento",

@@ -103,7 +103,7 @@ const PROCESSOS = [
 const CRITERIOS = [
   {
     t: "Ponto único de contato de verdade",
-    d: "Portal, e-mail, Teams e WhatsApp caindo na mesma fila. Se cada canal vira uma caixa separada, a ferramenta não entregou o básico do conceito.",
+    d: "Portal, e-mail e Teams caindo na mesma fila, e o pedido de telefone ou WhatsApp registrado ali pelo analista. Se cada canal vira uma caixa separada, a ferramenta não entregou o básico do conceito.",
   },
   {
     t: "Catálogo de serviços e automação",
