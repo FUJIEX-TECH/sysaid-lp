@@ -27,6 +27,7 @@ export async function pedirEmpresa(cfg: EmpresaConfig, dominio: string): Promise
       nome: data.nome,
       site: data.site ?? `https://${dominio}`,
       logo: data.logo,
+      cor: typeof data.cor === "string" && /^#[0-9a-f]{6}$/i.test(data.cor) ? data.cor.toLowerCase() : undefined,
       descricao: data.descricao,
       redes: data.redes ?? {},
       cnpj: data.cnpj,

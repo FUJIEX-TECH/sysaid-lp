@@ -1,410 +1,407 @@
 // ==========================================================================
-// Qualifica v2 · busca genérica — as 4 CENAS da SysAid (13/11/2026, Severino).
-// Briefing: clientes/sysaid/_growth/qualifica-fluxo-generico-conteudo-2026-11-13.md,
-// seção 3 (regras comuns, uma cena por dor, versão com logo, checklist 3.7).
+// Qualifica v2 · busca genérica — as 4 CENAS da SysAid na direção A, "três
+// atos em neon de console" (14/11/2026, Severino; aprovada pelo Fernando depois
+// da análise do vídeo dos Maestros, em fujiex/produtos/formulario-inteligente/
+// _contexto/analise-cenas-video-2026-11-14.md). Substitui o esquema técnico
+// de 13/11 (reprovado).
 //
-// Esquema técnico, não ilustração: traço fino de console, sem rosto, sem
-// caricatura, sem marca de terceiro (canal é ícone genérico). Um único tom de
-// alerta, só no ponto onde o problema quebra (o ✕). Menta só no caminho
-// principal. Desenhado à mão aqui, nada gerado por IA na hora.
+// A gramática: sempre a mesma frase em 3 atos, lida da esquerda pra direita.
+//   1º ato, "hoje" (ardósia)        como o pedido chega / a empresa (placa + prédio na cor da marca)
+//   2º ato, "onde quebra" (coral)   a dor dentro de um anel grande, com o ✕ no ponto exato
+//   3º ato (muda com a conversa)    estado 1: anel tracejado vazio ("…": a próxima pergunta é "é isso?")
+//                                   estado 2: o que isso causa (as consequências que a pessoa marcou)
+//                                   estado 3: com a SysAid (menta, o ÚNICO momento com a solução)
+// Poucos objetos, grandes; traço de 2,6 px com brilho; o traço se desenha na
+// entrada (classe cs-d + pathLength="1", em ordem de leitura, --t em segundos).
+// As palavras da pessoa NUNCA entram no SVG: vão nos 3 cartões embaixo (`atos`).
+// Texto no desenho só o que não é dela ("?" e a etiqueta "com a SysAid").
 //
-// Cada cena é uma função da largura: 640 × 360 (16:9, desktop e PDF) e
-// 480 × 360 (4:3, celular), as mesmas peças recompostas. O SVG só tem classes
-// cs-* (o tema pinta: escuro na tela, claro no papel) e NENHUM texto da pessoa:
-// rótulos e nomes de bloco ("time de TI", "TI da Empresa") são HTML por cima,
-// posicionados em % (tipo `cena` do núcleo).
+// Cada cena é função da largura: 640 × 360 (desktop, PDF) e 480 × 360 (celular,
+// 4:3). Só classes cs-* (o tema pinta: escuro na tela, papel claro no PDF).
 // ==========================================================================
 
-import type { DadosCena, LayoutCena, RotuloCena } from "../conversa-core/tipos";
+import type { AtoCena, DadosCena } from "../conversa-core/tipos";
+
+export type CenaId = "perda" | "complexidade" | "sla" | "relatorio";
+export type CausaId = "reclama" | "incendio" | "prazo" | "mostrar" | "contratar";
+export type CanalId = "mensagem" | "email" | "telefone" | "pessoalmente";
+export type EstadoCena = 1 | 2 | 3;
+export type OpcoesCena = {
+  estado: EstadoCena;
+  hoje: string; // 1º ato (palavras da pessoa ou do chip)
+  quebra: string; // 2º ato
+  causa?: string; // 3º ato no estado 2
+  solucao?: string; // 3º ato no estado 3 (só capacidades C1–C10)
+  causas?: CausaId[]; // ícones do 3º ato no estado 2 (até 3)
+  canais?: CanalId[]; // por onde o pedido chega (1º ato); padrão por cena
+  empresa?: string; // placa (nome) a partir do estado 2
+  logo?: { src: string; alt: string } | null; // placa (logo) a partir do estado 2
+  cor?: string | null; // cor da marca (hex); o núcleo decide se serve
+};
 
 const H = 360;
-const r = (n: number) => Math.round(n * 10) / 10;
+type Pt = [number, number];
+const f = (n: number) => Math.round(n * 10) / 10;
+const rad = (a: number) => ((a - 90) * Math.PI) / 180;
+const pol = (cx: number, cy: number, r: number, a: number): Pt => [f(cx + r * Math.cos(rad(a))), f(cy + r * Math.sin(rad(a)))];
 
 // --------------------------------------------------------------------------
-// peças
+// primitivas. Classes do núcleo: cs-s traço, cs-sf traço com fundo, cs-t fino,
+// cs-tr tracejado, cs-p fill, cs-i aparece depois do traço, cs-d se desenha.
 // --------------------------------------------------------------------------
-function fundo(w: number): string {
-  let d = "";
-  for (let x = 40; x < w; x += 40) d += `M${x} 0V${H}`;
-  for (let y = 40; y < H; y += 40) d += `M0 ${y}H${w}`;
-  return `<rect class="cs-fundo" x="0" y="0" width="${w}" height="${H}"/><path class="cs-grade" d="${d}"/>`;
+const PL = 'pathLength="1" ';
+const P = (cls: string, d: string, desenha = true) => `<path class="${cls}${desenha ? " cs-d" : ""}" ${desenha ? PL : ""}d="${d}"/>`;
+const Ci = (cls: string, x: number, y: number, r: number, desenha = true) => `<circle class="${cls}${desenha ? " cs-d" : ""}" ${desenha ? PL : ""}cx="${f(x)}" cy="${f(y)}" r="${f(r)}"/>`;
+const Rt = (cls: string, x: number, y: number, w: number, h: number, rx = 6, desenha = true) =>
+  `<rect class="${cls}${desenha ? " cs-d" : ""}" ${desenha ? PL : ""}x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(h)}" rx="${rx}"/>`;
+const ponto = (x: number, y: number, r = 2.4) => `<circle class="cs-p cs-i" cx="${f(x)}" cy="${f(y)}" r="${r}"/>`;
+const ato = (papel: string, t: number, corpo: string, brilho = true) => `<g class="cs-ato cs-ato--${papel}${brilho ? " cs-brilho" : ""}" style="--t:${t}">${corpo}</g>`;
+function setaPonta(x: number, y: number, ang: number, cls = "cs-s"): string {
+  const [a1, a2] = pol(x, y, 9, ang + 150);
+  const [b1, b2] = pol(x, y, 9, ang - 150);
+  return P(cls, `M${a1} ${a2}L${f(x)} ${f(y)}L${b1} ${b2}`);
 }
+const setaBaixo = (x: number, y: number) => P("cs-t", `M${x - 4} ${y - 5}L${x} ${y}L${x + 4} ${y - 5}`);
 
-function ponta(x: number, y: number, ang: number, cls = "cs-l", t = 6): string {
-  const a1 = ang + Math.PI - 0.5;
-  const a2 = ang + Math.PI + 0.5;
-  return `<path class="${cls}" d="M${r(x + t * Math.cos(a1))} ${r(y + t * Math.sin(a1))}L${r(x)} ${r(y)}L${r(x + t * Math.cos(a2))} ${r(y + t * Math.sin(a2))}"/>`;
+// --------------------------------------------------------------------------
+// peças (ícones grandes, sem rosto, sem marca de terceiro)
+// --------------------------------------------------------------------------
+function envelope(x: number, y: number, w = 52, h = 34): string {
+  return Rt("cs-sf", x, y, w, h, 5) + P("cs-t", `M${x + 3} ${y + 4}L${f(x + w / 2)} ${f(y + h * 0.6)}L${x + w - 3} ${y + 4}`);
 }
-function seta(x1: number, y1: number, x2: number, y2: number, cls = "cs-l"): string {
-  return `<path class="${cls}" d="M${r(x1)} ${r(y1)}L${r(x2)} ${r(y2)}"/>${ponta(x2, y2, Math.atan2(y2 - y1, x2 - x1), cls.replace(/ cs-tr2?/, ""))}`;
-}
-function curva(x1: number, y1: number, cx: number, cy: number, x2: number, y2: number, cls = "cs-l", comPonta = true): string {
-  return `<path class="${cls}" d="M${r(x1)} ${r(y1)}Q${r(cx)} ${r(cy)} ${r(x2)} ${r(y2)}"/>${comPonta ? ponta(x2, y2, Math.atan2(y2 - cy, x2 - cx), cls.replace(/ cs-tr2?/, "")) : ""}`;
-}
-function xis(cx: number, cy: number, s = 6.5): string {
-  return `<circle class="cs-s2" cx="${r(cx)}" cy="${r(cy)}" r="${s + 5}"/><path class="cs-x" d="M${r(cx - s)} ${r(cy - s)}L${r(cx + s)} ${r(cy + s)}M${r(cx + s)} ${r(cy - s)}L${r(cx - s)} ${r(cy + s)}"/>`;
-}
-function ponto(cx: number, cy: number, cls = "cs-p", rr = 2.2): string {
-  return `<circle class="${cls}" cx="${r(cx)}" cy="${r(cy)}" r="${rr}"/>`;
-}
-function linhas(x: number, y: number, larguras: number[], passo = 7, cls = "cs-f"): string {
-  return `<path class="${cls}" d="${larguras.map((w, i) => `M${r(x)} ${r(y + i * passo)}H${r(x + w)}`).join("")}"/>`;
-}
-function caixa(x: number, y: number, w: number, h: number, cls = "cs-s", rx = 3): string {
-  return `<rect class="${cls}" x="${r(x)}" y="${r(y)}" width="${r(w)}" height="${r(h)}" rx="${rx}"/>`;
-}
-
-// balão de conversa (canal de mensagem, sem marca)
 function balao(x: number, y: number, w: number, h: number): string {
-  const d = `M${x + 6} ${y}H${x + w - 6}Q${x + w} ${y} ${x + w} ${y + 6}V${y + h - 6}Q${x + w} ${y + h} ${x + w - 6} ${y + h}H${x + 18}L${x + 7} ${y + h + 9}L${x + 9} ${y + h}H${x + 6}Q${x} ${y + h} ${x} ${y + h - 6}V${y + 6}Q${x} ${y} ${x + 6} ${y}Z`;
-  return `<path class="cs-s" d="${d}"/>${linhas(x + 10, y + h * 0.36, [w - 22, w * 0.55], h * 0.3)}`;
+  const d = `M${x + 6} ${y}H${x + w - 6}Q${x + w} ${y} ${x + w} ${y + 6}V${y + h - 6}Q${x + w} ${y + h} ${x + w - 6} ${y + h}H${x + 16}L${x + 7} ${y + h + 7}L${x + 9} ${y + h}H${x + 6}Q${x} ${y + h} ${x} ${y + h - 6}V${y + 6}Q${x} ${y} ${x + 6} ${y}Z`;
+  return P("cs-sf", d) + P("cs-t", `M${x + 8} ${f(y + h * 0.38)}H${x + w - 8}M${x + 8} ${f(y + h * 0.66)}H${f(x + w * 0.55)}`);
 }
-function envelope(x: number, y: number, w: number, h: number): string {
-  return `${caixa(x, y, w, h, "cs-s", 2)}<path class="cs-l" d="M${x} ${y + 1}L${x + w / 2} ${y + h * 0.56}L${x + w} ${y + 1}"/>`;
+function telefone(x: number, y: number, w: number, h: number): string {
+  return Rt("cs-sf", x, y, w, h, 5) + P("cs-t", `M${f(x + w * 0.35)} ${y + 5}H${f(x + w * 0.65)}`) + P("cs-t", `M${x - 5} ${f(y + h * 0.3)}v${f(h * 0.22)}M${x + w + 5} ${f(y + h * 0.3)}v${f(h * 0.22)}`);
 }
-// silhueta geométrica: cabeça e ombro, sem rosto
-function pessoa(cx: number, base: number, s: number, cls = "cs-s"): string {
-  const ombro = `M${r(cx - s * 0.4)} ${r(base)}V${r(base - s * 0.16)}Q${r(cx - s * 0.4)} ${r(base - s * 0.44)} ${r(cx)} ${r(base - s * 0.44)}Q${r(cx + s * 0.4)} ${r(base - s * 0.44)} ${r(cx + s * 0.4)} ${r(base - s * 0.16)}V${r(base)}Z`;
-  return `<circle class="${cls}" cx="${r(cx)}" cy="${r(base - s * 0.68)}" r="${r(s * 0.19)}"/><path class="${cls}" d="${ombro}"/>`;
+function pessoa(cx: number, base: number, s: number): string {
+  const ombro = `M${f(cx - s * 0.42)} ${base}V${f(base - s * 0.16)}Q${f(cx - s * 0.42)} ${f(base - s * 0.44)} ${cx} ${f(base - s * 0.44)}Q${f(cx + s * 0.42)} ${f(base - s * 0.44)} ${f(cx + s * 0.42)} ${f(base - s * 0.16)}V${base}Z`;
+  return Ci("cs-sf", cx, base - s * 0.7, s * 0.2) + P("cs-sf", ombro);
 }
-function celular(x: number, y: number, w: number, h: number): string {
-  return `${caixa(x, y, w, h, "cs-s", 5)}<path class="cs-f" d="M${x + w * 0.36} ${y + 5}H${x + w * 0.64}"/>${linhas(x + 6, y + h * 0.36, [w - 12, w - 18], 7)}<path class="cs-f" d="M${x - 5} ${y + h * 0.3}v${h * 0.22}M${x - 9} ${y + h * 0.34}v${h * 0.14}M${x + w + 5} ${y + h * 0.3}v${h * 0.22}M${x + w + 9} ${y + h * 0.34}v${h * 0.14}"/>`;
+function chamado(x: number, y: number, w = 84, h = 58): string {
+  return Rt("cs-sf", x, y, w, h, 7) + P("cs-t", `M${x + 14} ${y + 21}H${x + w - 32}M${x + 14} ${y + 36}H${x + w - 46}`) + Ci("cs-t", x + w - 17, y + 19, 7.5) + P("cs-t", `M${x + w - 17} ${y + 14.5}V${y + 19}H${x + w - 13.5}`);
 }
-function pilha(x: number, y: number, w: number, h: number): string {
-  return `${caixa(x + 9, y - 9, w, h, "cs-s2")}${caixa(x + 4.5, y - 4.5, w, h, "cs-s2")}${caixa(x, y, w, h)}${linhas(x + 8, y + h * 0.34, [w - 18, w * 0.5], h * 0.3)}`;
+// relógio: 12 traços, ponteiro passado da marca; a marca e o quanto passou em coral
+function relogio(cx: number, cy: number, r: number, ponteiro: number, marca: number): string {
+  let ticks = "";
+  for (let i = 0; i < 12; i++) {
+    const [a, b] = pol(cx, cy, r - 4, i * 30);
+    const [c, d] = pol(cx, cy, r - (i % 3 ? 8 : 13), i * 30);
+    ticks += `M${a} ${b}L${c} ${d}`;
+  }
+  const [hx, hy] = pol(cx, cy, r * 0.74, ponteiro);
+  const [m1, m2] = pol(cx, cy, r - 14, marca);
+  const [m3, m4] = pol(cx, cy, r + 3, marca);
+  const [o1, o2] = pol(cx, cy, r + 11, marca + 6);
+  const [o3, o4] = pol(cx, cy, r + 11, ponteiro - 6);
+  return (
+    Ci("cs-s", cx, cy, r) +
+    P("cs-t", ticks) +
+    P("cs-s", `M${cx} ${cy}L${hx} ${hy}`) +
+    ponto(cx, cy, 3.2) +
+    `<g class="cs-ato cs-ato--quebra cs-brilho">${P("cs-s", `M${m1} ${m2}L${m3} ${m4}`)}${P("cs-t cs-tr", `M${o1} ${o2}A${r + 11} ${r + 11} 0 0 1 ${o3} ${o4}`)}</g>`
+  );
+}
+function sinoBase(cx: number, cy: number, s: number): string {
+  const b = `M${f(cx - s * 0.62)} ${f(cy + s * 0.5)}H${f(cx + s * 0.62)}L${f(cx + s * 0.48)} ${f(cy + s * 0.28)}V${f(cy - s * 0.1)}Q${f(cx + s * 0.48)} ${f(cy - s * 0.62)} ${cx} ${f(cy - s * 0.62)}Q${f(cx - s * 0.48)} ${f(cy - s * 0.62)} ${f(cx - s * 0.48)} ${f(cy - s * 0.1)}V${f(cy + s * 0.28)}Z`;
+  return P("cs-sf", b) + P("cs-t", `M${f(cx - s * 0.16)} ${f(cy + s * 0.68)}Q${cx} ${f(cy + s * 0.86)} ${f(cx + s * 0.16)} ${f(cy + s * 0.68)}`);
+}
+const sinoCortado = (cx: number, cy: number, s: number) => sinoBase(cx, cy, s) + `<g class="cs-ato cs-ato--quebra cs-brilho">${P("cs-s", `M${f(cx - s * 0.9)} ${f(cy - s * 0.9)}L${f(cx + s * 0.9)} ${f(cy + s * 0.9)}`)}</g>`;
+const sinoTocando = (cx: number, cy: number, s: number) =>
+  sinoBase(cx, cy, s) + P("cs-t", `M${f(cx - s * 0.95)} ${f(cy - s * 0.3)}Q${f(cx - s * 1.1)} ${cy} ${f(cx - s * 0.95)} ${f(cy + s * 0.3)}M${f(cx + s * 0.95)} ${f(cy - s * 0.3)}Q${f(cx + s * 1.1)} ${cy} ${f(cx + s * 0.95)} ${f(cy + s * 0.3)}`);
+// o ✕: onde quebra (pulsa uma vez; não se desenha, aparece inteiro)
+function xis(cx: number, cy: number, t: number, r = 13): string {
+  return `<g class="cs-ato cs-ato--quebra cs-brilho cs-pulso" style="--t:${t}">${Ci("cs-sf", cx, cy, r, false)}${P("cs-s", `M${f(cx - 5.5)} ${f(cy - 5.5)}L${f(cx + 5.5)} ${f(cy + 5.5)}M${f(cx + 5.5)} ${f(cy - 5.5)}L${f(cx - 5.5)} ${f(cy + 5.5)}`, false)}</g>`;
 }
 function bandeja(x: number, y: number, w: number, h: number): string {
-  const d = `M${x} ${y + h * 0.42}L${x + w * 0.16} ${y}H${x + w * 0.84}L${x + w} ${y + h * 0.42}V${y + h}H${x}Z`;
-  const slot = `M${x} ${y + h * 0.42}H${x + w * 0.3}L${x + w * 0.37} ${y + h * 0.66}H${x + w * 0.63}L${x + w * 0.7} ${y + h * 0.42}H${x + w}`;
-  return `${envelope(x + w * 0.22, y - h * 0.32, w * 0.42, h * 0.38)}${envelope(x + w * 0.4, y - h * 0.18, w * 0.42, h * 0.36)}<path class="cs-s" d="${d}"/><path class="cs-l" d="${slot}"/>`;
+  const d = `M${x} ${f(y + h * 0.4)}L${f(x + w * 0.16)} ${y}H${f(x + w * 0.84)}L${x + w} ${f(y + h * 0.4)}V${y + h}H${x}Z`;
+  const slot = `M${x} ${f(y + h * 0.4)}H${f(x + w * 0.3)}L${f(x + w * 0.37)} ${f(y + h * 0.64)}H${f(x + w * 0.63)}L${f(x + w * 0.7)} ${f(y + h * 0.4)}H${x + w}`;
+  return P("cs-sf", d) + P("cs-t", slot);
 }
-function postit(x: number, y: number, s: number): string {
-  return `<path class="cs-s" d="M${x} ${y}H${x + s}V${y + s * 0.72}L${x + s * 0.72} ${y + s}H${x}Z"/><path class="cs-l" d="M${x + s} ${y + s * 0.72}H${x + s * 0.72}V${y + s}"/>${linhas(x + 7, y + s * 0.26, [s - 16, s - 22, s * 0.4], s * 0.17)}`;
+function miniChamado(x: number, y: number, w: number, h: number, rot: number): string {
+  return `<g transform="rotate(${rot} ${f(x + w / 2)} ${f(y + h / 2)})">${Rt("cs-sf", x, y, w, h, 3)}${P("cs-t", `M${x + 6} ${f(y + h * 0.4)}H${x + w - 8}M${x + 6} ${f(y + h * 0.68)}H${f(x + w * 0.55)}`)}</g>`;
 }
-// posto de um técnico do time (cartão com a silhueta)
-function posto(x: number, y: number, w: number, h: number, cls = "cs-s"): string {
-  return `${caixa(x, y, w, h, cls)}${pessoa(x + 15, y + h - 6, 22, "cs-pf")}${linhas(x + 32, y + h * 0.38, [w - 44, w * 0.32], h * 0.26)}`;
-}
-// painel genérico de "ferramenta atual": abas, chaves, linhas de config, engrenagem
-function painel(x: number, y: number, w: number, h: number, completo = true): string {
-  let s = caixa(x, y, w, h);
-  s += `<path class="cs-l" d="M${x} ${y + 20}H${x + w}"/>`;
-  const abas = Math.max(1, Math.min(completo ? 4 : 3, Math.floor((w - 8) / 34)));
-  for (let i = 0; i < abas; i++) s += caixa(x + 8 + i * 34, y + 6, 28, 9, i === 0 ? "cs-s" : "cs-s2", 2);
-  const colX = x + 12;
-  const cabem = Math.max(1, Math.min(completo ? 4 : 3, Math.floor((h - 30) / 22)));
-  for (let i = 0; i < cabem; i++) {
-    const yy = y + 34 + i * 22;
-    s += `<rect class="cs-s2" x="${colX}" y="${yy}" width="22" height="11" rx="5.5"/>${ponto(i % 2 ? colX + 16 : colX + 6, yy + 5.5, "cs-p", 3.2)}`;
-    s += linhas(colX + 32, yy + 5.5, [completo ? w * 0.34 : w * 0.28], 0);
-  }
-  if (completo) {
-    s += `<path class="cs-f" d="M${x + w * 0.62} ${y + 30}V${y + h - 12}"/>`;
-    s += linhas(x + w * 0.66, y + 38, [w * 0.26, w * 0.18, w * 0.24, w * 0.12], 12);
-  }
-  if (h >= 80) s += engrenagem(x + w - 22, y + h - 22, 9);
-  return s;
-}
-function engrenagem(cx: number, cy: number, rr: number): string {
+const exclama = (cx: number, cy: number, s: number) => `<g class="cs-ato cs-ato--quebra cs-brilho">${P("cs-s", `M${cx} ${f(cy - s * 0.45)}V${f(cy + s * 0.12)}`)}${ponto(cx, cy + s * 0.38, 2.2)}</g>`;
+function engrenagem(cx: number, cy: number, r: number): string {
   let d = "";
   for (let i = 0; i < 8; i++) {
-    const a = (i * Math.PI) / 4;
-    d += `M${r(cx + rr * Math.cos(a))} ${r(cy + rr * Math.sin(a))}L${r(cx + (rr + 4) * Math.cos(a))} ${r(cy + (rr + 4) * Math.sin(a))}`;
+    const [a, b] = pol(cx, cy, r, i * 45 - 8);
+    const [c, e] = pol(cx, cy, r + 9, i * 45 - 5);
+    const [g, h] = pol(cx, cy, r + 9, i * 45 + 5);
+    const [k, l] = pol(cx, cy, r, i * 45 + 8);
+    d += `M${a} ${b}L${c} ${e}L${g} ${h}L${k} ${l}`;
   }
-  return `<circle class="cs-s" cx="${cx}" cy="${cy}" r="${rr}"/><circle class="cs-l" cx="${cx}" cy="${cy}" r="${r(rr * 0.4)}"/><path class="cs-l" d="${d}"/>`;
+  return Ci("cs-s", cx, cy, r) + P("cs-s", d) + Ci("cs-t", cx, cy, r * 0.38);
 }
-function relogio(cx: number, cy: number, rr = 5): string {
-  return `<circle class="cs-l" cx="${cx}" cy="${cy}" r="${rr}"/><path class="cs-l" d="M${cx} ${cy - rr * 0.55}V${cy}H${cx + rr * 0.5}"/>`;
+// chave inglesa diagonal, presa na engrenagem
+function chave(x1: number, y1: number, x2: number, y2: number): string {
+  const ang = (Math.atan2(y2 - y1, x2 - x1) * 180) / Math.PI;
+  const len = Math.hypot(x2 - x1, y2 - y1);
+  return `<g transform="rotate(${f(ang)} ${f(x1)} ${f(y1)})">${P("cs-sf", `M${x1} ${y1 - 5}H${f(x1 + len - 22)}V${y1 + 5}H${x1}Z`)}${P("cs-sf", `M${f(x1 + len - 22)} ${y1 - 13}H${f(x1 + len)}V${y1 - 3}L${f(x1 + len - 9)} ${y1}L${f(x1 + len)} ${y1 + 3}V${y1 + 13}H${f(x1 + len - 22)}Z`)}</g>`;
 }
-// cartão de ajuste parado na fila (novo formulário, mudar fluxo...)
-function ajuste(x: number, y: number, w: number, h: number): string {
-  return `${caixa(x, y, w, h, "cs-s")}${linhas(x + 8, y + 11, [w - 30, w * 0.4], 8)}${relogio(x + w - 12, y + 12, 5)}<path class="cs-f cs-tr2" d="M${x + 8} ${y + h - 8}H${x + w - 8}"/>`;
-}
-// planilha com células "?" (o número montado à mão)
-function planilha(x: number, y: number, w: number, h: number, cols: number, rows: number, buracos: [number, number][], comTexto: boolean): string {
-  let s = caixa(x, y, w, h, "cs-s", 2);
-  const cw = w / cols;
-  const rh = h / rows;
-  let d = "";
-  for (let c = 1; c < cols; c++) d += `M${r(x + c * cw)} ${y}V${y + h}`;
-  for (let k = 1; k < rows; k++) d += `M${x} ${r(y + k * rh)}H${x + w}`;
-  s += `<path class="cs-f" d="${d}"/>`;
-  s += `<path class="cs-l" d="M${x} ${r(y + rh)}H${x + w}"/>`;
-  for (const [c, k] of buracos) {
-    const cx = x + c * cw + cw / 2;
-    const cy = y + k * rh + rh / 2;
-    s += comTexto ? `<text class="cs-tx cs-tx-q" x="${r(cx)}" y="${r(cy + 4)}" text-anchor="middle">?</text>` : ponto(cx, cy, "cs-p", 2);
-  }
-  return s;
-}
-// sino com um corte: não houve aviso
-function sinoCortado(cx: number, cy: number, s = 16): string {
-  const d = `M${cx - s * 0.62} ${cy + s * 0.5}H${cx + s * 0.62}L${cx + s * 0.5} ${cy + s * 0.3}V${cy - s * 0.1}Q${cx + s * 0.5} ${cy - s * 0.62} ${cx} ${cy - s * 0.62}Q${cx - s * 0.5} ${cy - s * 0.62} ${cx - s * 0.5} ${cy - s * 0.1}V${cy + s * 0.3}Z`;
-  return `<path class="cs-s" d="${d}"/><path class="cs-l" d="M${cx - s * 0.16} ${cy + s * 0.66}Q${cx} ${cy + s * 0.82} ${cx + s * 0.16} ${cy + s * 0.66}"/><path class="cs-l" d="M${cx - s * 0.85} ${cy - s * 0.85}L${cx + s * 0.85} ${cy + s * 0.85}"/>`;
-}
-// retrovisor: o gráfico só olha pra trás, com um vão até "hoje"
-function retrovisor(x: number, y: number, w: number, h: number): { svg: string; vao: [number, number] } {
-  const px = (t: number) => x + 14 + t * (w - 28);
-  const base = y + h - 22;
-  const pts: [number, number][] = [0, 0.12, 0.24, 0.36, 0.5, 0.62].map((t, i) => [px(t), base - [18, 30, 24, 40, 34, 48][i]]);
-  const linha = pts.map((p, i) => `${i ? "L" : "M"}${r(p[0])} ${r(p[1])}`).join("");
+function retrovisor(x: number, y: number, w: number, h: number): { svg: string; vao: Pt } {
+  const px = (t: number) => f(x + 14 + t * (w - 28));
+  const base = y + h - 18;
+  const pts: Pt[] = [0, 0.13, 0.26, 0.4, 0.52, 0.64].map((t, i) => [px(t), f(base - [12, 22, 16, 30, 24, 36][i])]);
+  const linha = pts.map((p, i) => `${i ? "L" : "M"}${p[0]} ${p[1]}`).join("");
   const ult = pts[pts.length - 1];
   const hoje = px(1);
-  let s = `<rect class="cs-s" x="${x}" y="${y}" width="${w}" height="${h}" rx="16"/>`;
-  s += `<path class="cs-f" d="M${x + 14} ${base}H${x + w - 14}"/>`;
-  s += `<path class="cs-a" d="${linha}"/>${pts.map((p) => ponto(p[0], p[1], "cs-af", 2.4)).join("")}`;
-  s += `<path class="cs-f cs-tr" d="M${r(ult[0] + 6)} ${r(ult[1])}H${r(hoje - 14)}"/>`;
-  s += `<path class="cs-f" d="M${r(ult[0])} ${base - 4}V${base + 4}M${r(hoje)} ${base - 4}V${base + 4}"/>`;
-  return { svg: s, vao: [r((ult[0] + hoje) / 2 + 6), r(ult[1])] };
+  const svg =
+    Rt("cs-sf", x, y, w, h, 16) +
+    P("cs-t", `M${x + 14} ${base}H${x + w - 14}`) +
+    P("cs-s", linha) +
+    pts.map((p) => ponto(p[0], p[1], 2.2)).join("") +
+    `<g class="cs-ato cs-ato--quebra">${P("cs-t cs-tr", `M${f(ult[0] + 8)} ${ult[1]}H${f(hoje - 16)}`)}</g>` +
+    P("cs-t", `M${ult[0]} ${base - 4}V${base + 4}M${hoje} ${base - 4}V${base + 4}`);
+  return { svg, vao: [f((ult[0] + hoje) / 2 + 4), ult[1]] };
+}
+// a ferramenta atual: caixa com cabeçalho, chaves de configuração e um cadeado
+function ferramentaCaixa(x: number, y: number, w: number, h: number): string {
+  let s = Rt("cs-sf", x, y, w, h, 6) + P("cs-t", `M${x} ${y + 18}H${x + w}`);
+  const linhas = Math.max(2, Math.min(3, Math.floor((h - 30) / 24)));
+  for (let i = 0; i < linhas; i++) {
+    const yy = y + 30 + i * 24;
+    s += Rt("cs-t", x + 12, yy, 22, 11, 5.5) + ponto(i % 2 ? x + 28 : x + 18, yy + 5.5, 3) + P("cs-t", `M${x + 42} ${yy + 5.5}H${x + w - 14}`);
+  }
+  const cx = x + w - 16;
+  const cy = y + h - 16;
+  s += Rt("cs-sf", cx - 9, cy - 4, 18, 14, 3) + P("cs-t", `M${cx - 5} ${cy - 4}V${cy - 9}Q${cx - 5} ${cy - 15} ${cx} ${cy - 15}Q${cx + 5} ${cy - 15} ${cx + 5} ${cy - 9}V${cy - 4}`);
+  return s;
+}
+function documentoPergunta(x: number, y: number, w: number, h: number): string {
+  return Rt("cs-sf", x, y, w, h, 4) + P("cs-t", `M${x + 9} ${y + 14}H${x + w - 9}M${x + 9} ${y + 24}H${x + w - 16}`) + `<text class="cs-tx cs-i" x="${f(x + w / 2)}" y="${f(y + h - 12)}" text-anchor="middle" font-size="18">?</text>`;
+}
+function diretoria(x: number, y: number, w: number, h: number): string {
+  return Rt("cs-sf", x, y, w, h, 5) + [0.25, 0.5, 0.75].map((t) => pessoa(x + w * t, y + h - 8, 26)).join("");
+}
+// prédio da empresa: grade de janelas; devolve o centro de cada janela
+function predio(x: number, y: number, w: number, h: number, cols: number, rows: number): { svg: string; janela: (c: number, r: number) => Pt } {
+  const cw = (w - 16) / cols;
+  const rh = (h - 20) / rows;
+  let s = Rt("cs-sf", x, y, w, h, 3);
+  for (let c = 0; c < cols; c++) for (let r = 0; r < rows; r++) s += Rt("cs-t", x + 8 + c * cw + 3, y + 10 + r * rh + 3, cw - 6, rh - 6, 2);
+  s += Rt("cs-t", x + w / 2 - 12, y + h - 32, 24, 32, 2); // porta
+  return { svg: s, janela: (c, r) => [f(x + 8 + c * cw + 3 + (cw - 6) / 2), f(y + 10 + r * rh + 3 + (rh - 6) / 2)] };
+}
+const canalPequeno = (c: CanalId, cx: number, cy: number): string =>
+  c === "mensagem" ? balao(cx - 11, cy - 9, 22, 15) : c === "email" ? envelope(cx - 11, cy - 8, 22, 15) : c === "telefone" ? telefone(cx - 6, cy - 11, 12, 22) : pessoa(cx, cy + 12, 24);
+function canalGrande(c: CanalId, cx: number, cy: number): string {
+  if (c === "mensagem") return balao(cx - 30, cy - 18, 60, 36);
+  if (c === "email") return envelope(cx - 27, cy - 17, 54, 34);
+  if (c === "telefone") return telefone(cx - 14, cy - 24, 28, 48);
+  return pessoa(cx, cy + 28, 58);
+}
+// consequências (3º ato, estado 2): silhueta + "!" em coral, triângulo, relógio, quadro, vaga
+function causaIcone(c: CausaId, cx: number, cy: number): string {
+  if (c === "reclama") return pessoa(cx - 6, cy + 30, 46) + Rt("cs-sf", cx + 10, cy - 38, 34, 26, 7) + P("cs-sf", `M${cx + 16} ${cy - 12}L${cx + 13} ${cy - 5}L${cx + 23} ${cy - 12}`) + exclama(cx + 27, cy - 25, 22);
+  if (c === "incendio") return P("cs-sf", `M${cx} ${cy - 28}L${cx + 31} ${cy + 23}H${cx - 31}Z`) + exclama(cx, cy + 2, 31);
+  if (c === "prazo") {
+    const [hx, hy] = pol(cx, cy, 15, 125);
+    const [m1, m2] = pol(cx, cy, 14, 60);
+    const [m3, m4] = pol(cx, cy, 25, 60);
+    return Ci("cs-s", cx, cy, 22) + P("cs-s", `M${cx} ${cy}L${hx} ${hy}`) + ponto(cx, cy, 2.6) + `<g class="cs-ato cs-ato--quebra cs-brilho">${P("cs-s", `M${m1} ${m2}L${m3} ${m4}`)}</g>`;
+  }
+  if (c === "mostrar") return Rt("cs-sf", cx - 26, cy - 26, 52, 36, 3) + P("cs-t", `M${cx} ${cy + 10}V${cy + 24}M${cx - 10} ${cy + 24}H${cx + 10}`) + P("cs-t", `M${cx - 16} ${cy + 2}V${cy - 6}M${cx - 6} ${cy + 2}V${cy - 12}`) + `<g class="cs-ato cs-ato--quebra cs-brilho"><text class="cs-tx cs-i" x="${cx + 12}" y="${cy + 3}" text-anchor="middle" font-size="18">?</text></g>`;
+  return pessoa(cx - 6, cy + 28, 46) + `<g class="cs-ato cs-ato--quebra cs-brilho">${P("cs-s", `M${cx + 20} ${cy - 24}V${cy - 6}M${cx + 11} ${cy - 15}H${cx + 29}`)}</g>`;
+}
+// a solução (3º ato, estado 3, menta): fila ordenada, ajuste sem programar, sino antes do prazo, painel vivo
+function solucaoIcone(id: CenaId, cx: number, cy: number): string {
+  if (id === "perda") return [-18, 0, 18].map((dy) => Ci("cs-s", cx - 18, cy + dy, 5.5) + P("cs-t", `M${cx - 21} ${cy + dy}L${cx - 19} ${cy + dy + 2.5}L${cx - 15} ${cy + dy - 2.5}`) + P("cs-t", `M${cx - 6} ${cy + dy}H${cx + 22}`)).join("");
+  if (id === "complexidade") return P("cs-t", `M${cx - 22} ${cy - 10}H${cx + 22}M${cx - 22} ${cy + 10}H${cx + 22}`) + Ci("cs-sf", cx + 8, cy - 10, 6) + Ci("cs-sf", cx - 6, cy + 10, 6);
+  if (id === "sla") return sinoTocando(cx, cy + 2, 19);
+  return Rt("cs-sf", cx - 26, cy - 20, 52, 40, 4) + P("cs-t", `M${cx - 16} ${cy + 12}V${cy - 2}M${cx - 6} ${cy + 12}V${cy - 8}M${cx + 4} ${cy + 12}V${cy + 2}M${cx + 14} ${cy + 12}V${cy - 12}`) + ponto(cx + 18, cy - 13, 2.6);
 }
 
 // --------------------------------------------------------------------------
-// as cenas
+// a composição: 3 atos, função da largura, da cena e do estado
 // --------------------------------------------------------------------------
-type Slot = { x: number; y: number; lado?: RotuloCena["lado"]; alerta?: boolean };
-type Bloco = { id: string; x: number; y: number; lado?: RotuloCena["lado"] };
-// slots: onde fica o rótulo (composição larga); marcas: onde fica o marcador numerado (estreita, com legenda)
-type Desenho = { svg: string; slots: Slot[]; marcas?: Slot[]; blocos: Bloco[]; placa?: { x: number; y: number } };
-const pct = (v: number, total: number) => (v / total) * 100;
-
-const svg = (w: number, grupos: string[]) => `<svg viewBox="0 0 ${w} ${H}" xmlns="http://www.w3.org/2000/svg">${grupos.map((g) => `<g>${g}</g>`).join("")}</svg>`;
-
-// Cena 1 · Fila invisível: pedido chegando de todo lado e nenhum lugar onde vira fila
-function cenaFila(w: number): Desenho {
-  const estreito = w < 600;
-  const xc = estreito ? 162 : 236; // montes soltos
-  const xt = w - (estreito ? 132 : 154); // time de TI
-  const tw = estreito ? 104 : 120;
-  // entradas, à esquerda, em altura irregular
-  const ent =
-    balao(28, 46, estreito ? 56 : 64, 36) + envelope(32, 128, estreito ? 50 : 56, 36) + pessoa(estreito ? 56 : 60, 262, 58) + celular(estreito ? 40 : 46, 286, 28, 48);
-  // montes soltos no centro, em vez de fila
-  const montes = pilha(xc, 64, estreito ? 56 : 64, 40) + bandeja(xc + (estreito ? 44 : 58), 176, estreito ? 66 : 76, 44) + postit(xc - (estreito ? 4 : 2), 258, 46);
-  // linhas dos pedidos (cada uma chega num monte diferente, em ângulos diferentes)
-  const xBal = estreito ? 92 : 100;
-  const pedidos =
-    curva(xBal, 62, xc - 30, 50, xc - 3, 80) +
-    curva(estreito ? 90 : 96, 152, xc - 24, 196, xc + (estreito ? 40 : 54), 200) +
-    curva(estreito ? 82 : 86, 238, xc - 40, 248, xc - 8, 276) +
-    curva(76, 300, xc - 10, 330, xc + (estreito ? 60 : 76), 222);
-  // o ponto de quebra: um pedido que termina no vazio
-  const xp = estreito ? 122 : 150;
-  const perdido = `<path class="cs-l cs-tr" d="M${estreito ? 90 : 96} ${136}Q${xp - 10} ${120} ${xp} ${116}"/>${xis(xp + 12, 114)}`;
-  // dos montes pro time: linhas que se cruzam (quem vê primeiro atende)
-  const yT = [104, 160, 216];
-  const xm = xc + (estreito ? 60 : 72);
-  const cruzadas =
-    seta(xm, 72, xt - 6, yT[2] + 20, "cs-f") +
-    seta(xc + (estreito ? 110 : 134), 200, xt - 6, yT[0] + 20, "cs-f") +
-    seta(xc + 44, 280, xt - 6, yT[1] + 20, "cs-f") +
-    seta(xc + 44, 266, xt - 6, yT[0] + 30, "cs-f");
-  const time = yT.map((y) => posto(xt, y, tw, 40)).join("");
-  // embaixo, o contador da fila que não existe (só o desenho; o "?" não é número)
-  const cont = `<path class="cs-f" d="M${xt} ${290}H${xt + tw}"/><text class="cs-tx" x="${xt}" y="${310}">fila</text><text class="cs-tx cs-tx-q" x="${xt + tw}" y="${312}" text-anchor="end">?</text>`;
-  return {
-    svg: svg(w, [fundo(w), ent, montes, pedidos + perdido, cruzadas, time + cont]),
-    slots: [
-      { x: pct(28, w), y: 6.5, lado: "direita" },
-      { x: pct(92, w), y: 61, lado: "direita" },
-      { x: pct(xp + 28, w), y: 31.5, lado: "direita", alerta: true },
-    ],
-    marcas: [
-      { x: pct(28 + (estreito ? 56 : 64), w), y: pct(46, H) },
-      { x: pct(estreito ? 78 : 82, w), y: pct(214, H) },
-      { x: pct(xp + 34, w), y: pct(114, H), alerta: true },
-    ],
-    blocos: [{ id: "time", x: pct(xt, w), y: 23.5, lado: "direita" }],
-  };
-}
-
-// Cena 2 · Ferramenta que virou projeto: a ferramenta existe, o time trabalha em volta dela
-function cenaFerramenta(w: number): Desenho {
-  const estreito = w < 600;
-  const px = estreito ? 96 : 150;
-  const pw = estreito ? 214 : 248;
-  const py = 132;
-  const ph = 132;
-  // o caminho principal entrando na ferramenta, em menta
-  const entrada = `${pessoa(36, 214, 46, "cs-pf")}${seta(58, 196, px - 4, 196, "cs-a")}`;
-  const ferramenta = painel(px, py, pw, ph, !estreito);
-  // a fila de ajustes parados, em cima, travada na entrada
-  const aw = estreito ? 62 : 78;
-  const gap = estreito ? 8 : 12;
-  const ax = px + (estreito ? 16 : 34);
-  const ajustes = [0, 1, 2].map((i) => ajuste(ax + i * (aw + gap), 30, aw, 40)).join("");
-  const filaX = ax + 1.5 * (aw + gap) - gap / 2;
-  const travada = `<path class="cs-l cs-tr" d="M${r(filaX)} 76V${py - 4}"/>${xis(filaX, 101)}`;
-  // à direita, uma silhueta só, ligada ao painel por uma linha grossa: só ela mexe
-  const sx = w - (estreito ? 44 : 64);
-  const so = `${pessoa(sx, 230, 56)}<path class="cs-l" style="stroke-width:3.2" d="M${px + pw + 2} 198H${sx - 26}"/>`;
-  // embaixo, o desvio "por fora": e-mail e planilha, direto ao time, e a maioria passa por ali
-  const yb = 312;
-  const desvio = `<path class="cs-l cs-tr" d="M50 222Q54 ${yb} 110 ${yb}H${w - 96}"/>${ponta(w - 96, yb, 0)}<path class="cs-f cs-tr" d="M58 226Q64 ${yb - 12} 116 ${yb - 12}H${w - 104}"/><path class="cs-f cs-tr" d="M66 230Q74 ${yb + 12} 122 ${yb + 12}H${w - 104}"/>${envelope(estreito ? 150 : 200, yb - 13, 34, 24)}${planilha(estreito ? 196 : 262, yb - 15, 42, 28, 3, 3, [], false)}${posto(w - 90, yb - 20, 80, 38)}`;
-  return {
-    svg: svg(w, [fundo(w), entrada, ferramenta, ajustes + travada, so, desvio]),
-    slots: [
-      { x: pct(filaX + 22, w), y: 28, lado: "direita", alerta: true },
-      { x: pct(sx + 34, w), y: pct(150, H), lado: "esquerda" },
-      { x: pct(px + 4, w), y: pct(283, H), lado: "direita" },
-    ],
-    marcas: [
-      { x: pct(filaX + 24, w), y: pct(101, H), alerta: true },
-      { x: pct(sx + 22, w), y: pct(230 - 52, H) },
-      { x: pct(estreito ? 136 : 186, w), y: pct(yb, H) },
-    ],
-    blocos: [
-      { id: "ferramenta", x: pct(px, w), y: pct(py - 11, H), lado: "direita" },
-      { id: "time", x: pct(w - 90, w), y: pct(yb - 31, H), lado: "direita" },
-    ],
-  };
-}
-
-// Cena 3 · Prazo sem alarme: o prazo passa em silêncio e o gestor sabe pelo usuário
-function cenaPrazo(w: number): Desenho {
-  const estreito = w < 600;
-  const x0 = 28;
-  const xFim = estreito ? 300 : 420;
-  const xp = estreito ? 210 : 300; // a linha do prazo
-  const yEixo = 262;
-  let eixo = `<path class="cs-l" d="M${x0} ${yEixo}H${xFim}"/>${ponta(xFim, yEixo, 0)}`;
-  for (let x = x0 + 30; x < xFim - 10; x += estreito ? 30 : 40) eixo += `<path class="cs-f" d="M${x} ${yEixo - 4}V${yEixo + 4}"/>`;
-  const prazo = `<path class="cs-l" d="M${xp} 118V${yEixo + 10}"/>`;
-  // três chamados: dois fecham antes do prazo, um atravessa sem nenhum sinal
-  const barras =
-    `<rect class="cs-at" style="opacity:.55" x="${x0 + 14}" y="160" width="${xp - x0 - (estreito ? 90 : 120)}" height="13" rx="2"/>` +
-    `<rect class="cs-at" style="opacity:.55" x="${x0 + 46}" y="190" width="${xp - x0 - (estreito ? 76 : 96)}" height="13" rx="2"/>` +
-    `<rect class="cs-s" x="${x0 + 76}" y="220" width="${xFim - x0 - (estreito ? 100 : 130)}" height="13" rx="2"/>`;
-  const quebra = xis(xp, 226.5);
-  // em cima, o sino cortado: ninguém foi avisado
-  const sino = sinoCortado(xp, 74, 22);
-  // depois do prazo: usuário → você → diretoria (a cobrança chega antes do sistema)
-  const ux = estreito ? 352 : 486;
-  const vx = estreito ? 410 : 566;
-  const dx = estreito ? 392 : 538;
-  const usuario = pessoa(ux, 332, 50);
-  const voce = `${caixa(vx - 34, 186, 68, 52)}${pessoa(vx, 232, 40, "cs-pf")}`;
-  const diretoria = `${caixa(dx - 46, 34, 92, 48)}${[0, 1, 2].map((i) => pessoa(dx - 24 + i * 24, 78, 30, "cs-pf")).join("")}`;
-  const cobranca = curva(ux + 18, 300, ux + 48, 290, vx - 30, 236, "cs-l") + curva(vx, 182, vx + (estreito ? 4 : 10), 130, dx + 10, 88, "cs-l");
-  return {
-    svg: svg(w, [fundo(w), eixo + prazo, barras, sino, quebra, usuario + voce + diretoria, cobranca]),
-    slots: [
-      { x: pct(xp + 16, w), y: pct(150, H), lado: "direita", alerta: true },
-      { x: pct(ux - 30, w), y: pct(304, H), lado: "esquerda" },
-      { x: pct(dx - 56, w), y: pct(54, H), lado: "esquerda" },
-    ],
-    marcas: [
-      { x: pct(xp + 18, w), y: pct(226.5 - 18, H), alerta: true },
-      { x: pct(ux + 32, w), y: pct(300, H) },
-      { x: pct(dx - 58, w), y: pct(58, H) },
-    ],
-    blocos: [
-      { id: "prazo", x: pct(xp - 8, w), y: 31, lado: "esquerda" },
-      { id: "usuario", x: pct(ux + 30, w), y: 95, lado: "direita" },
-      { id: "voce", x: pct(vx - 34, w), y: pct(186 - 12, H), lado: "direita" },
-      { id: "diretoria", x: pct(dx - 46, w), y: pct(18, H), lado: "direita" },
-    ],
-  };
-}
-
-// Cena 4 · Gestão pelo retrovisor: a diretoria pede o número e ele só existe olhando pra trás
-function cenaRetrovisor(w: number): Desenho {
-  const estreito = w < 600;
-  const cx = estreito ? 150 : 230;
-  // no alto, a diretoria com a pergunta descendo até você
-  const dir = `${caixa(cx - 70, 22, 140, 46)}${[0, 1, 2].map((i) => pessoa(cx - 34 + i * 34, 64, 30, "cs-pf")).join("")}`;
-  const voce = `${caixa(cx - 34, 116, 68, 50)}${pessoa(cx, 162, 40, "cs-pf")}`;
-  const pede = seta(cx, 70, cx, 112, "cs-l");
-  // no centro, fontes soltas exportando pra uma planilha com "?"
-  const fx = 24;
-  const fontes = `${painel(fx, 196, estreito ? 64 : 76, 52, false)}${bandeja(fx + 4, 290, estreito ? 56 : 64, 36)}`;
-  const gx = estreito ? 120 : 150;
-  const gw = estreito ? 120 : 150;
-  const grade = planilha(gx, 214, gw, 104, 4, 5, [[1, 2], [3, 1], [2, 4], [0, 3]], !estreito);
-  const exporta = curva(fx + (estreito ? 66 : 78), 222, gx - 20, 214, gx - 4, 240, "cs-l") + curva(fx + (estreito ? 62 : 70), 312, gx - 24, 316, gx - 4, 296, "cs-l") + seta(cx, 168, cx, 208, "cs-f");
-  // à direita, o gráfico dentro do retrovisor, com o vão até "hoje"
-  const rx = estreito ? 262 : 410;
-  const rw = estreito ? 196 : 200;
-  const rv = retrovisor(rx, 150, rw, 120);
-  const vao = xis(rv.vao[0], rv.vao[1]);
-  const liga = curva(gx + gw + 4, 250, rx - 30, 250, rx - 4, 222, "cs-f");
-  return {
-    svg: svg(w, [fundo(w), dir, pede + voce, fontes, grade + exporta, rv.svg + liga, vao]),
-    slots: [
-      { x: pct(cx + 76, w), y: 12.5, lado: "direita" },
-      { x: pct(gx + gw / 2, w), y: 93.5, lado: "centro" },
-      { x: pct(rx + rw, w), y: pct(150 - 18, H), lado: "esquerda", alerta: true },
-    ],
-    marcas: [
-      { x: pct(cx + 70, w), y: pct(22, H) },
-      { x: pct(gx + gw, w), y: pct(214, H) },
-      { x: pct(rv.vao[0] - 26, w), y: pct(rv.vao[1] - 16, H), alerta: true },
-    ],
-    blocos: [
-      { id: "diretoria", x: ((cx - 70) / w) * 100, y: 3, lado: "direita" },
-      { id: "voce", x: ((cx + 40) / w) * 100, y: 38, lado: "direita" },
-      { id: "passado", x: ((rx + 14) / w) * 100, y: 80.5, lado: "direita" },
-      { id: "hoje", x: ((rx + rw - 14) / w) * 100, y: 80.5, lado: "esquerda" },
-    ],
-  };
-}
-
-// --------------------------------------------------------------------------
-// montagem do cartão: desenho + rótulos (palavras da pessoa) + nomes de bloco
-// --------------------------------------------------------------------------
-export type CenaId = "perda" | "complexidade" | "sla" | "relatorio";
-const DESENHOS: Record<CenaId, (w: number) => Desenho> = { perda: cenaFila, complexidade: cenaFerramenta, sla: cenaPrazo, relatorio: cenaRetrovisor };
+const CANAIS_PADRAO: Record<CenaId, CanalId[]> = {
+  perda: ["mensagem", "email", "pessoalmente", "telefone"],
+  complexidade: ["email"],
+  sla: ["email"],
+  relatorio: ["email"],
+};
 const DESCRICAO: Record<CenaId, string> = {
-  perda: "Pedidos chegando por mensagem, e-mail, pessoalmente e telefone, espalhados em montes soltos até o time de TI, sem uma fila; um pedido se perde no caminho.",
-  complexidade: "A ferramenta atual no centro, com uma fila de ajustes parados em cima, uma única pessoa que sabe mexer nela e a maioria dos pedidos passando por fora, por e-mail e planilha.",
-  sla: "Uma linha do tempo com o prazo: dois chamados fecham antes, um atravessa o prazo sem aviso; o usuário cobra você, e a cobrança sobe até a diretoria.",
-  relatorio: "A diretoria pede números a você; os dados saem de várias fontes pra uma planilha montada à mão, e o gráfico só mostra até o mês passado.",
-};
-const BLOCOS: Record<string, string> = {
-  time: "time de TI",
-  ferramenta: "ferramenta atual",
-  prazo: "prazo",
-  usuario: "usuário",
-  voce: "você",
-  diretoria: "diretoria",
-  passado: "mês passado",
-  hoje: "hoje",
+  perda: "Os pedidos chegam por vários canais e caem numa bandeja sem fila; um deles escorrega pra fora.",
+  complexidade: "A ferramenta atual travada: uma chave presa na engrenagem, e qualquer ajuste vira projeto.",
+  sla: "Um relógio cujo ponteiro passou da marca do prazo, com o sino de aviso cortado.",
+  relatorio: "Um retrovisor com o gráfico que só vai até o mês passado, e um vão até hoje.",
 };
 
-export type OpcoesCena = {
-  rotulos: string[]; // 2 ou 3, na ordem dos slots (palavras da pessoa ou do chip)
-  empresa?: string; // versão com logo: blocos "TI da X", "diretoria da X"
-  logo?: { src: string; alt: string } | null;
-};
+function montar(id: CenaId, w: number, o: OpcoesCena): { svg: string; placa: { x: number; y: number } } {
+  const n = w < 600;
+  const cx = n ? 240 : 320;
+  const cy = 184;
+  const R = n ? 82 : 96;
+  const lx = n ? 78 : 118;
+  const rx = n ? w - 76 : w - 108;
+  const estado = o.estado;
+  const canais = (o.canais?.length ? o.canais : CANAIS_PADRAO[id]).slice(0, 4);
+  const g: string[] = [];
+  const pid = `cs-g-${id}-${estado}-${w}`;
+  g.push(`<defs><pattern id="${pid}" width="24" height="24" patternUnits="userSpaceOnUse"><circle class="cs-grade" cx="12" cy="12" r="1.1"/></pattern></defs>`);
+  g.push(`<rect class="cs-fundo" width="${w}" height="${H}"/><rect width="${w}" height="${H}" fill="url(#${pid})"/>`);
+  g.push(P("cs-base", `M26 306H${w - 26}`, false));
+  let placa = { x: 3, y: 4 };
 
-function layout(id: CenaId, w: number, o: OpcoesCena): LayoutCena {
-  const d = DESENHOS[id](w);
-  const legenda = w < 600; // 4:3 no celular: marcador numerado + legenda embaixo
-  const nomeBloco = (b: string) => {
-    if (o.empresa && (b === "time" || b === "voce")) return `TI da ${o.empresa}`;
-    if (o.empresa && b === "diretoria" && id === "relatorio") return `diretoria da ${o.empresa}`;
-    return BLOCOS[b];
+  // ---- 1º ato: hoje
+  const ligaAnel = (x: number, y: number, ang: number) => {
+    const [tx, ty] = pol(cx, cy, R, ang);
+    return P("cs-t cs-tr", `M${f(x)} ${f(y)}Q${f((x + tx) / 2 + 10)} ${f(y)} ${tx} ${ty}`);
   };
-  const rotulos: RotuloCena[] = [
-    ...d.blocos.map((b) => ({ texto: nomeBloco(b.id), x: b.x, y: b.y, lado: b.lado, tipo: "bloco" as const })),
-    ...o.rotulos.slice(0, d.slots.length).map((t, i) => {
-      const s = legenda && d.marcas ? d.marcas[i] : d.slots[i];
-      return { texto: t, x: s.x, y: s.y, lado: s.lado, alerta: d.slots[i].alerta, tipo: "anotacao" as const };
-    }),
-  ];
-  return { svg: d.svg, proporcao: w / H, rotulos, placa: d.placa, legenda };
+  if (estado === 1) {
+    if (id === "perda") {
+      const ys = canais.length === 4 ? [60, 136, 206, 276] : canais.length === 3 ? [86, 176, 262] : [120, 236];
+      let pecas = "";
+      let ligas = "";
+      canais.forEach((c, i) => {
+        pecas += canalGrande(c, lx - 6, ys[i]);
+        ligas += ligaAnel(lx + 30, ys[i] - (c === "pessoalmente" ? 10 : 0), -44 - i * 20);
+      });
+      g.push(ato("contexto", 0, pecas));
+      g.push(`<g class="cs-ato cs-ato--contexto" style="--t:0.3">${ligas}</g>`);
+    } else if (id === "complexidade") {
+      g.push(ato("contexto", 0, ferramentaCaixa(lx - 48, 120, 96, 110) + P("cs-t cs-tr", `M${lx + 50} 190H${cx - R - 6}`)));
+    } else if (id === "sla") {
+      g.push(ato("contexto", 0, envelope(lx - 26, 104) + P("cs-t cs-tr", `M${lx} 146V170`) + setaBaixo(lx, 173) + chamado(lx - 42, 180) + P("cs-t cs-tr", `M${lx + 46} 206H${cx - R - 6}`)));
+    } else {
+      g.push(ato("contexto", 0, diretoria(lx - 44, 92, 88, 48) + P("cs-t cs-tr", `M${lx} 142V166`) + setaBaixo(lx, 169) + documentoPergunta(lx - 24, 176, 48, 60) + P("cs-t cs-tr", `M${lx + 28} 206H${cx - R - 6}`)));
+    }
+  } else {
+    // a empresa: placa (HTML, por cima) + prédio na cor da marca; o "hoje" da cena vira janelas acesas
+    // (os canais, a diretoria, a ferramenta trancada, o chamado com relógio), e dali sai a linha pro anel
+    const bw = n ? 88 : 104;
+    const bh = 162;
+    const bx = lx - bw / 2;
+    const by = 144;
+    const pr = predio(bx, by, bw, bh, 3, 4);
+    let janelas = "";
+    let ligas = "";
+    const ex = bx + bw + 2;
+    if (id === "perda") {
+      const slots: [number, number][] = [
+        [0, 0],
+        [2, 0],
+        [0, 1],
+        [2, 1],
+      ];
+      canais.forEach((c, i) => {
+        const [jx, jy] = pr.janela(slots[i][0], slots[i][1]);
+        janelas += canalPequeno(c, jx, jy);
+        ligas += ligaAnel(ex, jy + (i % 2 ? 8 : 0), -46 - i * 22);
+      });
+    } else if (id === "relatorio") {
+      for (let c = 0; c < 3; c++) {
+        const [jx, jy] = pr.janela(c, 0);
+        janelas += pessoa(jx, jy + 12, 22);
+      }
+      const [qx, qy] = pr.janela(1, 2);
+      janelas += `<text class="cs-tx cs-i" x="${qx}" y="${f(qy + 6)}" text-anchor="middle" font-size="17">?</text>`;
+      ligas = ligaAnel(ex, pr.janela(2, 1)[1], -78);
+    } else if (id === "complexidade") {
+      const [ax, ay] = pr.janela(1, 1);
+      janelas += Rt("cs-sf", ax - 7, ay - 1, 14, 11, 2) + P("cs-t", `M${ax - 4} ${ay - 1}V${ay - 5}Q${ax - 4} ${ay - 10} ${ax} ${ay - 10}Q${ax + 4} ${ay - 10} ${ax + 4} ${ay - 5}V${ay - 1}`);
+      const [tx, ty] = pr.janela(1, 2);
+      janelas += Rt("cs-t", tx - 11, ty - 5, 22, 10, 5) + ponto(tx + 5, ty, 3);
+      ligas = ligaAnel(ex, ay, -78);
+    } else {
+      const [e1, e2] = pr.janela(1, 0);
+      janelas += envelope(e1 - 11, e2 - 8, 22, 15);
+      const [c1, c2] = pr.janela(1, 1);
+      const [h1, h2] = pol(c1, c2, 6, 120);
+      janelas += Ci("cs-s", c1, c2, 9) + P("cs-t", `M${c1} ${c2}L${h1} ${h2}`) + ponto(c1, c2, 1.6);
+      ligas = ligaAnel(ex, e2 + 10, -72);
+    }
+    g.push(ato("marca", 0, pr.svg + `<g class="cs-ato cs-ato--contexto">${janelas}</g>`));
+    g.push(`<g class="cs-ato cs-ato--contexto" style="--t:0.25">${ligas}</g>`);
+    placa = { x: f((bx / w) * 100), y: f((90 / H) * 100) };
+  }
+
+  // ---- 2º ato: onde quebra
+  g.push(ato("quebra", 0.45, Ci("cs-s", cx, cy, R)));
+  let centro = "";
+  let x: Pt;
+  if (id === "perda") {
+    const [sx, sy] = pol(cx, cy, R - 6, 132);
+    centro = bandeja(cx - 40, cy + 12, 80, 42) + miniChamado(cx - 54, cy - 40, 40, 24, -14) + miniChamado(cx - 16, cy - 52, 40, 24, 8) + miniChamado(cx + 10, cy - 26, 40, 24, 22) + miniChamado(cx - 30, cy - 14, 40, 24, -4) + miniChamado(sx - 20, sy - 12, 40, 24, 34);
+    x = pol(cx, cy, R, 134);
+  } else if (id === "complexidade") {
+    const r = n ? 26 : 30;
+    const gx = cx - 10;
+    const gy = cy + 10;
+    const [c1, c2] = pol(gx, gy, r + 6, 40);
+    const [k1, k2] = pol(gx, gy, r + 62, 40);
+    centro = engrenagem(gx, gy, r) + chave(c1, c2, k1, k2);
+    x = pol(gx, gy, r + 10, 40);
+  } else if (id === "sla") {
+    const cr = n ? 52 : 60;
+    const [bx, by] = pol(cx, cy, R * 0.62, -38);
+    centro = relogio(cx, cy + 6, cr, 118, 58) + sinoCortado(bx, by, 15);
+    x = pol(cx, cy + 6, cr, 58);
+  } else {
+    const rv = retrovisor(cx - 70, cy - 30, 140, 76);
+    centro = rv.svg;
+    x = rv.vao;
+  }
+  g.push(ato("contexto", 0.7, centro));
+  g.push(xis(x[0], x[1], 1.0));
+
+  // ---- 3º ato
+  const causas = (o.causas ?? []).slice(0, 3);
+  if (estado === 1 || (estado === 2 && !causas.length)) {
+    g.push(`<g class="cs-ato cs-ato--dim" style="--t:1.2">${P("cs-t cs-tr cs-i", `M${cx + R + 6} ${cy}H${rx - 52}`, false)}${Ci("cs-s cs-tr cs-i", rx, cy, 46, false)}${ponto(rx - 12, cy)}${ponto(rx, cy)}${ponto(rx + 12, cy)}</g>`);
+  } else if (estado === 2) {
+    const pos: Pt[] = causas.length === 1 ? [[rx, cy]] : causas.length === 2 ? [[rx, cy - 58], [rx, cy + 58]] : [[rx - 6, cy - 74], [rx + 10, cy], [rx - 6, cy + 74]];
+    const angs = causas.length === 1 ? [90] : causas.length === 2 ? [62, 112] : [56, 90, 122];
+    let ligas = "";
+    causas.forEach((_, i) => {
+      const [a1, a2] = pol(cx, cy, R, angs[i]);
+      const [px, py] = pos[i];
+      ligas += P("cs-t cs-tr", `M${a1} ${a2}Q${f(cx + R + 40)} ${f(py)} ${f(px - 40)} ${f(py + (i === 1 && causas.length === 3 ? 0 : py < cy ? 8 : -8))}`);
+    });
+    g.push(`<g class="cs-ato cs-ato--causa" style="--t:1.2">${ligas}</g>`);
+    g.push(ato("contexto", 1.3, causas.map((c, i) => causaIcone(c, pos[i][0], pos[i][1])).join("")));
+  } else {
+    const [a1, a2] = pol(cx, cy, R, 42);
+    const qx = (cx + rx) / 2;
+    const qy = cy - R - 22;
+    const ang = (Math.atan2(cy - 54 - qy, rx - 8 - qx) * 180) / Math.PI + 90;
+    const etiqueta = `<rect class="cs-etiqueta cs-i" x="${f(qx - 36)}" y="${f(qy - 1)}" width="88" height="18" rx="9"/><text class="cs-tx cs-i" x="${f(qx + 8)}" y="${f(qy + 12)}" text-anchor="middle">com a SysAid</text>`;
+    g.push(ato("solucao", 1.2, P("cs-s cs-tr", `M${a1} ${a2}Q${f(qx)} ${f(qy)} ${f(rx - 8)} ${f(cy - 54)}`) + setaPonta(rx - 8, cy - 54, ang) + etiqueta));
+    g.push(ato("solucao", 1.5, Ci("cs-s", rx, cy, 46) + solucaoIcone(id, rx, cy)));
+  }
+
+  return { svg: `<svg viewBox="0 0 ${w} ${H}" xmlns="http://www.w3.org/2000/svg">${g.join("")}</svg>`, placa };
 }
 
+// --------------------------------------------------------------------------
+// o cartão
+// --------------------------------------------------------------------------
 export function cenaSysaid(id: CenaId, o: OpcoesCena): DadosCena {
-  const largo = layout(id, 640, o);
-  const estreito = layout(id, 480, o);
+  const largo = montar(id, 640, o);
+  const estreito = montar(id, 480, o);
+  const terceiro: AtoCena =
+    o.estado === 3
+      ? { rotulo: "Com a SysAid", texto: o.solucao ?? "", tom: "solucao", vazio: !o.solucao }
+      : { rotulo: "O que isso causa", texto: o.estado === 2 ? o.causa ?? "" : "", tom: "causa", vazio: o.estado === 1 || !o.causa };
+  const atos: AtoCena[] = [
+    { rotulo: "Hoje", texto: o.hoje, tom: "contexto" },
+    { rotulo: "Onde quebra", texto: o.quebra, tom: "quebra" },
+    terceiro,
+  ];
+  const sufixo = o.estado === 1 ? " O terceiro ato ainda está vazio." : o.estado === 2 ? " À esquerda, a empresa; à direita, o que isso causa." : " À direita, em menta, o caminho com a SysAid.";
+  const comEmpresa = o.estado >= 2;
   return {
     svg: largo.svg,
-    proporcao: largo.proporcao,
-    rotulos: largo.rotulos,
-    descricao: DESCRICAO[id],
-    logo: o.logo ?? null,
-    nome: o.empresa,
-    faixa: o.empresa ? { texto: `atendimento da ${o.empresa} hoje` } : undefined,
-    estreito,
+    proporcao: 640 / H,
+    placa: largo.placa,
+    estreito: { svg: estreito.svg, proporcao: 480 / H, placa: estreito.placa },
+    descricao: DESCRICAO[id] + sufixo,
+    atos,
+    logo: comEmpresa ? o.logo ?? null : null,
+    nome: comEmpresa ? o.empresa : undefined,
+    cor: comEmpresa ? o.cor ?? null : null,
   };
 }

@@ -26,7 +26,7 @@ import {
   revelacao,
 } from "./generica-sysaid";
 import { cenaSysaid, type CenaId } from "./cenas-sysaid";
-import { CARTOES_GENERICA, horasSysaid, itensComoResolve, itensDiretoria, maturidadeSysaid, etapasSysaid, rotulosCena } from "./cartoes-generica-sysaid";
+import { CARTOES_GENERICA, horasSysaid, itensComoResolve, itensDiretoria, maturidadeSysaid, etapasSysaid, atosDaDor, causaTexto, solucaoTexto } from "./cartoes-generica-sysaid";
 
 const g = (id: string, para: Record<string, string>, dados: Record<string, string>, extra: Partial<Gerado> = {}): Gerado => ({ id, para, textos: {}, dados, origem: "servidor", ...extra });
 const ctx = (respostas: Contexto["respostas"], gerados: Record<string, Gerado> = {}): Contexto => ({ origem: "generica", variaveis: {}, respostas, gerados });
@@ -147,42 +147,70 @@ describe("o documento só fala da lista fechada (C1–C10)", () => {
   });
 });
 
-describe("cenas", () => {
+describe("cenas (direção A, 14/11/2026: três atos)", () => {
   const IDS: CenaId[] = ["perda", "complexidade", "sla", "relatorio"];
-  test("as 4 cenas, larga e estreita, com e sem logo, passam na conferência do SVG", () => {
+  const base = { hoje: "pedido chega por whatsapp", quebra: "aqui o pedido se perde" };
+  const empresa = { empresa: "Acme", logo: { src: "https://acme.com/i.png", alt: "Acme" }, cor: "#162cb6" };
+  test("4 cenas × 3 estados, larga e estreita: SVG conferido, traço que se desenha, 3 atos, menta só no 3º", () => {
     for (const id of IDS) {
-      for (const o of [{ rotulos: DORES[id].rotulosChip }, { rotulos: DORES[id].rotulosChip, empresa: "Acme", logo: { src: "https://acme.com/i.png", alt: "Acme" } }]) {
-        const d = cenaSysaid(id, o);
-        assert.ok(svgSeguro(d.svg), `${id} largo`);
-        assert.ok(d.estreito && svgSeguro(d.estreito.svg), `${id} estreito`);
+      for (const estado of [1, 2, 3] as const) {
+        const d = cenaSysaid(id, { ...base, estado, causa: "o usuário reclama com a diretoria", causas: ["reclama", "incendio"], solucao: solucaoTexto(id), ...empresa });
+        assert.ok(svgSeguro(d.svg), `${id} e${estado} largo`);
+        assert.ok(d.estreito && svgSeguro(d.estreito.svg), `${id} e${estado} estreito`);
+        assert.match(d.svg, /pathLength="1"/);
+        assert.equal(/cs-ato--solucao/.test(d.svg), estado === 3, `${id} e${estado}: menta só no 3º estado`);
+        assert.equal(/cs-ato--marca/.test(d.svg), estado >= 2, `${id} e${estado}: a empresa só a partir do 2º`);
         const v = vistaCena(d)!;
         assert.ok(v, id);
-        assert.equal(v.estreito?.legenda, true);
-        assert.ok(v.rotulos.filter((r) => r.tipo === "anotacao").length >= 2);
+        assert.equal(v.atos.length, 3);
+        assert.equal(v.atos[0].tom, "contexto");
+        assert.equal(v.atos[1].tom, "quebra");
+        assert.equal(v.atos[2].vazio, estado === 1);
+        assert.equal(v.atos[2].tom, estado === 3 ? "solucao" : "causa");
+        assert.equal(v.rotulos.length, 0, "nada de rótulo por cima do desenho");
+        assert.equal(v.estreito?.legenda, false);
+        if (estado >= 2) {
+          assert.equal(v.nome, "Acme");
+          assert.ok(v.logo);
+          assert.ok(v.cor && v.cor !== "#162cb6", "a cor da marca escura é clareada pro fundo escuro");
+        } else {
+          assert.equal(v.logo, null);
+          assert.equal(v.cor, undefined);
+        }
       }
     }
   });
-  test("nenhum texto da pessoa entra no SVG (só classes e formas)", () => {
-    const d = cenaSysaid("perda", { rotulos: ["<b>pede no zap</b>"], empresa: "Acme <script>" });
-    assert.doesNotMatch(d.svg, /pede no zap|Acme/);
-    assert.match(d.rotulos!.map((r) => r.texto).join(" "), /TI da Acme <script>/); // vai como texto do HTML (o React escapa)
+  test("nenhum texto da pessoa nem da empresa entra no SVG: vai nos atos (HTML, o React escapa)", () => {
+    const d = cenaSysaid("perda", { estado: 2, hoje: "<b>pede no zap</b>", quebra: "some na mesa", causa: "x", causas: ["reclama"], empresa: "Acme <script>", cor: "#ff0000" });
+    assert.doesNotMatch(d.svg, /pede no zap|some na mesa|Acme/);
+    assert.doesNotMatch(d.estreito!.svg, /pede no zap|Acme/);
+    assert.equal(d.atos![0].texto, "<b>pede no zap</b>");
+    assert.equal(d.nome, "Acme <script>");
   });
-  test("versão com logo: blocos com o nome da empresa e a faixa", () => {
-    const d = cenaSysaid("relatorio", { rotulos: DORES.relatorio.rotulosChip, empresa: "Acme" });
-    const blocos = d.rotulos!.filter((r) => r.tipo === "bloco").map((r) => r.texto);
-    assert.ok(blocos.includes("diretoria da Acme"));
-    assert.ok(blocos.includes("TI da Acme"));
-    assert.equal(d.faixa?.texto, "atendimento da Acme hoje");
+  test("3º ato no estado 2: sem consequência marcada fica tracejado; 1, 2 e 3 consequências cabem", () => {
+    for (const n of [0, 1, 2, 3]) {
+      const causas = (["reclama", "incendio", "prazo"] as const).slice(0, n);
+      const d = cenaSysaid("sla", { estado: 2, ...base, causas: [...causas], causa: n ? "x" : undefined, empresa: "Acme" });
+      assert.ok(svgSeguro(d.svg));
+      assert.equal(/cs-ato--dim/.test(d.svg), n === 0, `${n} consequências`);
+    }
   });
-  test("prazo sem alarme: o 3º rótulo ('a reclamação sobe') só com a consequência marcada", () => {
-    assert.equal(rotulosCena(ctx({ situacao_texto: CHIP("sla") }), "sla", false).length, 2);
-    assert.equal(rotulosCena(ctx({ situacao_texto: CHIP("sla"), consequencias: "reclama" }), "sla", false).length, 3);
-  });
-  test("rótulos do Haiku só valem com a geração da mesma dor", () => {
+  test("atos da dor: Haiku quando vale e é da mesma dor (1ª anotação = hoje, última = onde quebra); senão os fixos", () => {
     const texto = "o chamado vence e eu só sei pelo usuário";
-    const imp = g("implicacao", { situacao_texto: texto }, { dor: "sla" }, { listas: { anotacoes: ["chamado vence", "sei pelo usuário"] } });
-    assert.deepEqual(rotulosCena(ctx({ situacao_texto: texto }, { implicacao: imp }), "sla", true), ["chamado vence", "sei pelo usuário"]);
-    assert.deepEqual(rotulosCena(ctx({ situacao_texto: texto }, { implicacao: imp }), "perda", true), DORES.perda.rotulosChip);
+    const imp = g("implicacao", { situacao_texto: texto }, { dor: "sla" }, { listas: { anotacoes: ["chamado vence", "usuário liga", "sei pelo usuário"] } });
+    assert.deepEqual(atosDaDor(ctx({ situacao_texto: texto }, { implicacao: imp }), "sla", true), { hoje: "chamado vence", quebra: "sei pelo usuário" });
+    assert.deepEqual(atosDaDor(ctx({ situacao_texto: texto }, { implicacao: imp }), "perda", true), { hoje: "pedido chega por whatsapp, e-mail e pessoalmente", quebra: "aqui o pedido se perde" });
+    assert.deepEqual(atosDaDor(ctx({ situacao_texto: CHIP("sla") }), "sla", false), { hoje: "o chamado entra e ninguém acompanha o prazo", quebra: "o prazo estoura sem ninguém ver" });
+    assert.equal(atosDaDor(ctx({}), "ativos", false).quebra, DORES.ativos.rotulosChip[2]);
+  });
+  test("a solução (estado 3) vem só da lista fechada C1–C10 e nunca fala em WhatsApp; a causa usa os chips", () => {
+    const todas = Object.values(CAPACIDADES).map((c) => c.necessidade.toLowerCase());
+    for (const d of Object.keys(DORES) as (keyof typeof DORES)[]) {
+      const s = solucaoTexto(d);
+      assert.ok(todas.includes(s.toLowerCase()), `${d}: ${s}`);
+      assert.doesNotMatch(s, /whatsapp/i);
+    }
+    assert.equal(causaTexto(ctx({ consequencias: "reclama|incendio|prazo" })), "o usuário reclama com a diretoria · o time vive apagando incêndio");
   });
 });
 

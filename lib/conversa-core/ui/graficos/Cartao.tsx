@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type CSSProperties } from "react";
 import { formatarNumero, type CartaoPronto, type LayoutCenaPronto, type VistaAntesDepois, type VistaBarras, type VistaCena, type VistaLinhaTempo, type VistaMedidor, type VistaNumero } from "../../cartoes";
+import { corDaMarcaUsavel, corDominante } from "../../cor";
 
 // ==========================================================================
 // conversa-core — 12/11/2026: o cartão visual da conversa. Recebe a "vista"
@@ -185,12 +186,61 @@ function Medidor({ v }: { v: VistaMedidor }) {
 // no SVG). Com `estreito`, a composição 4:3 aparece quando o cartão é estreito
 // (container query) e a larga some. Logo e nome numa faixa no topo; logo que falha
 // ao carregar cai no nome.
-function LayoutCena({ l, classe }: { l: LayoutCenaPronto; classe: string }) {
+// 14/11/2026: a cor da marca pelo logo, no navegador (só quando o servidor não achou a cor no site).
+// Lê os pixels num canvas pequeno; sem CORS no ícone o canvas fica "sujo" e cai no fallback, sem erro.
+function useCorDoLogo(src: string | undefined, ativo: boolean): string | null {
+  const [cor, setCor] = useState<string | null>(null);
+  useEffect(() => {
+    if (!ativo || !src || typeof window === "undefined") return;
+    let vivo = true;
+    const img = new window.Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      try {
+        const n = 48;
+        const c = document.createElement("canvas");
+        c.width = n;
+        c.height = n;
+        const g = c.getContext("2d", { willReadFrequently: true });
+        if (!g) return;
+        g.drawImage(img, 0, 0, n, n);
+        const hex = corDominante(g.getImageData(0, 0, n, n).data);
+        const ok = hex ? corDaMarcaUsavel(hex) : null;
+        if (vivo && ok) setCor(ok.hex);
+      } catch {
+        /* canvas sujo (ícone sem CORS): fica a cor do contexto */
+      }
+    };
+    img.src = src;
+    return () => {
+      vivo = false;
+    };
+  }, [src, ativo]);
+  return cor;
+}
+
+type PlacaProps = { logo: { src: string; alt: string } | null; nome?: string; aoFalhar: () => void };
+function Placa({ l, p }: { l: LayoutCenaPronto; p: PlacaProps }) {
+  if (!p.logo && !p.nome) return null;
+  return (
+    <span className={`cvc-cena__placa${p.logo ? "" : " cvc-cena__placa--nome"}`} style={{ left: `${l.placa.x}%`, top: `${l.placa.y}%` }}>
+      {p.logo ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={p.logo.src} alt={p.logo.alt || p.nome || ""} onError={p.aoFalhar} />
+      ) : (
+        p.nome
+      )}
+    </span>
+  );
+}
+
+function LayoutCena({ l, classe, placa }: { l: LayoutCenaPronto; classe: string; placa?: PlacaProps }) {
   const anot = l.rotulos.filter((r) => r.tipo === "anotacao");
   return (
     <div className={`cvc-cena__layout ${classe}`}>
       <div className="cvc-cena__quadro" style={{ aspectRatio: String(l.proporcao) }}>
         <div className="cvc-cena__desenho" aria-hidden="true" dangerouslySetInnerHTML={{ __html: l.svg }} />
+        {placa && <Placa l={l} p={placa} />}
         {l.rotulos.map((r, i) =>
           l.legenda && r.tipo === "anotacao" ? (
             // marcador numerado no desenho; a palavra vai na legenda embaixo
@@ -224,12 +274,20 @@ function LayoutCena({ l, classe }: { l: LayoutCenaPronto; classe: string }) {
   );
 }
 
-function Cena({ v }: { v: VistaCena }) {
+// 14/11/2026: sem `faixa`, logo e nome entram como placa dentro do desenho (posição `placa`), e os
+// atos (hoje / onde quebra / o que isso causa) ficam em cartões embaixo. A cor da marca vem do
+// servidor (site) ou do logo (canvas) e pinta a classe cs-ato--marca do SVG via --cs-marca.
+function Cena({ v, estatico }: { v: VistaCena; estatico?: boolean }) {
   const [logoFalhou, setLogoFalhou] = useState(false);
   const comLogo = !!v.logo && !logoFalhou;
+  const corLogo = useCorDoLogo(v.logo?.src, !v.cor && !!v.logo && !v.faixa && !estatico);
+  const cor = v.cor ?? corLogo ?? undefined;
+  const placa: PlacaProps | undefined = !v.faixa && (comLogo || v.nome) ? { logo: comLogo ? v.logo : null, nome: v.nome, aoFalhar: () => setLogoFalhou(true) } : undefined;
+  const descricao = [v.descricao, ...v.atos.filter((a) => !a.vazio).map((a) => `${a.rotulo}: ${a.texto}`), ...v.rotulos.filter((r) => r.tipo === "anotacao").map((r) => r.texto)].join(". ");
+  const estilo = cor ? ({ "--cs-marca": cor } as CSSProperties) : undefined;
   return (
-    <div className="cvc-cena" role="img" aria-label={[v.descricao, ...v.rotulos.filter((r) => r.tipo === "anotacao").map((r) => r.texto)].join(". ")}>
-      {(v.faixa || v.logo || v.nome) && (
+    <div className={`cvc-cena${v.animacao && !estatico ? " cvc-cena--anima" : ""}`} role="img" aria-label={descricao} style={estilo}>
+      {v.faixa && (
         <div className="cvc-cena__faixa">
           <span className="cvc-cena__marca">
             {comLogo ? (
@@ -239,11 +297,21 @@ function Cena({ v }: { v: VistaCena }) {
               v.nome && <span className="cvc-cena__nome">{v.nome}</span>
             )}
           </span>
-          {v.faixa && <span className="cvc-cena__faixa-texto">{v.faixa.texto}</span>}
+          <span className="cvc-cena__faixa-texto">{v.faixa.texto}</span>
         </div>
       )}
-      <LayoutCena l={v} classe={v.estreito ? "cvc-cena__quadro--largo" : ""} />
-      {v.estreito && <LayoutCena l={v.estreito} classe="cvc-cena__quadro--estreito" />}
+      <LayoutCena l={v} classe={v.estreito ? "cvc-cena__quadro--largo" : ""} placa={placa} />
+      {v.estreito && <LayoutCena l={v.estreito} classe="cvc-cena__quadro--estreito" placa={placa} />}
+      {v.atos.length > 0 && (
+        <div className="cvc-cena__atos">
+          {v.atos.map((a, i) => (
+            <div key={`${i}-${a.rotulo}`} className={`cvc-cena__ato cvc-cena__ato--${a.tom}${a.vazio ? " cvc-cena__ato--vazio" : ""}`} style={{ "--i": i } as Var}>
+              <small>{a.rotulo}</small>
+              <span>{a.vazio ? "…" : a.texto}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -255,7 +323,7 @@ export default function Cartao({ cartao, estatico }: Props) {
   else if (cartao.tipo === "antesDepois") corpo = <AntesDepois v={cartao.vista} />;
   else if (cartao.tipo === "linhaTempo") corpo = <LinhaTempo v={cartao.vista} />;
   else if (cartao.tipo === "medidor") corpo = <Medidor v={cartao.vista} />;
-  else if (cartao.tipo === "cena") corpo = <Cena v={cartao.vista} />;
+  else if (cartao.tipo === "cena") corpo = <Cena v={cartao.vista} estatico={estatico} />;
   return (
     <figure className={`cvg cvc cvc--${cartao.tipo}${estatico ? " cvc--estatico" : ""}`} data-cartao={cartao.id} aria-label={cartao.titulo ?? cartao.rotulo}>
       {(cartao.rotulo || cartao.titulo) && (

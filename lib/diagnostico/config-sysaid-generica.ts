@@ -526,11 +526,11 @@ export const configSysaidGenerica: ConfigConversa = {
         { id: "causa", tipo: "itens", titulo: "O que isso causa", itens: itensCausa },
         { id: "leitura", tipo: "texto", titulo: "Leitura do especialista", texto: "{{leitura}}" },
         // página 2 · como a SysAid resolve cada ponto (só a lista fechada C1–C10)
+        // 14/11/2026: a cena no 3º estado abre a página (o único desenho com a SysAid, em menta)
+        { id: "resolve_cena", tipo: "cartoes", novaPagina: true, rotulo: "Como a SysAid resolve", titulo: "O caminho na {{empresa}}", cartoes: ["cena_resolve"] },
         {
           id: "resolve",
           tipo: "itens",
-          novaPagina: true,
-          rotulo: "Como a SysAid resolve",
           titulo: "Cada ponto, e como a SysAid resolve",
           colunas: ["O que vocês precisam", "Como a SysAid resolve"],
           itens: itensComoResolve,

@@ -890,42 +890,72 @@ a.cvt__logo:focus-visible { outline: 2px solid var(--cv-focus); outline-offset: 
 .cvc-cena__marca img { display: block; height: 32px; width: auto; max-width: 140px; object-fit: contain; padding: 4px 8px; background: var(--cv-logo-caixa, #fff); border-radius: 4px; box-sizing: border-box; }
 .cvc-cena__nome { font-family: var(--cv-font-titulo); font-style: italic; font-size: 1.15rem; line-height: 1.1; color: var(--cv-ink); overflow-wrap: anywhere; }
 .cvc-cena__faixa-texto { font-family: var(--cv-font-mono); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: lowercase; color: var(--cv-ink-400); text-align: right; }
+/* 14/11/2026: os 3 atos embaixo do desenho (as palavras da pessoa, com a cor do papel) e a placa da
+   empresa dentro do desenho (logo em caixa clara, ou o nome em itálico), na posição `placa` */
+.cvc-cena__atos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.cvc-cena__ato { min-width: 0; min-height: 54px; box-sizing: border-box; padding: 9px 11px 10px; background: var(--cv-bg); border: 1px solid var(--cv-line); border-radius: calc(var(--cv-radius-cartao) / 1.4); animation: cvt-sobe 0.3s ease calc(1.7s + var(--i, 0) * 0.18s) both; }
+.cvc-cena__ato small { display: block; margin-bottom: 6px; font-family: var(--cv-font-mono); font-size: 0.58rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cs-ctx); }
+.cvc-cena__ato span { display: block; font-size: 0.86rem; line-height: 1.3; color: var(--cv-ink); overflow-wrap: anywhere; }
+.cvc-cena__ato--quebra small, .cvc-cena__ato--causa small { color: var(--cv-alerta); }
+.cvc-cena__ato--solucao small { color: var(--cv-primary); }
+.cvc-cena__ato--vazio { border-style: dashed; opacity: 0.55; }
+.cvc-cena:not(.cvc-cena--anima) .cvc-cena__ato { animation: none; }
+@container (max-width: 479px) {
+  .cvc-cena__atos { grid-template-columns: 1fr; gap: 6px; }
+  .cvc-cena__ato { display: grid; grid-template-columns: 94px 1fr; gap: 10px; align-items: baseline; min-height: 0; padding: 8px 10px; }
+  .cvc-cena__ato small { margin: 0; }
+}
+.cvc-cena__placa { position: absolute; z-index: 1; display: inline-flex; align-items: center; height: 30px; padding: 5px 9px; box-sizing: border-box; background: var(--cv-logo-caixa, #fff); border-radius: 5px; }
+.cvc-cena__placa img { display: block; height: 100%; width: auto; max-width: 120px; object-fit: contain; }
+.cvc-cena__placa--nome { height: auto; padding: 0; background: none; font-family: var(--cv-font-titulo); font-style: italic; font-size: 1.1rem; line-height: 1.1; color: var(--cv-ink); white-space: nowrap; }
+@container (max-width: 479px) {
+  .cvc-cena__placa { height: 26px; padding: 4px 7px; }
+  .cvc-cena__placa img { max-width: 96px; }
+  .cvc-cena__placa--nome { font-size: 0.95rem; }
+}
 @container (max-width: 359px) {
   .cvc-cena__rotulo { font-size: 0.64rem; padding: 2px 5px 3px; }
   .cvc-cena__rotulo--bloco { font-size: 0.56rem; padding: 0; }
 }
 
-/* traço do desenho */
+/* traço do desenho (14/11/2026, direção "três atos"): uma cor por papel, herdada por currentColor.
+   Cada grupo de ato leva a classe do papel (cs-ato--contexto | --quebra | --causa | --solucao | --marca)
+   e, se quiser brilho, cs-brilho. Formas com traço: cs-s (fechada com fundo: cs-sf; fina: cs-t);
+   as que se desenham na entrada levam cs-d + pathLength="1". Fills: cs-p (cs-i = aparece depois do traço). */
+.cvc-cena { --cs-ctx: var(--cv-cena-contexto, #6b7f94); --cs-fundo: var(--cv-bg); }
 .cvc-cena svg * { vector-effect: non-scaling-stroke; }
-.cvc-cena svg .cs-fundo { fill: var(--cv-bg); stroke: none; }
-.cvc-cena svg .cs-grade { stroke: var(--cv-line); stroke-width: 1; fill: none; opacity: 0.38; }
-.cvc-cena svg .cs-l { stroke: var(--cv-ink-400); stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.cvc-cena svg .cs-f { stroke: var(--cv-line-forte); stroke-width: 1; fill: none; stroke-linecap: round; }
-.cvc-cena svg .cs-s { fill: var(--cv-superficie); stroke: var(--cv-ink-400); stroke-width: 1.5; stroke-linejoin: round; }
-.cvc-cena svg .cs-s2 { fill: var(--cv-bg); stroke: var(--cv-line-forte); stroke-width: 1; }
-.cvc-cena svg .cs-p { fill: var(--cv-ink-400); stroke: none; }
-.cvc-cena svg .cs-pf { fill: var(--cv-line-forte); stroke: none; }
-.cvc-cena svg .cs-a { stroke: var(--cv-primary); stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.cvc-cena svg .cs-af { fill: var(--cv-primary); stroke: none; }
-.cvc-cena svg .cs-at { fill: var(--cv-primary-tinta); stroke: var(--cv-primary); stroke-width: 1.5; }
-.cvc-cena svg .cs-x { stroke: var(--cv-alerta); stroke-width: 1.8; fill: none; stroke-linecap: round; }
-.cvc-cena svg .cs-xf { fill: var(--cv-alerta); stroke: none; }
-.cvc-cena svg .cs-tr { stroke-dasharray: 4 5; }
-.cvc-cena svg .cs-tr2 { stroke-dasharray: 2 4; }
-.cvc-cena svg .cs-tx { fill: var(--cv-ink-400); font-family: var(--cv-font-mono); font-size: 11px; letter-spacing: 0.04em; }
-.cvc-cena svg .cs-tx-a { fill: var(--cv-primary); }
-.cvc-cena svg .cs-tx-x { fill: var(--cv-alerta); }
-.cvc-cena svg .cs-tx-q { font-size: 15px; fill: var(--cv-ink-700); }
-/* entrada sóbria: os grupos do desenho aparecem em sequência, os rótulos depois */
-.cvc-cena svg > g { animation: cvc-cena-entra 0.5s ease both; }
-.cvc-cena svg > g:nth-of-type(2) { animation-delay: 0.08s; }
-.cvc-cena svg > g:nth-of-type(3) { animation-delay: 0.16s; }
-.cvc-cena svg > g:nth-of-type(4) { animation-delay: 0.24s; }
-.cvc-cena svg > g:nth-of-type(5) { animation-delay: 0.32s; }
-.cvc-cena svg > g:nth-of-type(6) { animation-delay: 0.4s; }
-.cvc-cena svg > g:nth-of-type(n + 7) { animation-delay: 0.48s; }
+.cvc-cena svg .cs-fundo { fill: var(--cs-fundo); stroke: none; }
+.cvc-cena svg .cs-grade { fill: var(--cv-ink-400); stroke: none; opacity: 0.16; }
+.cvc-cena svg .cs-base { stroke: var(--cs-ctx); stroke-width: 1.2; fill: none; opacity: 0.3; }
+.cvc-cena svg .cs-ato { color: var(--cs-ctx); }
+.cvc-cena svg .cs-ato--quebra, .cvc-cena svg .cs-ato--causa { color: var(--cv-alerta); }
+.cvc-cena svg .cs-ato--solucao { color: var(--cv-primary); }
+.cvc-cena svg .cs-ato--marca { color: var(--cs-marca, var(--cs-ctx)); }
+.cvc-cena svg .cs-ato--dim { opacity: 0.42; }
+.cvc-cena svg .cs-brilho { filter: drop-shadow(0 0 3px currentColor) drop-shadow(0 0 10px color-mix(in srgb, currentColor 42%, transparent)); }
+.cvc-cena svg .cs-s { stroke: currentColor; stroke-width: 2.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.cvc-cena svg .cs-sf { stroke: currentColor; stroke-width: 2.6; fill: var(--cs-fundo); stroke-linecap: round; stroke-linejoin: round; }
+.cvc-cena svg .cs-t { stroke: currentColor; stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.cvc-cena svg .cs-tr { stroke-dasharray: 5 7; }
+.cvc-cena svg .cs-p { fill: currentColor; stroke: none; }
+.cvc-cena svg .cs-tx { fill: currentColor; font-family: var(--cv-font-mono); font-size: 10.5px; font-weight: 500; letter-spacing: 0.06em; }
+.cvc-cena svg .cs-etiqueta { fill: var(--cs-fundo); stroke: currentColor; stroke-width: 1.2; }
+@container (max-width: 479px) {
+  .cvc-cena svg .cs-brilho { filter: drop-shadow(0 0 4px currentColor); }
+}
+/* entrada: o traço corre (stroke-dashoffset com pathLength="1") na ordem dos atos (--t em segundos,
+   por grupo); fills e etiquetas (cs-i) aparecem depois do traço; o ✕ (cs-pulso) pulsa uma vez */
+.cvc-cena--anima svg .cs-d { stroke-dasharray: 1; stroke-dashoffset: 1; animation: cs-desenha 0.55s cubic-bezier(0.3, 0.7, 0.3, 1) forwards; animation-delay: calc(var(--t, 0) * 1s); }
+.cvc-cena--anima svg .cs-i { opacity: 0; animation: cvc-cena-entra 0.3s ease forwards; animation-delay: calc(var(--t, 0) * 1s + 0.35s); }
+.cvc-cena--anima svg .cs-pulso { transform-box: fill-box; transform-origin: center; animation: cs-pulsa 0.7s ease-out both; animation-delay: calc(var(--t, 0) * 1s + 0.45s); }
+.cvc-cena--anima .cvc-cena__placa { animation: cvc-cena-entra 0.4s ease both; animation-delay: 0.2s; }
+@keyframes cs-desenha { to { stroke-dashoffset: 0; } }
+@keyframes cs-pulsa { 0% { transform: scale(0.5); opacity: 0; } 55% { transform: scale(1.2); opacity: 1; } 100% { transform: none; opacity: 1; } }
 @keyframes cvc-cena-entra { from { opacity: 0; } to { opacity: 1; } }
-.cvc--estatico .cvc-cena svg > g, .cvc--estatico .cvc-cena__rotulo { animation: none; }
+.cvc--estatico .cvc-cena__rotulo { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .cvc-cena--anima svg .cs-d, .cvc-cena--anima svg .cs-i, .cvc-cena--anima svg .cs-pulso, .cvc-cena--anima .cvc-cena__placa, .cvc-cena__ato { animation: none; stroke-dashoffset: 0; opacity: 1; }
+}
 
 /* ==========================================================================
    13/11/2026: "montando o seu documento" (ui/Montagem.tsx)
@@ -1011,6 +1041,11 @@ a.cvt__logo:focus-visible { outline: 2px solid var(--cv-focus); outline-offset: 
   .cven--doc .cvd__cartoes--1 { grid-template-columns: minmax(0, 1fr); }
   .cven--doc .cvd__secao--destaque { padding: 10px 12px; background: #f4f6f5; border-color: var(--cv-line-forte); }
   .cven--doc .cvc-cena__rotulo--anotacao { background: #fff; }
+  /* 14/11/2026: no papel, sem brilho; o "hoje" num ardósia que imprime */
+  .cven--doc .cvc-cena { --cs-ctx: #4f6275; }
+  .cven--doc .cvc-cena svg .cs-brilho { filter: none; }
+  .cven--doc .cvc-cena svg .cs-grade { opacity: 0.1; }
+  .cven--doc .cvc-cena__ato { background: #fff; }
   .cven--doc .cvd__secao .cvg--mapa { padding: 12px 14px; }
   .cven--doc .cvm--linear .cvm__liga { height: 12px; }
   .cven--doc .cvm--linear .cvm__no { padding: 5px 9px; }

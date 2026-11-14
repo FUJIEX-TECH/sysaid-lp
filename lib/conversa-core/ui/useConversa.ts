@@ -262,7 +262,8 @@ export function useConversa({ config, persistencia, onEvento, comEntrega = false
     const proxima = motor.proximaEtapa(ctxNovo);
     // cartões visuais que entram depois desta resposta: avisa e dá tempo de desenhar
     const cartoesNovos = motor.cartoes(ctxNovo, etapa.id);
-    if (cartoesNovos.length) pausaCartao.current = config.pausaCartaoMs ?? 900;
+    // 14/11/2026: cada cartão pode pedir a própria pausa (a cena desenhada pede ~2 s); vale a maior
+    if (cartoesNovos.length) pausaCartao.current = Math.max(...cartoesNovos.map((k) => k.pausaMs ?? config.pausaCartaoMs ?? 900));
     momentos.current[etapa.id] = new Date().toISOString();
     setRespostas(novo);
     setTexto(proxima?.prefill ? motor.variavel(ctxNovo, proxima.prefill) : "");

@@ -9,6 +9,7 @@
 // ==========================================================================
 
 import { avaliar, geradoValido, type Resolvedor } from "./condicoes";
+import { corDaMarcaUsavel } from "./cor";
 import { renderTexto } from "./texto";
 import type {
   CartaoConfig,
@@ -93,12 +94,18 @@ export type VistaMedidor = {
 };
 export type RotuloCenaPronto = { texto: string; x: number; y: number; lado: "esquerda" | "direita" | "centro"; alerta: boolean; tipo: "anotacao" | "bloco" };
 export type LayoutCenaPronto = { svg: string; proporcao: number; rotulos: RotuloCenaPronto[]; placa: { x: number; y: number }; legenda: boolean };
+export type AtoCenaPronto = { rotulo: string; texto: string; tom: "contexto" | "quebra" | "causa" | "solucao"; vazio: boolean };
 export type VistaCena = LayoutCenaPronto & {
   descricao: string;
   logo: { src: string; alt: string } | null;
   nome?: string;
   faixa?: { texto: string };
   estreito?: LayoutCenaPronto;
+  // 14/11/2026: os cartões dos atos embaixo do desenho, a cor da marca (já passada pela regra de
+  // contraste; ausente = fallback na cor do contexto) e se a entrada se desenha
+  atos: AtoCenaPronto[];
+  cor?: string;
+  animacao: boolean;
 };
 export type VistaPorTipo = {
   numero: VistaNumero;
@@ -217,6 +224,18 @@ function proporcaoDe(p: unknown, padrao: number): number {
 function placaDe(p: { x: number; y: number } | undefined): { x: number; y: number } {
   return p && finito(p.x) && finito(p.y) ? { x: prende(p.x), y: prende(p.y) } : { x: 3, y: 4 };
 }
+// até 3 atos; rótulo curto, texto até 120 caracteres; sem texto = cartão vazio (tracejado)
+const TONS = new Set(["contexto", "quebra", "causa", "solucao"]);
+function atosCena(l: DadosCena["atos"]): AtoCenaPronto[] {
+  return (l ?? [])
+    .filter((a) => a && limpo(a.rotulo))
+    .slice(0, 3)
+    .map((a) => {
+      const texto = limpo(a.texto).slice(0, 120);
+      const tom = a.tom && TONS.has(a.tom) ? a.tom : "contexto";
+      return { rotulo: a.rotulo.trim().slice(0, 24), texto, tom, vazio: !!a.vazio || !texto };
+    });
+}
 export function vistaCena(d: DadosCena): VistaCena | null {
   if (!d || !svgSeguro(d.svg)) return null;
   const logo = d.logo && limpo(d.logo.src) && /^(https:\/\/|\/)/.test(d.logo.src) ? { src: d.logo.src.trim(), alt: limpo(d.logo.alt) } : null;
@@ -234,6 +253,9 @@ export function vistaCena(d: DadosCena): VistaCena | null {
     placa: placaDe(d.placa),
     legenda: false,
     estreito,
+    atos: atosCena(d.atos),
+    cor: corDaMarcaUsavel(d.cor)?.hex,
+    animacao: d.animacao !== "nenhuma",
   };
 }
 
@@ -274,8 +296,10 @@ export function resumoCartao(c: CartaoPronto): string {
       const v = c.vista;
       return `nível ${v.atual} de ${v.niveis.length} (${v.niveis[v.atual - 1].rotulo})${v.alvo ? ` → ${v.alvo} (${v.niveis[v.alvo - 1].rotulo})` : ""}`;
     }
-    case "cena":
-      return `${c.vista.descricao}${c.vista.rotulos.some((r) => r.tipo === "anotacao") ? ` · rótulos: ${c.vista.rotulos.filter((r) => r.tipo === "anotacao").map((r) => `“${r.texto}”`).join(", ")}` : ""}${c.vista.nome ? ` · ${c.vista.nome}` : ""}`;
+    case "cena": {
+      const atos = c.vista.atos.filter((a) => !a.vazio);
+      return `${c.vista.descricao}${atos.length ? ` · ${atos.map((a) => `${a.rotulo}: “${a.texto}”`).join("; ")}` : ""}${c.vista.rotulos.some((r) => r.tipo === "anotacao") ? ` · rótulos: ${c.vista.rotulos.filter((r) => r.tipo === "anotacao").map((r) => `“${r.texto}”`).join(", ")}` : ""}${c.vista.nome ? ` · ${c.vista.nome}` : ""}`;
+    }
     default:
       return "";
   }
@@ -285,7 +309,7 @@ export function resumoCartao(c: CartaoPronto): string {
 // resolver: config + contexto → cartões prontos pra desenhar
 // --------------------------------------------------------------------------
 type Textos = { fala?: string; rotulo?: string; titulo?: string; legenda?: string };
-export type CartaoPronto = { [K in TipoCartao]: { id: string; tipo: K; apos: string; naEntrega: boolean; soNaEntrega: boolean; idioma: string; vista: VistaPorTipo[K] } & Textos }[TipoCartao];
+export type CartaoPronto = { [K in TipoCartao]: { id: string; tipo: K; apos: string; naEntrega: boolean; soNaEntrega: boolean; pausaMs?: number; idioma: string; vista: VistaPorTipo[K] } & Textos }[TipoCartao];
 
 function vistaDe(c: CartaoConfig, ctx: Contexto, idioma: string): VistaPorTipo[TipoCartao] | null {
   let d: unknown;
@@ -334,6 +358,7 @@ export function resolverCartao(c: CartaoConfig, ctx: Contexto, variavel?: Resolv
     apos: c.apos,
     naEntrega: c.naEntrega !== false || !!c.soNaEntrega,
     soNaEntrega: !!c.soNaEntrega,
+    pausaMs: c.pausaMs,
     idioma,
     vista,
     fala: texto("fala"),

@@ -79,6 +79,7 @@ export type Empresa = {
   nome: string; // melhor nome encontrado (site, CNPJ) ou chute pelo domínio
   site: string;
   logo?: string; // URL de imagem (apple-touch-icon ou favicon grande)
+  cor?: string; // 14/11/2026: cor da marca declarada pelo site (theme-color / TileColor), hex #rrggbb
   descricao?: string;
   redes: { instagram?: string; linkedin?: string; facebook?: string; youtube?: string };
   cnpj?: string;
@@ -588,6 +589,10 @@ export type RotuloCena = {
 // `legenda` (13/11/2026): as anotações viram marcadores numerados no desenho e a lista com as
 // palavras logo abaixo (pra composição estreita, onde 3 rótulos de 28 caracteres cruzariam linha)
 export type LayoutCena = { svg: string; proporcao: number; rotulos?: RotuloCena[]; placa?: { x: number; y: number }; legenda?: boolean };
+// 14/11/2026: direção "três atos" (hoje → onde quebra → o que isso causa / com a solução). As palavras
+// da pessoa NÃO vão mais por cima do desenho: vão em até 3 cartões embaixo, um por ato, com a cor do
+// papel (contexto, quebra, causa, solução). `vazio` desenha o cartão tracejado (o ato ainda não aconteceu).
+export type AtoCena = { rotulo: string; texto: string; tom?: "contexto" | "quebra" | "causa" | "solucao"; vazio?: boolean };
 export type DadosCena = {
   svg: string; // marcação <svg ...>...</svg>, com viewBox
   proporcao?: number; // largura / altura (padrão 16/9)
@@ -596,10 +601,17 @@ export type DadosCena = {
   logo?: { src: string; alt: string } | null;
   nome?: string; // nome ao lado do logo (ou sozinho, sem logo)
   placa?: { x: number; y: number }; // onde fica a placa de logo + nome (padrão canto de cima, à esquerda)
-  // 13/11/2026: faixa no topo com logo (ou nome) e uma linha em mono (ex.: "atendimento da X hoje")
+  // 13/11/2026: faixa no topo com logo (ou nome) e uma linha em mono (ex.: "atendimento da X hoje").
+  // Sem faixa, logo e nome entram como PLACA dentro do desenho, na posição `placa` (14/11/2026).
   faixa?: { texto: string };
   // a composição pro cartão estreito (abaixo de ~480 px de largura do cartão)
   estreito?: LayoutCena;
+  // 14/11/2026: os 3 atos (cartões embaixo do desenho), a cor da marca que pinta a classe
+  // cs-ato--marca (hex; fora da regra de contraste o núcleo descarta) e a animação de entrada
+  // (padrão "desenha": o traço corre nos elementos com classe cs-d e pathLength="1")
+  atos?: AtoCena[];
+  cor?: string | null;
+  animacao?: "desenha" | "nenhuma";
 };
 
 export type DadosPorTipoCartao = {
@@ -628,6 +640,9 @@ type CartaoBase = {
   naEntrega?: boolean;
   // 13/11/2026: só no documento/PDF, nunca na conversa (ex.: maturidade e etapas)
   soNaEntrega?: boolean;
+  // 14/11/2026: quanto a próxima fala espera depois deste cartão (padrão: pausaCartaoMs da config);
+  // a cena desenhada pede ~2 s, o tempo do traço correr
+  pausaMs?: number;
 };
 export type CartaoConfig = { [K in TipoCartao]: CartaoBase & { tipo: K; calcular: (ctx: Contexto) => DadosPorTipoCartao[K] | null } }[TipoCartao];
 

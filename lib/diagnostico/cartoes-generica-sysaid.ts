@@ -37,18 +37,40 @@ import { listaNatural } from "../conversa-core/selecao";
 const maiuscula = (t: string) => (t ? t.charAt(0).toUpperCase() + t.slice(1) : t);
 
 // --------------------------------------------------------------------------
-// rótulos da cena: os do Haiku (palavras da pessoa) quando a geração vale e é
-// da mesma dor; senão os fixos do chip. Prazo sem alarme: o 3º ("a reclamação
-// sobe") só com "o usuário reclama com a diretoria" marcado.
+// 14/11/2026 (direção A): a cena tem 3 atos (hoje → onde quebra → o que isso
+// causa / com a SysAid) e as palavras da pessoa vão nos cartões embaixo.
+// "Hoje" e "onde quebra" vêm das anotações do Haiku quando a geração vale e é
+// da mesma dor (o prompt pede 2 ou 3 anotações: a 1ª é onde o pedido chega, a
+// última é onde quebra); senão dos textos fixos da dor.
+// PROVISÓRIO (sysaid-growth): os textos fixos abaixo e o remapeamento do prompt
+// pra devolver {hoje, quebra, causa} direto, em vez das anotações por slot.
 // --------------------------------------------------------------------------
-export function rotulosCena(ctx: Contexto, dor: DorId, comHaiku: boolean): string[] {
-  const fixos = [...DORES[dor].rotulosChip];
-  if (dor === "sla" && !consequencias(ctx).includes("reclama")) fixos.splice(2);
+const ATOS_FIXOS: Partial<Record<DorId, { hoje: string; quebra: string }>> = {
+  perda: { hoje: "pedido chega por whatsapp, e-mail e pessoalmente", quebra: "aqui o pedido se perde" },
+  complexidade: { hoje: "o time resolve por fora da ferramenta", quebra: "qualquer ajuste vira projeto" },
+  sla: { hoje: "o chamado entra e ninguém acompanha o prazo", quebra: "o prazo estoura sem ninguém ver" },
+  relatorio: { hoje: "a diretoria pede o número", quebra: "o número chega depois, montado na planilha" },
+};
+export function atosDaDor(ctx: Contexto, dor: DorId, comHaiku: boolean): { hoje: string; quebra: string } {
+  const chip = DORES[dor].rotulosChip;
+  const fixos = ATOS_FIXOS[dor] ?? { hoje: chip[0], quebra: chip[chip.length - 1] };
   if (comHaiku && geradoValido(ctx, "implicacao") && ctx.gerados?.implicacao?.dados?.dor === dor) {
     const a = (ctx.gerados.implicacao.listas?.anotacoes ?? []).map((x) => x.trim()).filter(Boolean);
-    if (a.length >= 2) return a.slice(0, 3);
+    if (a.length >= 2) return { hoje: a[0], quebra: a[a.length - 1] };
   }
   return fixos;
+}
+// o 3º ato no estado 2: as consequências que a pessoa marcou, nas palavras dos chips (até 2)
+export function causaTexto(ctx: Contexto): string {
+  return consequencias(ctx)
+    .slice(0, 2)
+    .map((c) => CONSEQUENCIAS[c].triste.charAt(0).toLowerCase() + CONSEQUENCIAS[c].triste.slice(1))
+    .join(" · ");
+}
+// o 3º ato no estado 3: a 1ª capacidade da dor, e só da lista fechada C1–C10
+export function solucaoTexto(dor: DorId): string {
+  const n = CAPACIDADES[DORES[dor].capacidades[0]].necessidade;
+  return n.charAt(0).toLowerCase() + n.slice(1);
 }
 
 function logoDa(ctx: Contexto): { src: string; alt: string } | null {
@@ -58,15 +80,27 @@ function logoDa(ctx: Contexto): { src: string; alt: string } | null {
 
 const cenaDaDor = (fonte: "p1" | "atual", comHaiku: boolean) => (ctx: Contexto) => {
   const d = fonte === "p1" ? dorP1(ctx) : dorAtual(ctx);
-  return d ? cenaSysaid(DORES[d].cena, { rotulos: rotulosCena(ctx, d, comHaiku) }) : null;
+  return d ? cenaSysaid(DORES[d].cena, { estado: 1, ...atosDaDor(ctx, d, comHaiku) }) : null;
 };
 
-function cenaEmpresa(ctx: Contexto) {
+// estados 2 e 3: a empresa (placa, prédio na cor da marca) e, à direita, as consequências ou a SysAid
+function cenaComEmpresa(ctx: Contexto, estado: 2 | 3) {
   const d = dorPrincipal(ctx);
   const empresa = (ctx.respostas.empresa ?? "").trim();
   if (!d || !empresa) return null;
-  return cenaSysaid(DORES[d].cena, { rotulos: rotulosCena(ctx, d, d === dorP1(ctx)), empresa, logo: logoDa(ctx) });
+  return cenaSysaid(DORES[d].cena, {
+    estado,
+    ...atosDaDor(ctx, d, d === dorP1(ctx)),
+    causa: estado === 2 ? causaTexto(ctx) : undefined,
+    causas: estado === 2 ? consequencias(ctx) : undefined,
+    solucao: estado === 3 ? solucaoTexto(d) : undefined,
+    empresa,
+    logo: logoDa(ctx),
+    cor: ctx.empresa?.cor ?? null,
+  });
 }
+const cenaEmpresa = (ctx: Contexto) => cenaComEmpresa(ctx, 2);
+const cenaResolve = (ctx: Contexto) => cenaComEmpresa(ctx, 3);
 
 // --------------------------------------------------------------------------
 // a conta (passo 7): dias de trabalho do time por ano no problema
@@ -144,9 +178,12 @@ export function etapasSysaid(ctx: Contexto): DadosLinhaTempo | null {
 // --------------------------------------------------------------------------
 const NAO_DOR_LISTA: Condicao = { nao: { campo: "dor_lista", definido: true } };
 const NAO_DOR_LISTA2: Condicao = { nao: { campo: "dor_lista2", definido: true } };
-const CENA_DOR = { rotulo: "O seu atendimento hoje", fala: "Deixa eu desenhar o que você contou.", naEntrega: false } as const;
-// a faixa da cena já diz "atendimento da Empresa hoje" (com o logo): sem rótulo em cima, pra não repetir
-const CENA_EMPRESA = { fala: "Esse é o atendimento da {{empresa}} hoje, do jeito que você contou." } as const;
+// as cenas pedem ~2 s de pausa: é o tempo do traço se desenhar (3 atos em sequência)
+const CENA_DOR = { rotulo: "O seu atendimento hoje", fala: "Deixa eu desenhar o que você contou.", naEntrega: false, pausaMs: 2200 } as const;
+// estado 2: a placa com o logo vai dentro do desenho; o rótulo em cima diz de quem é a cena
+const CENA_EMPRESA = { rotulo: "O atendimento da {{empresa}} hoje", fala: "Esse é o atendimento da {{empresa}} hoje, do jeito que você contou.", pausaMs: 2200 } as const;
+// estado 3 (depois do need-payoff, antes da revelação): o único desenho com a SysAid, em menta
+const CENA_RESOLVE = { rotulo: "O caminho na {{empresa}}", fala: "Então o desenho fecha assim:", pausaMs: 2400 } as const;
 
 export const CARTOES_GENERICA: CartaoConfig[] = [
   { id: "cena_dor", tipo: "cena", apos: "situacao_texto", quando: NAO_DOR_LISTA, ...CENA_DOR, calcular: cenaDaDor("p1", true) },
@@ -157,6 +194,8 @@ export const CARTOES_GENERICA: CartaoConfig[] = [
   { id: "cena_empresa", tipo: "cena", apos: "cargo", quando: { nao: { variavel: "pergunta_ferramenta", igual: "sim" } }, ...CENA_EMPRESA, calcular: cenaEmpresa },
   { id: "cena_empresa_f", tipo: "cena", apos: "ferramenta", quando: { campo: "ferramenta", diferente: "outra" }, ...CENA_EMPRESA, calcular: cenaEmpresa },
   { id: "cena_empresa_o", tipo: "cena", apos: "ferramenta_outra", ...CENA_EMPRESA, calcular: cenaEmpresa },
+  // 14/11/2026: a cena no 3º estado, depois do need-payoff (entra no documento também)
+  { id: "cena_resolve", tipo: "cena", apos: "payoff", ...CENA_RESOLVE, calcular: cenaResolve },
   {
     id: "horas",
     tipo: "numero",

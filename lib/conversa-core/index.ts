@@ -9,6 +9,7 @@ export { recomendar } from "./recomendacao";
 export { pontuar, rotaDe, rotuloFinal } from "./pontuacao";
 export { lerSinais, sinaisDoCaminho, resolverOrigem, casa, casaOrigem } from "./origem";
 export { montarMapa } from "./mapa";
+export { corHex, corDaMarcaUsavel, corDominante, luminancia, type CorMarca } from "./cor";
 // 12/11/2026: cartões visuais (funções puras) e o mapa liberado
 export {
   resolverCartoes,

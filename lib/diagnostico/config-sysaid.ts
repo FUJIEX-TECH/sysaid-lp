@@ -263,6 +263,8 @@ const TEMA_ESCURO: Record<string, string> = {
   "--cv-input-borda": "#5f6663",
   "--cv-mais-borda": "rgba(255, 255, 255, 0.28)",
   "--cv-erro": "#ff8a80",
+  // 14/11/2026: a cor do "hoje" nas cenas desenhadas (ardósia; a quebra usa --cv-erro e a solução --cv-primary)
+  "--cv-cena-contexto": "#9fb3c8",
   // a resposta da pessoa: balão na cor de acento (verde da marca), à direita
   "--cv-eu-bg": "#175d4a",
   "--cv-eu-ink": "#f1f8f4",

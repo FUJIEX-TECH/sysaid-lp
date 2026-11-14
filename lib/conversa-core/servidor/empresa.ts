@@ -8,6 +8,7 @@
 // DNS antes), no máximo 300 KB de HTML, sem seguir pra fora de http(s).
 import { lookup } from "node:dns/promises";
 import type { Empresa } from "../tipos";
+import { corHex } from "../cor";
 import { criarCache } from "./custo";
 
 export type EmpresaServidorConfig = {
@@ -271,6 +272,9 @@ export function criarLeitorDeEmpresa(cfg: EmpresaServidorConfig) {
       if (desc) empresa.descricao = desc.slice(0, 180);
       empresa.site = pagina.urlFinal.replace(/\/$/, "");
       empresa.logo = icone(html, pagina.urlFinal);
+      // 14/11/2026: a cor que o próprio site declara (pinta o prédio da empresa na cena)
+      const cor = corHex(m["theme-color"]) ?? corHex(m["msapplication-tilecolor"]);
+      if (cor) empresa.cor = cor;
       empresa.redes = redes(html);
       empresa.origem = "site";
       const digitos = cnpjNoHtml(html);
