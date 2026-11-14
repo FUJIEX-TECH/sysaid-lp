@@ -200,7 +200,10 @@ export default function LeadForm({ variant = "hero", submitLabel }: Props) {
       }
       // marca o envio para a /obrigado disparar a conversao, e redireciona.
       // Envio descartado pelo honeypot (hp) nao vira conversao: nao entrou no banco.
-      if (!data.hp) sessionStorage.setItem("sysaid_lead", "1");
+      // Guarda o id do lead: a /obrigado manda como transaction_id pro Google Ads, o que
+      // permite retirar pela API uma conversao que se prove falsa (sem Order ID o Google
+      // recusa o ajuste: "Adjustment for website conversion requires Order ID", 14/11/2026).
+      if (!data.hp) sessionStorage.setItem("sysaid_lead", data.id ? `lead:${data.id}` : "1");
       window.location.href = "/obrigado";
     } catch {
       setError("Erro de conexão. Tente novamente em instantes.");
