@@ -8,10 +8,11 @@ import type { Contexto, ResumoConfig } from "../tipos";
 // pessoa responde (coluna lateral no desktop). Linhas e textos vêm da
 // configuração; só entram as que têm valor.
 
-export default function Resumo({ config, ctx, motor }: { config: ResumoConfig; ctx: Contexto; motor: Motor }) {
+// 18/11/2026: `mascarar` (só na entrega) esconde termos do texto (config.entrega.mascarar)
+export default function Resumo({ config, ctx, motor, mascarar }: { config: ResumoConfig; ctx: Contexto; motor: Motor; mascarar?: (t: string) => string }) {
   const linhas = config.linhas
     .filter((l) => avaliar(l.quando, ctx, motor.resolvedor(ctx)))
-    .map((l) => ({ rotulo: l.rotulo, texto: motor.texto(l.texto, ctx).trim() }))
+    .map((l) => ({ rotulo: l.rotulo, texto: (mascarar ?? ((t: string) => t))(motor.texto(l.texto, ctx).trim()) }))
     .filter((l) => l.texto);
 
   return (

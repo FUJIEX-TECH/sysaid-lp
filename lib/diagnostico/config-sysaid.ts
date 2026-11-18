@@ -16,6 +16,7 @@
 // ==========================================================================
 
 import { REACAO_CUSTO_ANTERIOR } from "@/lib/diagnostico/custo-sysaid";
+import { MASCARA_PDF, termosConcorrente } from "@/lib/diagnostico/generica-sysaid";
 import type { ConfigConversa, Contexto, Opcao, OrigemRegra } from "@/lib/conversa-core";
 import { sugerirEmpresa, sugerirNome, primeiroNome } from "@/lib/conversa-core";
 import { isCorporateEmail } from "@/lib/email-domains";
@@ -886,6 +887,8 @@ export const configSysaid: ConfigConversa = {
   // com download em PDF (impressão do navegador, folha clara com o logo preto).
   // Nada de "te mandamos pelo WhatsApp". Copy PROVISÓRIA (sysaid-growth revisa).
   entrega: {
+    // 18/11/2026 (Fernando): nome de concorrente escondido no mapa liberado e no PDF (a tela segue crua)
+    mascarar: { ...MASCARA_PDF, termos: (ctx) => termosConcorrente([rotuloFerramenta(ctx), ctx.respostas.ferramenta_outra, ctx.variaveis.concorrente]) },
     apos: "telefone",
     fala: "Pronto{{saudacao}}. O seu mapa está liberado aqui embaixo.",
     rotulo: "Mapa liberado",

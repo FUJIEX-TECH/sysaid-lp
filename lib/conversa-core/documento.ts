@@ -9,6 +9,7 @@
 
 import { avaliar, type Resolvedor } from "./condicoes";
 import { renderTexto } from "./texto";
+import { mascaraDaEntrega } from "./mascara";
 import type { CartaoPronto } from "./cartoes";
 import type { ConfigConversa, Contexto, ItemDocumento, SecaoDocumento } from "./tipos";
 
@@ -78,6 +79,18 @@ export function resolverDocumento(
     if (s.tipo === "itens" && !pronta.itens.length) continue;
     if (s.tipo === "texto" && !pronta.texto && !pronta.paragrafos.length) continue;
     secoes.push(pronta);
+  }
+  // 18/11/2026: termos escondidos (config.entrega.mascarar) em todo texto das seções
+  if (config.entrega?.mascarar) {
+    const x = mascaraDaEntrega(config, ctx);
+    const o = (v: string | undefined) => (v ? x(v) : v);
+    for (const s of secoes) {
+      s.rotulo = o(s.rotulo);
+      s.titulo = o(s.titulo);
+      s.texto = o(s.texto);
+      s.paragrafos = s.paragrafos.map(x);
+      s.itens = s.itens.map((i) => ({ titulo: x(i.titulo), texto: o(i.texto), nota: o(i.nota) }));
+    }
   }
   const e = ctx.empresa;
   const logo = doc.logoCliente && e && e.origem !== "fallback" && e.logo && /^(https:\/\/|\/)/.test(e.logo) ? { src: e.logo, alt: e.nome } : null;

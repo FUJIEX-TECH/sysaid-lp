@@ -2,6 +2,7 @@
 
 import { forwardRef } from "react";
 import Resumo from "./Resumo";
+import { mascaraDaEntrega, mascararMapa } from "../mascara";
 import Mapa from "./graficos/Mapa";
 import Cartao from "./graficos/Cartao";
 import type { CartaoPronto } from "../cartoes";
@@ -85,12 +86,12 @@ const Entrega = forwardRef<HTMLHeadingElement, Props>(function Entrega({ config,
       <div className={`cven__grade${comResumo ? "" : " cven__grade--so-mapa"}`}>
         {mapa && (
           <div className="cven__mapa">
-            <Mapa mapa={mapa} titulo={t(e.tituloMapa) || undefined} escalonado />
+            <Mapa mapa={e.mascarar ? mascararMapa(mapa, mascaraDaEntrega(config, ctx)) : mapa} titulo={t(e.tituloMapa) || undefined} escalonado />
           </div>
         )}
         {comResumo && (
           <div className="cven__resumo">
-            <Resumo config={config.resumo!} ctx={ctx} motor={motor} />
+            <Resumo config={config.resumo!} ctx={ctx} motor={motor} mascarar={mascaraDaEntrega(config, ctx)} />
           </div>
         )}
       </div>

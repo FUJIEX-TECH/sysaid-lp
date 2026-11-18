@@ -20,7 +20,7 @@ import { formatarNumero } from "../conversa-core/cartoes";
 import { formatarHorario, lerHorarios } from "../conversa-core/horarios";
 import { listaNatural, partesMultipla } from "../conversa-core/selecao";
 import { decidirReacao } from "../conversa-core/reacoes";
-import type { Contexto, EtapaConfig, Opcao, RegrasHorario } from "../conversa-core/tipos";
+import type { Contexto, EtapaConfig, MascaraConfig, Opcao, RegrasHorario } from "../conversa-core/tipos";
 import { ETAPAS_CUSTO_GENERICA, REACAO_CUSTO_GENERICA, type TipoCusto } from "./custo-sysaid";
 
 // --------------------------------------------------------------------------
@@ -702,3 +702,42 @@ export function notasGenerica(ctx: Contexto): string {
   if (o.pede !== null) linhas.push(`Objeção de custo (pediu preço): ${o.pede}`);
   return linhas.join("\n").slice(0, 1900);
 }
+
+// --------------------------------------------------------------------------
+// 10. Concorrente escondido no documento (decisão do Fernando, 18/11/2026): todo
+//     texto do lead que entra no PDF troca o nome da ferramenta por "a ferramenta
+//     atual". Só o documento; a conversa, o mapa da tela e o /admin ficam crus
+//     (o Marcelo precisa saber a ferramenta). SysAid nunca entra na lista.
+// --------------------------------------------------------------------------
+export const CONCORRENTES_PDF: string[] = [
+  "ManageEngine ServiceDesk Plus", "ServiceDesk Plus", "ManageEngine", "Manage Engine",
+  "Jira Service Management", "Jira Service Desk", "Jira",
+  "Movidesk", "GLPI", "ServiceNow", "Service Now", "Freshservice", "Fresh Service", "Freshdesk", "Fresh Desk", "Zendesk",
+  "TOPdesk", "Top Desk", "Milvus", "OTRS", "Znuny", "Ivanti", "Octadesk", "Desk Manager", "DeskManager", "Qualitor",
+  "CITSmart", "4biz", "Zammad", "osTicket", "Spiceworks",
+];
+const NAO_E_CONCORRENTE = /sysaid|^(outra|outro|nenhuma|nenhum|planilha|excel|e-?mail|whatsapp)$/i;
+// a lista + os nomes que a pessoa deu (campo da ferramenta, "Outra", o que o Jev leu); nunca SysAid
+export function termosConcorrente(doLead: (string | null | undefined)[]): string[] {
+  const nomes = doLead
+    .map((t) => (t ?? "").trim())
+    .filter((t) => t.length >= 3 && !NAO_E_CONCORRENTE.test(t) && !/\b(ferramenta|planilha|sistema pr[óo]prio)\b/i.test(t));
+  return [...CONCORRENTES_PDF, ...nomes].filter((t) => !/sysaid/i.test(t));
+}
+export function termosPdf(ctx: Contexto): string[] {
+  return termosConcorrente([ferramentaNome(ctx), ctx.respostas.ferramenta_outra, dado(ctx, "implicacao", "ferramenta_nome")]);
+}
+const FERRAMENTA = "ferramenta atual";
+export const MASCARA_PDF: MascaraConfig = {
+  termos: termosPdf,
+  por: `a ${FERRAMENTA}`,
+  contracoes: {
+    o: `a ${FERRAMENTA}`, a: `a ${FERRAMENTA}`,
+    do: `da ${FERRAMENTA}`, da: `da ${FERRAMENTA}`, de: `da ${FERRAMENTA}`,
+    no: `na ${FERRAMENTA}`, na: `na ${FERRAMENTA}`, em: `na ${FERRAMENTA}`,
+    pelo: `pela ${FERRAMENTA}`, pela: `pela ${FERRAMENTA}`, por: `pela ${FERRAMENTA}`,
+    ao: `à ${FERRAMENTA}`, "à": `à ${FERRAMENTA}`,
+    "o nosso": `a nossa ${FERRAMENTA}`, "a nossa": `a nossa ${FERRAMENTA}`, "do nosso": `da nossa ${FERRAMENTA}`, "da nossa": `da nossa ${FERRAMENTA}`,
+    "no nosso": `na nossa ${FERRAMENTA}`, "na nossa": `na nossa ${FERRAMENTA}`, nosso: `nossa ${FERRAMENTA}`, nossa: `nossa ${FERRAMENTA}`,
+  },
+};

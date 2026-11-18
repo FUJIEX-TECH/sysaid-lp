@@ -698,6 +698,16 @@ export type SecaoDocumento = {
   colunas?: [string, string]; // tipo "itens": cabeçalho das duas colunas (ex.: "O que vocês precisam", "Como resolve")
   destaque?: boolean; // caixa com fundo (ex.: contato)
 };
+// 18/11/2026: termos escondidos no documento entregue (ex.: nome de concorrente que a
+// pessoa escreveu). Só o documento: a conversa, o mapa da tela e o registro ficam crus.
+export type MascaraConfig = {
+  // lista fixa e/ou função pura do contexto (ex.: a ferramenta que a pessoa informou)
+  termos: string[] | ((ctx: Contexto) => string[]);
+  por: string; // ex.: "a ferramenta atual"
+  // palavra logo antes do termo → troca inteira (ex.: { do: "da ferramenta atual" })
+  contracoes?: Record<string, string>;
+};
+
 export type DocumentoConfig = {
   preparadoPara?: Texto; // "Preparado para a {{empresa}}"
   cliente?: Texto; // nome da empresa da pessoa, ao lado do logo dela (ex.: "{{empresa}}")
@@ -714,6 +724,8 @@ export type EntregaConfig = {
   montagem?: { apos: string; rotulo: Texto; pronto: Texto; itens?: Texto[]; duracaoMs?: number };
   // 13/11/2026: documento por seções (com isto, a entrega vira o documento)
   documento?: DocumentoConfig;
+  // 18/11/2026: termos escondidos em tudo o que é entregue (documento, mapa e resumo da entrega, PDF)
+  mascarar?: MascaraConfig;
   quando?: Condicao; // condição a mais
   fala?: Texto; // balão do bot logo antes do mapa
   rotulo?: Texto; // linha em mono acima do título (ex.: "Mapa liberado")

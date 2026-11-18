@@ -42,6 +42,7 @@ import {
   dorPrincipal,
   dores,
   horariosPedidos,
+  MASCARA_PDF,
   objecaoCusto,
   opcoesPayoff,
   payoffs,
@@ -517,6 +518,8 @@ export const configSysaidGenerica: ConfigConversa = {
     dicaPdf: "Abre a janela de impressão: escolha “Salvar como PDF”.",
     verCompleto: "Ver o documento ↓",
     teaser: { ocultar: ["resolve"], rotulo: "Libera com o seu WhatsApp", ateMontagem: true },
+    // 18/11/2026 (Fernando): nome de concorrente escondido em todo texto do documento
+    mascarar: MASCARA_PDF,
     documento: {
       preparadoPara: "Preparado para a {{empresa}}",
       cliente: "{{empresa}}",
