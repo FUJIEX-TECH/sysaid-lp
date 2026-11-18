@@ -42,6 +42,7 @@ import {
   dorPrincipal,
   dores,
   horariosPedidos,
+  objecaoCusto,
   opcoesPayoff,
   payoffs,
   pedido,
@@ -64,6 +65,7 @@ import {
   textoProximoPasso,
 } from "@/lib/diagnostico/cartoes-generica-sysaid";
 import { geradoValido } from "@/lib/conversa-core";
+import { REACAO_CUSTO_GENERICA } from "@/lib/diagnostico/custo-sysaid";
 
 const base = configSysaid;
 const LLM_LIGADO = process.env.NEXT_PUBLIC_DIAG_LLM === "1";
@@ -208,7 +210,13 @@ export const configSysaidGenerica: ConfigConversa = {
       const p = payoffs(ctx).map((c) => CONSEQUENCIAS[c].feliz);
       return p.join(" · ");
     },
-    mapa_resolve: (ctx) => capacidadesDoCaso(ctx, 3).map((x) => x.cap.curto).join(" · "),
+    // 18/11/2026: com objeção de custo, "Mais acessível" entra primeiro (sem número)
+    mapa_resolve: (ctx) => {
+      const o = objecaoCusto(ctx);
+      const custo = o.reclama !== null || o.pede !== null;
+      return [...(custo ? ["Mais acessível"] : []), ...capacidadesDoCaso(ctx, custo ? 2 : 3).map((x) => x.cap.curto)].join(" · ");
+    },
+    objecao_preco: (ctx) => (objecaoCusto(ctx).pede !== null ? "sim" : ""),
     mapa_passo: (ctx) => {
       const p = pedido(ctx.respostas);
       return p === "reuniao" ? "Reunião com o especialista" : p === "orcamento" ? "Orçamento na reunião" : p === "whatsapp" ? "Conversa pelo WhatsApp" : "";
@@ -426,7 +434,15 @@ export const configSysaidGenerica: ConfigConversa = {
       id: "reuniao",
       passo: 10,
       tipo: "horarios",
-      falas: [{ rotulo: "Resumindo", texto: "{{resumo_caso}}" }],
+      falas: [
+        { rotulo: "Resumindo", texto: "{{resumo_caso}}" },
+        // 18/11/2026: ele perguntou o preço antes: o fechamento responde (sem número)
+        {
+          quando: { variavel: "objecao_preco", igual: "sim" },
+          rotulo: "Sobre o investimento",
+          texto: "Você perguntou do investimento: ele sai no tamanho do time de vocês, na reunião. Se preferir, toca em “Quero orçamento” e o especialista já leva a proposta.",
+        },
+      ],
       texto: "O próximo passo é ver a SysAid rodando no cenário da {{empresa}}, com o teste grátis liberado na conversa com o especialista. Escolhe dois horários que funcionam pra você:",
       nota: NOTA_HORARIOS,
       horarios: HORARIOS,
@@ -472,6 +488,9 @@ export const configSysaidGenerica: ConfigConversa = {
 
   cartoes: CARTOES_GENERICA,
   pausaCartaoMs: 1300,
+
+  // 18/11/2026: objeção de custo em qualquer passo (custo-sysaid.ts)
+  reacoes: [REACAO_CUSTO_GENERICA],
 
   // o documento: começa a ser montado depois do WhatsApp e sai no fim da conversa (seção 2, passos 10 e 15–17)
   entrega: {

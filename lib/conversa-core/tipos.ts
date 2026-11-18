@@ -148,6 +148,32 @@ export type GeracaoConfig = {
 };
 
 // --------------------------------------------------------------------------
+// 18/11/2026: REAÇÕES. Um assunto que a pessoa pode trazer em qualquer passo, no
+// texto livre (ex.: uma objeção), ganha uma fala do bot logo depois da resposta,
+// e a conversa segue no fluxo normal. Quem detecta é uma função PURA da config
+// (`detectar`, o reserva local); com `geracao`, o servidor confirma (pode trocar
+// o tipo ou devolver `dados.tipo = "nenhuma"` pra cancelar um falso positivo) e
+// escreve a fala (`textos[geracao.chave]`). O chat espera no máximo `esperaMs`;
+// passou, vale a fala fixa do tipo. Cada tipo reage uma vez por conversa (a 1ª
+// etapa em que aparece). O resultado do servidor fica em `gerados["<id>:<etapa>"]`.
+// --------------------------------------------------------------------------
+export type ReacaoConfig = {
+  id: string;
+  // texto livre da resposta (sem chip, sem opção marcada) → tipo da reação, ou null
+  detectar: (texto: string, ctx: Contexto, etapa: EtapaConfig) => string | null;
+  // etapas em que vale (padrão: todas as etapas de texto e múltipla escolha); nunca ponha campo de dado pessoal
+  etapas?: string[];
+  // a fala de cada tipo (templates; {{trecho}} = o texto livre da pessoa)
+  falas: Record<string, { rotulo?: Texto; texto: Texto }>;
+  // o servidor confirma e escreve (POST {id, sessao, respostas, origem, variaveis, extras: {etapa, trecho, tipo}})
+  // `extras` vai junto, fixo da config (ex.: como a conversa termina, pra fala apontar pro fechamento certo)
+  geracao?: { endpoint: string; chave: string; esperaMs: number; timeoutMs: number; omitir?: string[]; extras?: Record<string, string> };
+  // segura a próxima pergunta enquanto a fala é lida (padrão: config.pausaCartaoMs ou 900)
+  pausaMs?: number;
+};
+export type ReacaoPronta = { id: string; etapa: string; tipo: string; trecho: string; rotulo?: string; texto: string; origem: "servidor" | "local" };
+
+// --------------------------------------------------------------------------
 // Condicionais declarativas (avaliadas por condicoes.ts)
 // --------------------------------------------------------------------------
 export type Condicao =
@@ -440,6 +466,7 @@ export type Turno = {
   oferecidas?: string[]; // rótulos das opções/chips que a pessoa viu
   cartao?: { id: string; tipo: string; titulo?: string; rotulo?: string; detalhe?: string };
   em?: string; // ISO, quando a pessoa respondeu
+  reacao?: { id: string; tipo: string }; // 18/11/2026: fala que reagiu a um assunto (ReacaoConfig)
 };
 
 export type Persistencia = {
@@ -770,6 +797,8 @@ export type ConfigConversa = {
   jev: JevConfig;
   // gerações do servidor disparadas enquanto a pessoa digita (parte 2)
   geracoes?: GeracaoConfig[];
+  // 18/11/2026: reações a um assunto que a pessoa traz em qualquer passo (ex.: objeção), ver ReacaoConfig
+  reacoes?: ReacaoConfig[];
   // v2: empresa pelo domínio do e-mail
   empresa?: EmpresaConfig;
   // v2: painéis visuais, mapa declarativo, porte e resumo lateral

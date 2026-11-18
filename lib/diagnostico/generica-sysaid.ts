@@ -8,7 +8,7 @@
 // Regras que este arquivo garante:
 // - o "como a SysAid resolve" e as necessidades só saem de CAPACIDADES;
 // - nenhum texto diz que o WhatsApp é canal da SysAid (C1 fala de e-mail, portal e Teams);
-// - nada de "até 90%", plano, preço ou "incluso";
+// - nada de "até 90%", plano, preço ou "incluso" (18/11: objeção de custo = "mais acessível", proposta na reunião, nunca número);
 // - número só do lead (horas que ele informou) ou com fonte (1,3 chamado por pessoa por mês, HDI/MetricNet 2020).
 //
 // Só funções puras e imports relativos (roda no teste sem navegador e no servidor).
@@ -18,7 +18,9 @@ import { geradoValido } from "../conversa-core/condicoes";
 import { formatarNumero } from "../conversa-core/cartoes";
 import { formatarHorario, lerHorarios } from "../conversa-core/horarios";
 import { listaNatural, partesMultipla } from "../conversa-core/selecao";
-import type { Contexto, Opcao, RegrasHorario } from "../conversa-core/tipos";
+import { decidirReacao } from "../conversa-core/reacoes";
+import type { Contexto, EtapaConfig, Opcao, RegrasHorario } from "../conversa-core/tipos";
+import { ETAPAS_CUSTO_GENERICA, REACAO_CUSTO_GENERICA, type TipoCusto } from "./custo-sysaid";
 
 // --------------------------------------------------------------------------
 // 1. Capacidades (lista fechada, seção 1 do arquivo de conteúdo). A coluna
@@ -190,13 +192,14 @@ export const DORES: Record<DorId, Dor> = {
     situacaoCurta: "Atendimento de TI hoje",
   },
   custo: {
-    nome: "custo por fora",
-    nomeFala: "A gente chama isso de custo por fora: o preço de entrada parece certo, mas o que a operação precisa vai entrando à parte.",
-    implicacao: "Se a conta só sobe, imagino que cada coisa que a operação precisa vai entrando como item à parte ou plano de cima.",
+    // 18/11/2026: também entra quando a pessoa reclama do custo em qualquer passo (objecaoCusto)
+    nome: "custo que pesa no orçamento",
+    nomeFala: "A gente chama isso de custo que pesa no orçamento: a ferramenta de hoje custa mais do que entrega, e o que a operação precisa vai entrando à parte.",
+    implicacao: "Se o custo da ferramenta pesa no orçamento, imagino que cada coisa nova que a operação precisa vira conversa de verba, e o time segue no básico.",
     capacidades: ["C5", "C6", "C10"],
-    fragmento: "a demanda crescesse sem o time ter que crescer junto",
+    fragmento: "o custo da ferramenta coubesse no orçamento",
     cena: "perda",
-    rotulosChip: ["a conta só sobe", "item à parte", "a demanda cresce"],
+    rotulosChip: ["a conta só sobe", "item à parte", "pesa no orçamento"],
     situacaoCurta: "Ferramenta atual",
   },
   ia: {
@@ -312,13 +315,49 @@ export function dorAtual(ctx: Contexto): DorId | null {
 }
 
 // todas as dores, na ordem: a da vez, as do "Tem mais", a que o Jev leu no comentário
+// e, por último, o custo quando a pessoa reclamou dele em qualquer passo (18/11/2026)
 export function dores(ctx: Contexto): DorId[] {
   const a = dorAtual(ctx);
   const mais = partesMultipla(ctx.respostas.dores_mais).filter(ehDor);
   const comentario = dado(ctx, "comentario", "outra_dor");
-  const lista = [a, ...mais, ehDor(comentario) ? comentario : null].filter((x): x is DorId => !!x);
+  const custo: DorId | null = objecaoCusto(ctx).reclama !== null ? "custo" : null;
+  const lista = [a, ...mais, ehDor(comentario) ? comentario : null, custo].filter((x): x is DorId => !!x);
   return [...new Set(lista)];
 }
+
+// --------------------------------------------------------------------------
+// 4b. Objeção de custo (18/11/2026, custo-sysaid.ts): o texto livre de cada passo
+//     que vale, decidido como o chat decidiu (o Jev no servidor quando a resposta
+//     dele ainda vale; senão o detector). `reclama`/`pede` = o trecho nas palavras dele.
+// --------------------------------------------------------------------------
+const ATALHOS_IMPLICACAO = ["sim", "mais", "nao"];
+function textoLivreSysaid(ctx: Contexto, campo: string): string {
+  const v = (ctx.respostas[campo] ?? "").trim();
+  if (!v) return "";
+  if (campo === "situacao_texto") return CHIP_DOR[v] ? "" : v;
+  if (campo === "implicacao") return ATALHOS_IMPLICACAO.includes(v) ? "" : v;
+  if (campo === "dores_mais") return partesMultipla(v).filter((p) => !(TODAS_DORES as string[]).includes(p)).join(" ").trim();
+  if (campo === "consequencias" || campo === "payoff") return partesMultipla(v).filter((p) => !(CONSEQUENCIAS_IDS as string[]).includes(p)).join(" ").trim();
+  return v;
+}
+export type ObjecaoCusto = { reclama: string | null; pede: string | null; etapas: string[] };
+export function objecaoCusto(ctx: Contexto): ObjecaoCusto {
+  const o: ObjecaoCusto = { reclama: null, pede: null, etapas: [] };
+  for (const campo of ETAPAS_CUSTO_GENERICA) {
+    const trecho = textoLivreSysaid(ctx, campo);
+    if (!trecho) continue;
+    const d = decidirReacao(REACAO_CUSTO_GENERICA, ctx, { id: campo, tipo: "texto" } as EtapaConfig, trecho);
+    if (!d) continue;
+    const t = d.tipo as TipoCusto;
+    if (o[t] === null) o[t] = trecho;
+    if (!o.etapas.includes(campo)) o.etapas.push(campo);
+  }
+  return o;
+}
+const temObjecao = (ctx: Contexto) => {
+  const o = objecaoCusto(ctx);
+  return o.reclama !== null || o.pede !== null;
+};
 
 // a dor de mais valor (o Jev escolhe quando há mais de uma; sem Jev, a da vez)
 export function dorPrincipal(ctx: Contexto): DorId | null {
@@ -532,6 +571,8 @@ export function revelacao(ctx: Contexto, empresa: string): string {
   if (citacao) partes.push(`Você disse: “${citacao}”.`);
   const quem = empresa ? `da ${empresa}` : "de vocês";
   partes.push(`A SysAid atende o que vocês precisam. O que for bem específico do cenário ${quem}, o nosso especialista avalia com você na reunião e, se precisar, pede uma customização.`);
+  // 18/11/2026: objeção de custo, sem número
+  if (temObjecao(ctx)) partes.push("E sobre o custo: a SysAid costuma ser mais acessível, e a proposta no tamanho do time de vocês sai na reunião com o comercial.");
   return partes.join(" ");
 }
 
@@ -628,9 +669,16 @@ export function derivados(ctx: Contexto): Record<string, unknown> {
     capacidades: capacidadesDoCaso(ctx).map((x) => `${x.cap.id} ${x.cap.necessidade}`),
     pedido: pedido(ctx.respostas),
     horarios: horariosPedidos(ctx.respostas) || null,
+    objecao_custo: objecaoDerivada(ctx),
+    sinais: temObjecao(ctx) ? ["objeção de custo"] : [],
     papel: ctx.respostas.papel ?? null,
     cargo: ctx.respostas.cargo && ctx.respostas.cargo !== "pulou" ? ctx.respostas.cargo : null,
   };
+}
+
+function objecaoDerivada(ctx: Contexto): { reclama: string | null; pede: string | null; etapas: string[] } | null {
+  const o = objecaoCusto(ctx);
+  return o.reclama !== null || o.pede !== null ? o : null;
 }
 
 // o que vai em `notes` no lead parcial (nasce no e-mail; nunca vai pro RD Station)
@@ -647,5 +695,8 @@ export function notasGenerica(ctx: Contexto): string {
   if (cs.length) linhas.push(`Consequências: ${cs.join("; ")}`);
   const ct = consequenciaTexto(ctx);
   if (ct) linhas.push(`Consequência (texto): ${ct}`);
+  const o = objecaoCusto(ctx);
+  if (o.reclama !== null) linhas.push(`Objeção de custo (reclamou): ${o.reclama}`);
+  if (o.pede !== null) linhas.push(`Objeção de custo (pediu preço): ${o.pede}`);
   return linhas.join("\n").slice(0, 1900);
 }

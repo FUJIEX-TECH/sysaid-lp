@@ -135,6 +135,10 @@
 .pill--whatsapp { background: #fff4e5; color: #b26a00; }
 .pill--parcial { background: #f1f3f2; color: var(--ink-400); }
 .pill--neutra { background: #f1f3f2; color: var(--ink); text-transform: none; }
+/* 18/11/2026: objeção de custo (o comercial vê de cara) */
+.pill--objecao { background: #fdecea; color: #a8321f; text-transform: none; }
+.qd__pill-lado { margin-left: 6px; }
+.qd__sinal { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; margin: 10px 0 0; font-size: 0.9rem; }
 
 .qd { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
 @media (min-width: 1040px) { .qd { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); align-items: start; } }

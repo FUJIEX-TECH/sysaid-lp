@@ -23,7 +23,7 @@ export const LLM_SYSAID: LLMConfig = {
   precoPorMilhao: { entrada: 0.1, saida: 0.5 },
   cache: { ttlMs: 30 * 60 * 1000, maximo: 500 },
   // plano: < R$ 40/mês a 500 preenchimentos. 1 chamada por preenchimento, com folga pra correções
-  tetos: { chamadasPorSessao: 4, chamadasPorHora: 300, usdPorHora: 0.5 },
+  tetos: { chamadasPorSessao: 6, chamadasPorHora: 300, usdPorHora: 0.5 },
 };
 
 // no envio final. O plano pedia 800 ms, mas em 30/10/2026 o Jev respondia em
@@ -407,4 +407,61 @@ export function perguntasRotuloGenerica(): Record<string, PerguntaJev> {
       criteria: { true: "coerente, parece real", false: "respostas que se contradizem, cliques aleatórios ou texto sem sentido" },
     },
   };
+}
+
+// --------------------------------------------------------------------------
+// 18/11/2026 · OBJEÇÃO DE CUSTO (custo-sysaid.ts): o Jev confirma o tipo, o Haiku
+// escreve a fala com as palavras da pessoa. Nunca preço, número, plano ou desconto.
+// --------------------------------------------------------------------------
+export const OBJECAO_JEV: Record<string, string> = {
+  reclama:
+    "a pessoa reclama do custo da ferramenta ou do sistema que usa hoje (caro, licença, mensalidade ou assinatura que pesa, conta que só sobe, cobrança à parte) ou diz que o orçamento ou a verba da TI está apertado",
+  pede: "a pessoa pergunta o preço, o valor, quanto custa ou o investimento da solução, ou pede orçamento ou cotação",
+  nenhuma:
+    "o texto não reclama de custo nem pergunta preço: fala de outra coisa, inclusive 'valor' no sentido de importância, valorizar o time, custo em tempo ou horas do time, licença vencida ou inventário de licenças, ou o usuário que cobra o time",
+};
+export function perguntasObjecao(): Record<string, PerguntaJev> {
+  return { objecao: { type: "choice", criteria: OBJECAO_JEV } };
+}
+
+export const SAIDA_OBJECAO = z.object({
+  fala: z.string().describe("2 frases, até 40 palavras e 260 caracteres, sem número"),
+});
+
+export const SYSTEM_OBJECAO = `Você escreve uma fala curta de um chat de atendimento de TI no site brasileiro da SysAid (software de service desk). Quem lê é gestor, coordenador ou analista de TI. Português do Brasil, tom de colega experiente: direto, cordial, profissional. Frases curtas. Sem exclamação, sem emoji, sem travessão, sem jargão de marketing.
+
+A pessoa tocou no custo no meio da conversa. O tipo já vem decidido por outra camada. Escreva "fala" com EXATAMENTE 2 frases (até 40 palavras no total):
+
+Tipo "reclama" (a ferramenta de hoje é cara, a licença pesa, o orçamento está apertado):
+1. Reconheça a dor reaproveitando pelo menos uma palavra que a pessoa usou (sem repetir o texto inteiro).
+2. Diga que a SysAid costuma ser mais acessível e atender melhor o que vocês precisam. Use as palavras "mais acessível".
+
+Tipo "pede" (perguntou preço, valor, quanto custa, orçamento):
+1. Diga que o investimento depende do tamanho do time e do que vocês precisam.
+2. Se o fecho for "reuniao": a proposta sai na reunião com o comercial, e no fim desta conversa a pessoa já escolhe o horário. Se o fecho for "contato": a proposta sai na conversa com o comercial da SysAid. Use as palavras "investimento" e "proposta".
+
+Exemplos:
+- reclama, texto "a licença do nosso sistema tá muito cara" → "Licença cara pesa todo mês no orçamento da TI. A SysAid costuma ser mais acessível e atender melhor o que vocês precisam, e isso entra no seu mapa."
+- reclama, texto "orçamento apertado esse ano" → "Com o orçamento apertado, cada ferramenta precisa se pagar. A SysAid costuma ser mais acessível e atender melhor o que vocês precisam."
+- pede, fecho reuniao, texto "quanto custa?" → "O investimento depende do tamanho do time e do que vocês precisam. Por isso a proposta sai na reunião com o comercial, e no fim desta conversa você já escolhe o horário."
+
+Regras fixas:
+- Nunca dê preço, número, faixa, porcentagem, plano, desconto, "grátis", "a partir de", "até". Nenhum dígito.
+- Não cite concorrente nem a ferramenta da pessoa pelo nome. Não prometa economia nem resultado.
+- Não termine com pergunta. Não use "Entendi", "Ótimo", "Claro", "Com certeza", "Excelente".`;
+
+export const OBJECAO_PROMPT = (a: { tipo: string; fecho: string; texto: string }) => `Tipo: ${a.tipo}\nFecho: ${a.fecho}\nTexto da pessoa: """${mascarar(a.texto.slice(0, 600))}"""`;
+
+const CONCORRENTES = PROIBIDOS.filter((p) => !["sysaid", "r$", "us$", "reais", "desconto"].includes(p));
+const NUMERO_OU_PRECO = /\d|r\$|\breais\b|%|\bplanos?\b|desconto|gr[aá]tis|a partir de|\bat[ée](?![a-z])|barat|\bpre[çc]os?\b|whatsapp|incluso|inclu[ií]do/i;
+export function travaObjecao(t: string, tipo: string): boolean {
+  const x = t.trim();
+  if (!x || x.length > 280 || /[!—–]/.test(x) || /\?\s*$/.test(x)) return false;
+  if (NUMERO_OU_PRECO.test(x) || FRASES_PROIBIDAS.test(x) || /com certeza|excelente/i.test(x)) return false;
+  if (CONCORRENTES.some((p) => x.toLowerCase().includes(p))) return false;
+  const frases = x.split(/(?<=[.])\s+/).filter((f) => f.trim());
+  if (frases.length < 1 || frases.length > 3) return false;
+  if (tipo === "reclama") return /mais acess[ií]vel/i.test(x);
+  if (tipo === "pede") return /investimento/i.test(x) && /proposta/i.test(x);
+  return false;
 }

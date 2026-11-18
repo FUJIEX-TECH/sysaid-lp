@@ -14,6 +14,7 @@ import { montarMapa } from "./mapa";
 import { resolverOrigem, sinaisDoCaminho } from "./origem";
 import { pontuar, rotaDe, rotuloFinal } from "./pontuacao";
 import { recomendar } from "./recomendacao";
+import { chaveReacao, decidirReacao, reacaoValeNaEtapa, textoLivre } from "./reacoes";
 import { renderTemplate, renderTexto } from "./texto";
 import type {
   Classificacao,
@@ -25,6 +26,7 @@ import type {
   ListaOpcoes,
   Opcao,
   Opcoes,
+  ReacaoPronta,
   Respostas,
   RotuloJev,
   Sinais,
@@ -306,6 +308,31 @@ export function criarMotor(config: ConfigConversa) {
     return !!e && aplica(e, ctx) && ctx.respostas[id] !== undefined;
   }
 
+  // 18/11/2026: reações (config.reacoes) às respostas dadas, na ordem da conversa; cada tipo
+  // reage uma vez (na 1ª etapa em que aparece). Texto do servidor quando ele decidiu e escreveu.
+  function reacoes(ctx: Contexto): ReacaoPronta[] {
+    const lista: ReacaoPronta[] = [];
+    if (!config.reacoes?.length) return lista;
+    const respondidas = etapasRespondidas(ctx);
+    for (const r of config.reacoes) {
+      const vistos = new Set<string>();
+      for (const e of respondidas) {
+        if (!reacaoValeNaEtapa(r, e)) continue;
+        const trecho = textoLivre(e, ctx.respostas[e.id], resolver(e, ctx));
+        const d = decidirReacao(r, ctx, e, trecho);
+        if (!d || vistos.has(d.tipo)) continue;
+        vistos.add(d.tipo);
+        const f = r.falas[d.tipo];
+        const escrito = d.origem === "servidor" && r.geracao ? (ctx.gerados?.[chaveReacao(r.id, e.id)]?.textos?.[r.geracao.chave] ?? "").trim() : "";
+        const extras = { trecho };
+        const t = escrito || texto(f.texto, ctx, extras).trim();
+        if (!t) continue;
+        lista.push({ id: r.id, etapa: e.id, tipo: d.tipo, trecho, rotulo: texto(f.rotulo, ctx, extras).trim() || undefined, texto: t, origem: escrito ? "servidor" : "local" });
+      }
+    }
+    return lista;
+  }
+
   // 13/11/2026: a conversa como aconteceu, pro registro do cliente: abertura, e por
   // etapa respondida as falas e a pergunta, o que foi oferecido (opções, chips), a
   // resposta (crua e como apareceu), os painéis e os cartões que entraram depois.
@@ -317,6 +344,7 @@ export function criarMotor(config: ConfigConversa) {
       if (x) turnos.push({ quem: "bot", tipo: "abertura", texto: x });
     }
     const cartoesTodos = extras.cartoes ?? cartoes(ctx);
+    const reacoesTodas = reacoes(ctx);
     for (const e of etapasRespondidas(ctx)) {
       const r = resolver(e, ctx);
       for (const f of r.falas) turnos.push({ quem: "bot", tipo: "fala", etapa: e.id, texto: f.rotulo ? `[${f.rotulo}] ${f.texto}` : f.texto });
@@ -327,6 +355,8 @@ export function criarMotor(config: ConfigConversa) {
       const via: Turno["via"] =
         e.pular && valor === e.pular.valor ? "pular" : viaChip ? "chip" : e.tipo === "escolha" || e.tipo === "info" ? "opcao" : e.tipo === "multipla" ? "multipla" : e.tipo === "horarios" ? "horarios" : "texto";
       turnos.push({ quem: "pessoa", tipo: "resposta", etapa: e.id, texto: resumo(e, valor, ctx), valor, via, em: momentos[e.id] });
+      for (const x of reacoesTodas.filter((x) => x.etapa === e.id))
+        turnos.push({ quem: "bot", tipo: "fala", etapa: e.id, texto: x.rotulo ? `[${x.rotulo}] ${x.texto}` : x.texto, reacao: { id: x.id, tipo: x.tipo } });
       for (const p of config.paineis ?? []) {
         if (p.apos !== e.id || !avaliar(p.quando, ctx, resolvedor(ctx))) continue;
         const nome = p.tipo === "empresa" ? ctx.empresa?.nome : undefined;
@@ -366,6 +396,7 @@ export function criarMotor(config: ConfigConversa) {
     entregaLiberada: entregaLiberadaEm,
     resolvedor,
     transcricao,
+    reacoes,
   };
 }
 

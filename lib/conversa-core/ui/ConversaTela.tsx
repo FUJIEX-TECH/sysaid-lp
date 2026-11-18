@@ -149,6 +149,8 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
   // cartões visuais das etapas respondidas (funções puras da config, validadas no núcleo)
   const cartoes = useMemo(() => motor.cartoes(ctx), [motor, ctx]);
   const cartoesDe = (etapaId: string) => cartoes.filter((k) => k.apos === etapaId && !k.soNaEntrega);
+  // 18/11/2026: reações (config.reacoes) entram logo depois da resposta que as provocou
+  const reacoes = useMemo(() => motor.reacoes(ctx), [motor, ctx]);
   // 13/11/2026: "montando o seu documento" depois da etapa da montagem
   const montagem = config.entrega?.montagem;
 
@@ -265,6 +267,13 @@ export default function ConversaTela({ config, persistencia, onEvento, textos }:
         >
           {r}
         </button>
+        {reacoes
+          .filter((x) => x.etapa === e.id)
+          .map((x) => (
+            <Bot key={`reacao-${x.id}-${x.tipo}`} rotulo={x.rotulo}>
+              {x.texto}
+            </Bot>
+          ))}
         {noFluxo(e.id).map(painel)}
         {cartoesDe(e.id).map((k) => (
           <Fragment key={k.id}>

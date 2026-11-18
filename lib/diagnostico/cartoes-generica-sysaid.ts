@@ -29,6 +29,7 @@ import {
   payoffs,
   pedido,
   horariosPedidos,
+  objecaoCusto,
   querTexto,
   resumoDuasLinhas,
 } from "./generica-sysaid";
@@ -244,6 +245,10 @@ export function itensOQuePesa(ctx: Contexto): ItemDocumento[] {
   if (!p) return [];
   const itens: ItemDocumento[] = [{ titulo: maiuscula(DORES[p].nome), texto: DORES[p].nomeFala, nota: `Pelo que você contou: ${implicacaoDoCaso(ctx)}` }];
   for (const d of dores(ctx).filter((x) => x !== p)) itens.push({ titulo: maiuscula(DORES[d].nome), texto: DORES[d].nomeFala });
+  // 18/11/2026: o custo nas palavras da pessoa
+  const reclama = objecaoCusto(ctx).reclama;
+  const custo = itens.find((i) => i.titulo === maiuscula(DORES.custo.nome));
+  if (custo && reclama) custo.nota = `${custo.nota ? `${custo.nota} · ` : ""}Nas suas palavras: “${reclama.length > 140 ? `${reclama.slice(0, 137)}...` : reclama}”`;
   return itens;
 }
 
@@ -254,8 +259,25 @@ export function itensCausa(ctx: Contexto): ItemDocumento[] {
   return l;
 }
 
+// 18/11/2026: objeção de custo. Não é capacidade nova (C1–C10 seguem fechadas): é a
+// resposta da SysAid ao custo, sem número, e a proposta na reunião com o comercial.
+export const LINHA_INVESTIMENTO = {
+  titulo: "Um investimento mais acessível",
+  texto:
+    "A SysAid costuma ser um investimento mais acessível e atender melhor o que vocês precisam: o portal e a IA na triagem deixam a demanda crescer sem o time crescer junto. A proposta sai no tamanho do time de vocês, na reunião com o Marcelo Rosin, do comercial da SysAid.",
+};
+export function linhaInvestimento(ctx: Contexto): ItemDocumento | null {
+  const o = objecaoCusto(ctx);
+  if (o.reclama === null && o.pede === null) return null;
+  return { ...LINHA_INVESTIMENTO, nota: o.reclama !== null ? `por causa de: ${DORES.custo.nome}` : "você perguntou do investimento" };
+}
+
 export function itensComoResolve(ctx: Contexto): ItemDocumento[] {
-  return capacidadesDoCaso(ctx).map(({ cap, motivos }) => ({ titulo: cap.necessidade, texto: cap.comoResolve, nota: `por causa de: ${listaNatural(motivos)}` }));
+  const caps: ItemDocumento[] = capacidadesDoCaso(ctx).map(({ cap, motivos }) => ({ titulo: cap.necessidade, texto: cap.comoResolve, nota: `por causa de: ${listaNatural(motivos)}` }));
+  const inv = linhaInvestimento(ctx);
+  if (!inv) return caps;
+  // o custo é a dor principal: a resposta a ele abre a lista; senão fecha
+  return dorPrincipal(ctx) === "custo" ? [inv, ...caps] : [...caps, inv];
 }
 
 export function textoLeitura(ctx: Contexto, empresa: string): string {
@@ -272,13 +294,15 @@ export function itensDiretoria(ctx: Contexto, empresa: string): ItemDocumento[] 
   const quer = [...formas, ...(citacao ? [`“${citacao}”`] : [])];
   if (quer.length) l.push({ titulo: "O que a equipe quer", texto: maiuscula(`${listaNatural(quer)}.`) });
   const caps = capacidadesDoCaso(ctx, 3).map((x) => x.cap.necessidade.toLowerCase());
+  if (linhaInvestimento(ctx)) caps.push("um investimento mais acessível, com a proposta na reunião com o comercial");
   if (caps.length) l.push({ titulo: "Como a SysAid resolve", texto: maiuscula(`${listaNatural(caps)}.`) });
   l.push({ titulo: "O que a equipe propõe", texto: `Uma reunião com o especialista da SysAid pra ver a solução no cenário ${empresa ? `da ${empresa}` : "de vocês"}, com teste grátis antes de decidir.` });
   return l;
 }
 
 export const PERGUNTAS_DIRETORIA: ItemDocumento[] = [
-  { titulo: "Quanto custa?", texto: "O preço sai do escopo: quantas pessoas atendem chamados e o que entra primeiro." },
+  // 18/11/2026: o PDF não fala de preço; o investimento sai do escopo, na proposta
+  { titulo: "Quanto custa?", texto: "O investimento sai do escopo: quantas pessoas atendem chamados e o que entra primeiro. A proposta vem na reunião com o comercial." },
   { titulo: "Quanto tempo leva?", texto: "Depende do tamanho do time e do que entra primeiro; vem na proposta." },
   { titulo: "E se não servir?", texto: "Dá pra testar no cenário de vocês antes de decidir." },
 ];

@@ -38,6 +38,8 @@ export default async function AdminQualificaDetalhe({ params }: { params: Promis
         <dd>{typeof valor === "string" ? valor : Array.isArray(valor) ? valor.map((v) => (typeof v === "object" && v && "nome" in v ? (v as { nome: string }).nome : String(v))).join(" · ") : JSON.stringify(valor)}</dd>
       </>
     );
+  // 18/11/2026: objeção de custo (reclamou do custo ou pediu preço), pro comercial ver de cara
+  const objecao = derivados.objecao_custo as { reclama?: string | null; pede?: string | null } | null | undefined;
   const conta = derivados.conta as { medido?: boolean; diasTexto?: string; hMesTexto?: string; horasTexto?: string; volume?: string } | null;
 
   return (
@@ -50,6 +52,13 @@ export default async function AdminQualificaDetalhe({ params }: { params: Promis
             {c.company ? `${c.company} · ` : ""}
             {dataBR(c.created_at)} (Brasília) · {c.completo ? "conversa completa" : "parou no meio"} · {FLUXO_ROTULO[c.fluxo ?? ""] ?? c.fluxo}
           </p>
+          {objecao && (objecao.reclama || objecao.pede) && (
+            <p className="qd__sinal" role="note">
+              <span className="pill pill--objecao">Objeção de custo</span>
+              {objecao.reclama && <span>Reclamou do custo: “{objecao.reclama}”</span>}
+              {objecao.pede && <span>Pediu preço: “{objecao.pede}”</span>}
+            </p>
+          )}
         </div>
         <a className="qd__acao" href={`/admin/qualifica/${c.id}/documento`} target="_blank" rel="noopener">
           Abrir o documento (PDF)
@@ -118,6 +127,7 @@ export default async function AdminQualificaDetalhe({ params }: { params: Promis
           <section className="qd__bloco" aria-label="O caso">
             <h2>O caso</h2>
             <dl className="qd__dados">
+              {linha("Sinais", derivados.sinais)}
               {linha("Dor principal", derivados.dor_principal_nome)}
               {linha("Dores", derivados.dores)}
               {linha("Consequências", derivados.consequencias)}

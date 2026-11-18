@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import type { ConversaComLead } from "@/lib/qualifica-db";
 import { dataBR, horariosTexto, PAPEL_ROTULO, PEDIDO_ROTULO, FLUXO_ROTULO } from "./formato";
 
-type Derivados = { dor_principal_nome?: string | null; conta?: { medido?: boolean; diasTexto?: string } | null };
+type Derivados = { dor_principal_nome?: string | null; sinais?: string[]; conta?: { medido?: boolean; diasTexto?: string } | null };
 
 export default function QualificaLista({ conversas, erro }: { conversas: ConversaComLead[]; erro: string | null }) {
   const [pedido, setPedido] = useState("");
@@ -104,7 +104,10 @@ export default function QualificaLista({ conversas, erro }: { conversas: Convers
                   </td>
                   <td>{c.company}</td>
                   <td>{c.papel ? PAPEL_ROTULO[c.papel] ?? c.papel : ""}</td>
-                  <td>{d.dor_principal_nome ?? ""}</td>
+                  <td>
+                    {d.dor_principal_nome ?? ""}
+                    {d.sinais?.includes("objeção de custo") && <span className="pill pill--objecao qd__pill-lado">custo</span>}
+                  </td>
                   <td className="nowrap">{d.conta?.medido ? `${d.conta.diasTexto} dias/ano` : d.conta ? "não mede" : ""}</td>
                   <td>{FLUXO_ROTULO[c.fluxo ?? ""] ?? c.fluxo}</td>
                 </tr>

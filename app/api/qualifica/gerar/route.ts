@@ -9,21 +9,28 @@ import {
   JEV_SYSAID_GERAR,
   LEITURA_PROMPT,
   LLM_SYSAID,
+  OBJECAO_JEV,
+  OBJECAO_PROMPT,
   SAIDA_IMPLICACAO,
+  SAIDA_OBJECAO,
   SAIDA_LEITURA,
   SITUACAO_JEV_GENERICA,
   SYSTEM_IMPLICACAO,
   SYSTEM_LEITURA,
+  SYSTEM_OBJECAO,
   ferramentaNoTexto,
   perguntasComentario,
   perguntasImplicacao,
+  perguntasObjecao,
   perguntasPrincipal,
   perguntasReleitura,
   travaAnotacao,
   travaImplicacao,
   travaLeitura,
+  travaObjecao,
 } from "@/lib/diagnostico/servidor-sysaid";
 import { DORES } from "@/lib/diagnostico/generica-sysaid";
+import { detectarCusto } from "@/lib/diagnostico/custo-sysaid";
 
 export const runtime = "nodejs";
 
@@ -33,11 +40,13 @@ export const runtime = "nodejs";
 //   releitura   "Não é bem isso": Jev (dor, consequência)
 //   principal   mais de uma dor: Jev escolhe a de mais valor
 //   leitura     no WhatsApp: Haiku escreve a leitura do caso pro documento
+//   objecao     18/11/2026, custo em qualquer passo: Jev confirma (reclama | pede | nenhuma),
+//               Haiku escreve a fala (custo-sysaid.ts); Jev fora = detector por palavras
 // Nada aqui classifica, pontua ou roteia o lead. Jev ou Haiku fora = a conversa
 // segue com as reservas fixas da config. Nenhum dado pessoal vai pro Jev nem pro Haiku.
 
 const schema = z.object({
-  id: z.enum(["implicacao", "comentario", "releitura", "principal", "leitura"]),
+  id: z.enum(["implicacao", "comentario", "releitura", "principal", "leitura", "objecao"]),
   sessao: z.string().min(8).max(64),
   respostas: z.record(z.string(), z.string().max(2000)),
   origem: z.string().max(16),
@@ -167,6 +176,41 @@ export async function POST(req: NextRequest) {
     if (!j.dados.principal) return NextResponse.json({ ok: false, motivo: "jev" });
     const para = Object.fromEntries(["situacao_texto", "dor_lista", "implicacao", "dor_releitura", "dor_lista2", "implicacao2", "dores_mais", "consequencias"].map((k) => [k, (r[k] ?? "").trim()]));
     return NextResponse.json({ id, para, textos: {}, dados: j.dados, origem: "servidor", medicao: medicao("desligado", jevOrig(j.origem)) } satisfies Gerado);
+  }
+
+  // ---------------------------------------------------------------- objeção de custo (qualquer passo)
+  if (id === "objecao") {
+    const etapa = extras.etapa ?? "";
+    const valor = (r[etapa] ?? "").trim();
+    const trecho = (extras.trecho ?? "").trim();
+    // o trecho tem que estar na resposta daquela etapa (nada de texto solto vindo do navegador)
+    if (!etapa || !valor || trecho.length < 3 || !valor.toLowerCase().includes(trecho.slice(0, 60).toLowerCase())) return NextResponse.json({ ok: false, error: "sem texto" }, { status: 422 });
+    const fecho = extras.fecho === "contato" ? "contato" : "reuniao";
+    const local = detectarCusto(trecho) ?? (extras.tipo === "reclama" || extras.tipo === "pede" ? extras.tipo : null);
+    const j = await perguntarJev(sessao, chaveDe("obj", trecho), { passo_da_conversa: etapa, texto_da_pessoa: trecho }, perguntasObjecao(), (x) =>
+      limpa({ objecao: escolhaDe(x, "objecao", Object.keys(OBJECAO_JEV), 0.4) })
+    );
+    const tipo = j.origem === "ok" && j.dados.objecao ? j.dados.objecao : local ?? "nenhuma";
+    const para = { [etapa]: valor };
+    if (tipo === "nenhuma") {
+      log({ id, jev: j.origem, ms: j.ms, tipo, local });
+      return NextResponse.json({ id, para, textos: {}, dados: { tipo }, origem: "servidor", medicao: medicao("desligado", jevOrig(j.origem)) } satisfies Gerado);
+    }
+    const rl = await llm.gerar({
+      sessao,
+      chave: ["objecao", tipo, fecho, trecho],
+      system: SYSTEM_OBJECAO,
+      prompt: OBJECAO_PROMPT({ tipo, fecho, texto: trecho }),
+      schema: SAIDA_OBJECAO,
+      validar: (v) => {
+        if (travaObjecao(v.fala, tipo)) return { ok: true };
+        log({ id, trava: "objecao", texto: v.fala });
+        return { ok: false, motivo: "objecao" };
+      },
+    });
+    log({ id, jev: j.origem, jevMs: j.ms, tipo, local, llm: rl.origem, llmMs: rl.ms, custo: rl.custoUsd, motivo: rl.motivo });
+    const textos: Record<string, string> = rl.valor ? { fala: rl.valor.fala.trim() } : {};
+    return NextResponse.json({ id, para, textos, dados: { tipo }, origem: "servidor", medicao: medicao(rl.origem, jevOrig(j.origem), rl.custoUsd) } satisfies Gerado);
   }
 
   // ---------------------------------------------------------------- leitura do caso (documento)

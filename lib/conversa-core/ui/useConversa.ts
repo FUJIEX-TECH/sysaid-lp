@@ -9,6 +9,7 @@ import { avaliar } from "../condicoes";
 import { montagemIniciada } from "../entrega";
 import { juntarHorarios, validarHorarios, type Horario } from "../horarios";
 import { juntarMultipla } from "../selecao";
+import { chaveReacao } from "../reacoes";
 import { aplicarMascara, normalizar, validarValor } from "../util";
 import type { ConfigConversa, Contexto, Empresa, EtapaConfig, Evento, Gerado, GeracaoConfig, Medicao, Persistencia, Respostas, Sinais } from "../tipos";
 
@@ -258,12 +259,46 @@ export function useConversa({ config, persistencia, onEvento, comEntrega = false
     }
     const ctxBase = motor.contexto(sinais, respostas, undefined, geradosNovos, empresaNova ?? null);
     const novo = motor.responder(respostas, etapa, valor, geradosNovos, ctxBase);
-    const ctxNovo: Contexto = { ...ctxBase, respostas: novo };
+    let ctxNovo: Contexto = { ...ctxBase, respostas: novo };
+    // 18/11/2026: reação a esta resposta (config.reacoes). O detector local achou; com
+    // `geracao`, o servidor confirma e escreve, e a conversa espera no máximo `esperaMs`
+    // (mostrando "digitando"); passou do tempo, vale a fala fixa e o que chegar depois é ignorado.
+    const reacoesAqui = motor.reacoes(ctxNovo).filter((x) => x.etapa === etapa.id);
+    for (const x of reacoesAqui) {
+      const r = config.reacoes?.find((y) => y.id === x.id);
+      if (!r?.geracao) continue;
+      const chave = chaveReacao(r.id, etapa.id);
+      const g: GeracaoConfig = {
+        id: r.id,
+        endpoint: r.geracao.endpoint,
+        gatilho: { aoResponder: [] },
+        esperaMs: r.geracao.esperaMs,
+        timeoutMs: r.geracao.timeoutMs,
+        omitir: r.geracao.omitir,
+        incluir: () => ({ ...r.geracao?.extras, etapa: etapa.id, trecho: x.trecho.slice(0, 600), tipo: x.tipo }),
+      };
+      setDigitando(true);
+      const t0 = Date.now();
+      const res = await comTimeout(pedirGeracao(g, sessao.current, ctxNovo, novo), r.geracao.esperaMs, null);
+      emitir({ tipo: "geracao", id: chave, resultado: res ? "usado" : "fallback", ms: Date.now() - t0 });
+      if (res) {
+        contabilizar(res);
+        geradosNovos = { ...geradosNovos, [chave]: { ...res, id: chave } };
+        ctxNovo = { ...ctxNovo, gerados: geradosNovos };
+        setGerados(geradosNovos);
+      }
+    }
+    const reacoesFinais = reacoesAqui.length ? motor.reacoes(ctxNovo).filter((x) => x.etapa === etapa.id) : [];
     const proxima = motor.proximaEtapa(ctxNovo);
     // cartões visuais que entram depois desta resposta: avisa e dá tempo de desenhar
     const cartoesNovos = motor.cartoes(ctxNovo, etapa.id);
     // 14/11/2026: cada cartão pode pedir a própria pausa (a cena desenhada pede ~2 s); vale a maior
     if (cartoesNovos.length) pausaCartao.current = Math.max(...cartoesNovos.map((k) => k.pausaMs ?? config.pausaCartaoMs ?? 900));
+    // 18/11/2026: a fala da reação também pede tempo de leitura antes da próxima pergunta
+    for (const x of reacoesFinais) {
+      const p = config.reacoes?.find((y) => y.id === x.id)?.pausaMs ?? config.pausaCartaoMs ?? 900;
+      pausaCartao.current = Math.max(pausaCartao.current, p);
+    }
     momentos.current[etapa.id] = new Date().toISOString();
     setRespostas(novo);
     setTexto(proxima?.prefill ? motor.variavel(ctxNovo, proxima.prefill) : "");

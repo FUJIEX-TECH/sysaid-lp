@@ -24,6 +24,8 @@ const turno = z.object({
   oferecidas: z.array(z.string().max(300)).max(20).optional(),
   cartao: z.record(z.string(), z.string().max(3000)).optional(),
   em: z.string().max(40).optional(),
+  // 18/11/2026: fala que reagiu a um assunto (ex.: objeção de custo)
+  reacao: z.object({ id: z.string().max(40), tipo: z.string().max(40) }).optional(),
 });
 const schema = z.object({
   sessao: z.string().min(8).max(64),

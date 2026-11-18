@@ -49,6 +49,8 @@ export {
   type Horario,
   type ValidacaoHorarios,
 } from "./horarios";
+// 18/11/2026: reações a um assunto trazido em qualquer passo (objeção etc.)
+export { chaveReacao, decidirReacao, reacaoValeNaEtapa, textoLivre } from "./reacoes";
 export { resolverDocumento, type DocumentoPronto, type SecaoPronta } from "./documento";
 export { dominioDe, pedirEmpresa } from "./enriquecimento";
 export { comTimeout, rotularComJev, pedirGeracao, novaSessao } from "./jev";

@@ -15,6 +15,7 @@
 //                   corporativo (lib/email-domains da LP)
 // ==========================================================================
 
+import { REACAO_CUSTO_ANTERIOR } from "@/lib/diagnostico/custo-sysaid";
 import type { ConfigConversa, Contexto, Opcao, OrigemRegra } from "@/lib/conversa-core";
 import { sugerirEmpresa, sugerirNome, primeiroNome } from "@/lib/conversa-core";
 import { isCorporateEmail } from "@/lib/email-domains";
@@ -1037,6 +1038,9 @@ export const configSysaid: ConfigConversa = {
     enviar: "Enviar",
     corrigir: "corrigir",
   },
+
+  // 18/11/2026: objeção de custo em qualquer passo de texto livre (custo-sysaid.ts)
+  reacoes: [REACAO_CUSTO_ANTERIOR],
 
   Cena: CenaPlaceholder,
 };
