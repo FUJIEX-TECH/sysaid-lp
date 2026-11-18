@@ -6,20 +6,12 @@ import {
   isFreeEmail,
   CORPORATE_EMAIL_ERROR,
 } from "@/lib/email-domains";
+import { getUtm } from "@/lib/utm";
 
 type Props = {
   variant?: "hero" | "final";
   submitLabel?: string;
 };
-
-const UTM_KEYS = [
-  "utm_source",
-  "utm_medium",
-  "utm_campaign",
-  "utm_content",
-  "utm_term",
-  "gclid",
-] as const;
 
 // sugestao heuristica de nome de empresa a partir do dominio do e-mail
 // corporativo. Nao é enriquecimento real (sem API paga) - so um chute
@@ -35,16 +27,6 @@ function suggestCompanyFromEmail(email: string): string {
     .filter(Boolean)
     .map((w) => w[0].toUpperCase() + w.slice(1))
     .join(" ");
-}
-
-function getUtm(): Record<string, string> {
-  const params = new URLSearchParams(window.location.search);
-  const found: Record<string, string> = {};
-  for (const k of UTM_KEYS) {
-    const v = params.get(k);
-    if (v) found[k] = v;
-  }
-  return found;
 }
 
 export default function LeadForm({ variant = "hero", submitLabel }: Props) {

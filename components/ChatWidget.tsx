@@ -1,21 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { getUtm } from "@/lib/utm";
 
 // Widget flutuante com cara de chat online, mas que na pratica e o mesmo
 // formulario progressivo de leads (mesmos endpoints /api/lead e
 // /api/lead/partial). Cada resposta vira uma "mensagem" do usuario e o
 // bot conduz a proxima pergunta. A conversao do Google Ads e disparada
 // direto no sucesso do envio (nao depende da /obrigado).
-
-const UTM_KEYS = [
-  "utm_source",
-  "utm_medium",
-  "utm_campaign",
-  "utm_content",
-  "utm_term",
-  "gclid",
-] as const;
 
 const FREE_EMAIL_DOMAINS = new Set([
   "gmail.com", "hotmail.com", "outlook.com", "live.com", "yahoo.com", "yahoo.com.br",
@@ -34,16 +26,6 @@ function suggestCompanyFromEmail(email: string): string {
     .filter(Boolean)
     .map((w) => w[0].toUpperCase() + w.slice(1))
     .join(" ");
-}
-
-function getUtm(): Record<string, string> {
-  const params = new URLSearchParams(window.location.search);
-  const found: Record<string, string> = {};
-  for (const k of UTM_KEYS) {
-    const v = params.get(k);
-    if (v) found[k] = v;
-  }
-  return found;
 }
 
 // dispara a conversao do Google Ads + evento GA4 no sucesso do widget
