@@ -4,7 +4,7 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import type { Contexto, Gerado } from "../conversa-core/tipos";
-import { detectarCusto, FALA_PEDE_REUNIAO, FALA_RECLAMA } from "./custo-sysaid";
+import { detectarCusto, FALA_PEDE, FALA_RECLAMA } from "./custo-sysaid";
 import { DORES, derivados, dores, dorPrincipal, notasGenerica, objecaoCusto, revelacao } from "./generica-sysaid";
 import { itensComoResolve, itensDiretoria, itensOQuePesa, PERGUNTAS_DIRETORIA } from "./cartoes-generica-sysaid";
 import { travaObjecao } from "./servidor-sysaid";
@@ -95,7 +95,7 @@ describe("objeção de custo na busca genérica", () => {
 describe("falas da objeção", () => {
   test("as fixas passam na mesma trava do Haiku", () => {
     assert.ok(travaObjecao(FALA_RECLAMA, "reclama"));
-    assert.ok(travaObjecao(FALA_PEDE_REUNIAO, "pede"));
+    assert.ok(travaObjecao(FALA_PEDE, "pede"));
   });
   test("trava: sem número, preço, plano, desconto, concorrente ou pergunta; com as palavras certas", () => {
     assert.ok(travaObjecao("Licença cara pesa no orçamento da TI. A SysAid costuma ser mais acessível e atender melhor o que vocês precisam.", "reclama"));

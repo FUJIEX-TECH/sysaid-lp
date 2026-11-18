@@ -9,8 +9,10 @@
 //            → reconhece a dor + "a SysAid costuma ser mais acessível e atender melhor
 //              o que vocês precisam"; vira dor registrada no mapa e no documento
 //   pede     pergunta o preço / valor / quanto custa
-//            → "o investimento depende do tamanho do time e do que vocês precisam; a
-//              proposta sai na reunião com o comercial" e aponta pro fechamento
+//            → "o investimento depende do tamanho do time e do que vocês precisam, então
+//              a proposta sai sob medida"; o "Quero orçamento" do fechamento lembra depois
+// Regra do Fernando (18/11/2026): nada de reunião, agenda, horário, comercial ou
+// especialista antes do passo de fechamento (sem-reuniao-antes-do-fim.test.ts).
 // Nunca preço, número, faixa, plano, desconto ou "até X%".
 //
 // Quem detecta: com o Jev ligado, o Jev confirma no servidor (/api/qualifica/gerar,
@@ -67,8 +69,8 @@ export function detectarCusto(texto: string): TipoCusto | null {
 
 // --------------------------------------------------------------------------
 // A reação (config.reacoes do núcleo). Falas fixas = reserva quando o Haiku não
-// chega a tempo ou reprova na trava. "fecho" diz como a conversa termina, pra a
-// fala de "pede" apontar pro fechamento certo.
+// chega a tempo ou reprova na trava. A reação sempre vem antes do fechamento:
+// nunca fala de reunião, agenda, horário, comercial ou especialista.
 // --------------------------------------------------------------------------
 const LLM_LIGADO = typeof process !== "undefined" && process.env?.NEXT_PUBLIC_DIAG_LLM === "1";
 const PESSOAIS = ["email", "nome", "empresa", "telefone", "cargo", "confirma"];
@@ -86,27 +88,25 @@ function detectar(texto: string, ctx: Contexto, etapa: EtapaConfig): string | nu
   return null;
 }
 
-export const FALA_RECLAMA = "Anotado: o custo de hoje pesa no orçamento. A SysAid costuma ser mais acessível e atender melhor o que vocês precisam, e isso entra no seu mapa.";
-export const FALA_PEDE_REUNIAO =
-  "O investimento depende do tamanho do time e do que vocês precisam, por isso a proposta sai na reunião com o comercial. No fim desta conversa você já escolhe o horário.";
-export const FALA_PEDE_CONTATO = "O investimento depende do tamanho do time e do que vocês precisam, por isso a proposta sai na conversa com o comercial da SysAid.";
+export const FALA_RECLAMA = "Anotado: o custo de hoje pesa no orçamento. A SysAid costuma ser mais acessível e atender melhor o que vocês precisam.";
+export const FALA_PEDE = "O investimento depende do tamanho do time e do que vocês precisam, então a proposta sai sob medida pra vocês.";
 
-function reacao(id: string, etapas: string[], fecho: "reuniao" | "contato"): ReacaoConfig {
+function reacao(id: string, etapas: string[]): ReacaoConfig {
   return {
     id,
     etapas,
     detectar,
     falas: {
       reclama: { rotulo: "Sobre o custo", texto: FALA_RECLAMA },
-      pede: { rotulo: "Sobre o investimento", texto: fecho === "reuniao" ? FALA_PEDE_REUNIAO : FALA_PEDE_CONTATO },
+      pede: { rotulo: "Sobre o investimento", texto: FALA_PEDE },
     },
-    geracao: LLM_LIGADO ? { endpoint: "/api/qualifica/gerar", chave: "fala", esperaMs: 3200, timeoutMs: 6000, omitir: PESSOAIS, extras: { fecho } } : undefined,
+    geracao: LLM_LIGADO ? { endpoint: "/api/qualifica/gerar", chave: "fala", esperaMs: 3200, timeoutMs: 6000, omitir: PESSOAIS } : undefined,
     pausaMs: 1400,
   };
 }
 
 // busca genérica: todo texto livre que não é dado pessoal
 export const ETAPAS_CUSTO_GENERICA = ["situacao_texto", "implicacao", "dor_releitura", "dores_mais", "consequencias", "ferramenta_outra", "payoff"];
-export const REACAO_CUSTO_GENERICA = reacao("objecao", ETAPAS_CUSTO_GENERICA, "reuniao");
+export const REACAO_CUSTO_GENERICA = reacao("objecao", ETAPAS_CUSTO_GENERICA);
 // fluxo de sempre (comparativa, marca, preço)
-export const REACAO_CUSTO_ANTERIOR = reacao("objecao", ["situacao_texto", "implicacao_mais", "ferramenta_outra"], "contato");
+export const REACAO_CUSTO_ANTERIOR = reacao("objecao", ["situacao_texto", "implicacao_mais", "ferramenta_outra"]);

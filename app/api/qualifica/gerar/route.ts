@@ -185,7 +185,6 @@ export async function POST(req: NextRequest) {
     const trecho = (extras.trecho ?? "").trim();
     // o trecho tem que estar na resposta daquela etapa (nada de texto solto vindo do navegador)
     if (!etapa || !valor || trecho.length < 3 || !valor.toLowerCase().includes(trecho.slice(0, 60).toLowerCase())) return NextResponse.json({ ok: false, error: "sem texto" }, { status: 422 });
-    const fecho = extras.fecho === "contato" ? "contato" : "reuniao";
     const local = detectarCusto(trecho) ?? (extras.tipo === "reclama" || extras.tipo === "pede" ? extras.tipo : null);
     const j = await perguntarJev(sessao, chaveDe("obj", trecho), { passo_da_conversa: etapa, texto_da_pessoa: trecho }, perguntasObjecao(), (x) =>
       limpa({ objecao: escolhaDe(x, "objecao", Object.keys(OBJECAO_JEV), 0.4) })
@@ -198,9 +197,9 @@ export async function POST(req: NextRequest) {
     }
     const rl = await llm.gerar({
       sessao,
-      chave: ["objecao", tipo, fecho, trecho],
+      chave: ["objecao", tipo, trecho],
       system: SYSTEM_OBJECAO,
-      prompt: OBJECAO_PROMPT({ tipo, fecho, texto: trecho }),
+      prompt: OBJECAO_PROMPT({ tipo, texto: trecho }),
       schema: SAIDA_OBJECAO,
       validar: (v) => {
         if (travaObjecao(v.fala, tipo)) return { ok: true };

@@ -8,7 +8,8 @@
 // Regras que este arquivo garante:
 // - o "como a SysAid resolve" e as necessidades só saem de CAPACIDADES;
 // - nenhum texto diz que o WhatsApp é canal da SysAid (C1 fala de e-mail, portal e Teams);
-// - nada de "até 90%", plano, preço ou "incluso" (18/11: objeção de custo = "mais acessível", proposta na reunião, nunca número);
+// - nada de "até 90%", plano, preço ou "incluso" (18/11: objeção de custo = "mais acessível", proposta sob medida, nunca número);
+// - nada de reunião, agenda, horário, comercial ou especialista antes do fechamento (regra do Fernando, 18/11/2026);
 // - número só do lead (horas que ele informou) ou com fonte (1,3 chamado por pessoa por mês, HDI/MetricNet 2020).
 //
 // Só funções puras e imports relativos (roda no teste sem navegador e no servidor).
@@ -570,9 +571,10 @@ export function revelacao(ctx: Contexto, empresa: string): string {
   if (formas.length) partes.push(`Você disse que quer ${listaNatural(formas)}.`);
   if (citacao) partes.push(`Você disse: “${citacao}”.`);
   const quem = empresa ? `da ${empresa}` : "de vocês";
-  partes.push(`A SysAid atende o que vocês precisam. O que for bem específico do cenário ${quem}, o nosso especialista avalia com você na reunião e, se precisar, pede uma customização.`);
+  // 18/11/2026 (regra do Fernando): a revelação vem antes do fechamento, então não cita reunião nem especialista
+  partes.push(`A SysAid atende o que vocês precisam. O que for bem específico do cenário ${quem} dá pra ajustar com uma customização, se precisar.`);
   // 18/11/2026: objeção de custo, sem número
-  if (temObjecao(ctx)) partes.push("E sobre o custo: a SysAid costuma ser mais acessível, e a proposta no tamanho do time de vocês sai na reunião com o comercial.");
+  if (temObjecao(ctx)) partes.push("E sobre o custo: a SysAid costuma ser mais acessível, com a proposta sob medida pro tamanho do time de vocês.");
   return partes.join(" ");
 }
 

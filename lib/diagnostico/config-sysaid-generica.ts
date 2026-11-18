@@ -219,7 +219,7 @@ export const configSysaidGenerica: ConfigConversa = {
     objecao_preco: (ctx) => (objecaoCusto(ctx).pede !== null ? "sim" : ""),
     mapa_passo: (ctx) => {
       const p = pedido(ctx.respostas);
-      return p === "reuniao" ? "Reunião com o especialista" : p === "orcamento" ? "Orçamento na reunião" : p === "whatsapp" ? "Conversa pelo WhatsApp" : "";
+      return p === "reuniao" ? "Reunião com o especialista" : p === "orcamento" ? "Orçamento na reunião" : p === "whatsapp" ? "Conversa pelo WhatsApp" : ""; // pos-fechamento: só aparece depois do passo dos horários
     },
   },
 

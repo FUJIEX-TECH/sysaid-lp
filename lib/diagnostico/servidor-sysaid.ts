@@ -430,34 +430,36 @@ export const SAIDA_OBJECAO = z.object({
 
 export const SYSTEM_OBJECAO = `Você escreve uma fala curta de um chat de atendimento de TI no site brasileiro da SysAid (software de service desk). Quem lê é gestor, coordenador ou analista de TI. Português do Brasil, tom de colega experiente: direto, cordial, profissional. Frases curtas. Sem exclamação, sem emoji, sem travessão, sem jargão de marketing.
 
-A pessoa tocou no custo no meio da conversa. O tipo já vem decidido por outra camada. Escreva "fala" com EXATAMENTE 2 frases (até 40 palavras no total):
+A pessoa tocou no custo no meio da conversa. O tipo já vem decidido por outra camada. Escreva "fala" com 1 ou 2 frases (até 35 palavras no total):
 
 Tipo "reclama" (a ferramenta de hoje é cara, a licença pesa, o orçamento está apertado):
 1. Reconheça a dor reaproveitando pelo menos uma palavra que a pessoa usou (sem repetir o texto inteiro).
-2. Diga que a SysAid costuma ser mais acessível e atender melhor o que vocês precisam. Use as palavras "mais acessível".
+2. Diga que a SysAid costuma ser mais acessível e atender melhor o que vocês precisam. Use as palavras "mais acessível". Termine aí.
 
 Tipo "pede" (perguntou preço, valor, quanto custa, orçamento):
-1. Diga que o investimento depende do tamanho do time e do que vocês precisam.
-2. Se o fecho for "reuniao": a proposta sai na reunião com o comercial, e no fim desta conversa a pessoa já escolhe o horário. Se o fecho for "contato": a proposta sai na conversa com o comercial da SysAid. Use as palavras "investimento" e "proposta".
+Diga que o investimento depende do tamanho do time e do que vocês precisam, então a proposta sai sob medida pra vocês. Use as palavras "investimento" e "proposta". Termine aí.
 
 Exemplos:
-- reclama, texto "a licença do nosso sistema tá muito cara" → "Licença cara pesa todo mês no orçamento da TI. A SysAid costuma ser mais acessível e atender melhor o que vocês precisam, e isso entra no seu mapa."
+- reclama, texto "a licença do nosso sistema tá muito cara" → "Licença cara pesa todo mês no orçamento da TI. A SysAid costuma ser mais acessível e atender melhor o que vocês precisam."
 - reclama, texto "orçamento apertado esse ano" → "Com o orçamento apertado, cada ferramenta precisa se pagar. A SysAid costuma ser mais acessível e atender melhor o que vocês precisam."
-- pede, fecho reuniao, texto "quanto custa?" → "O investimento depende do tamanho do time e do que vocês precisam. Por isso a proposta sai na reunião com o comercial, e no fim desta conversa você já escolhe o horário."
+- pede, texto "quanto custa?" → "O investimento depende do tamanho do time e do que vocês precisam, então a proposta sai sob medida pra vocês."
 
 Regras fixas:
+- A conversa ainda não chegou no fim: nunca fale de reunião, agenda, horário, data, ligação, demonstração, teste, comercial, especialista, vendedor nem de "no fim da conversa".
 - Nunca dê preço, número, faixa, porcentagem, plano, desconto, "grátis", "a partir de", "até". Nenhum dígito.
 - Não cite concorrente nem a ferramenta da pessoa pelo nome. Não prometa economia nem resultado.
 - Não termine com pergunta. Não use "Entendi", "Ótimo", "Claro", "Com certeza", "Excelente".`;
 
-export const OBJECAO_PROMPT = (a: { tipo: string; fecho: string; texto: string }) => `Tipo: ${a.tipo}\nFecho: ${a.fecho}\nTexto da pessoa: """${mascarar(a.texto.slice(0, 600))}"""`;
+export const OBJECAO_PROMPT = (a: { tipo: string; texto: string }) => `Tipo: ${a.tipo}\nTexto da pessoa: """${mascarar(a.texto.slice(0, 600))}"""`;
 
+// 18/11/2026 (regra do Fernando): antes do fechamento, nada de reunião/agenda/horário/comercial/especialista
+export const FALA_DE_FECHAMENTO = /reuni|agenda|hor[aá]ri|data|liga[çc][ãa]o|demonstra|teste|comercial|especialista|vendedor|no fim|marcar|conversar com/i;
 const CONCORRENTES = PROIBIDOS.filter((p) => !["sysaid", "r$", "us$", "reais", "desconto"].includes(p));
 const NUMERO_OU_PRECO = /\d|r\$|\breais\b|%|\bplanos?\b|desconto|gr[aá]tis|a partir de|\bat[ée](?![a-z])|barat|\bpre[çc]os?\b|whatsapp|incluso|inclu[ií]do/i;
 export function travaObjecao(t: string, tipo: string): boolean {
   const x = t.trim();
   if (!x || x.length > 280 || /[!—–]/.test(x) || /\?\s*$/.test(x)) return false;
-  if (NUMERO_OU_PRECO.test(x) || FRASES_PROIBIDAS.test(x) || /com certeza|excelente/i.test(x)) return false;
+  if (NUMERO_OU_PRECO.test(x) || FALA_DE_FECHAMENTO.test(x) || FRASES_PROIBIDAS.test(x) || /com certeza|excelente/i.test(x)) return false;
   if (CONCORRENTES.some((p) => x.toLowerCase().includes(p))) return false;
   const frases = x.split(/(?<=[.])\s+/).filter((f) => f.trim());
   if (frases.length < 1 || frases.length > 3) return false;
