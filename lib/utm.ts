@@ -1,12 +1,13 @@
 // Origem do clique (UTM + gclid) guardada no navegador.
 // Antes, o formulário e o widget liam a UTM só da URL da página em que o lead
 // era enviado: quem chegava por /topdesk?utm_... e navegava pra home perdia a
-// origem no banco e no RD (caso Sertrading, 18/11/2026: clique pago na TopDesk,
-// lead gravado em "/" sem campanha). Agora a UTM do pouso fica guardada por
+// origem no banco e no RD. Agora a UTM do pouso fica guardada por
 // 30 dias e vale enquanto a URL atual não trouxer outra.
 // Sem nada na URL nem guardado, o gclid vem do cookie _gcl_aw que a tag do
 // Google grava em .sysaid.com.br (conferido em 19/11/2026: o clique que cai no
-// site da SysAid, ex. sitelink "Clientes", deixa o cookie legível aqui). Só o
+// site da SysAid, ex. sitelink "Clientes" do anúncio do TopDesk, caso
+// Sertrading de 18/11/2026, gravado em "/" sem campanha, deixa o cookie
+// legível aqui). Só o
 // gclid: a origem (utm_source) não é inventada.
 
 export const UTM_KEYS = [
