@@ -1,6 +1,7 @@
 import Script from "next/script";
 
-// Carrega Hotjar, gtag.js (Google Ads + GA4). A conversao do Google Ads e
+// Carrega gtag.js (Google Ads + GA4) e o Hotjar (lazyOnload: so depois do
+// load, pra nao disputar a thread principal com a pagina). A conversao do Google Ads e
 // disparada no envio do formulario (LeadForm). GA4 so ativa quando o
 // NEXT_PUBLIC_GA4_ID for definido.
 export default function Analytics() {
@@ -30,7 +31,7 @@ export default function Analytics() {
       )}
 
       {hotjarId && (
-        <Script id="hotjar" strategy="afterInteractive">
+        <Script id="hotjar" strategy="lazyOnload">
           {`
             (function(h,o,t,j,a,r){
               h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
