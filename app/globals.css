@@ -614,3 +614,10 @@ img, svg { max-width: 100%; height: auto; display: block; }
 @media (max-width: 640px) {
   .planos__row { grid-template-columns: 1fr; gap: 6px; padding: 18px 0; }
 }
+
+/* Lista de sinais (páginas de categoria): filete fino, sem card */
+.sinais { list-style: none; padding: 0; margin: 8px 0 28px; border-top: 1px solid var(--line); }
+.sinais li { position: relative; padding: 14px 0 14px 26px; border-bottom: 1px solid var(--line); color: var(--ink); }
+.sinais li::before { content: ""; position: absolute; left: 4px; top: 1.45em; width: 8px; height: 2px; background: var(--green-700); }
+.texto-corrido p { color: var(--ink-400); font-size: 1.05rem; }
+.texto-corrido a { color: var(--green-700); text-decoration: underline; text-underline-offset: 3px; }

@@ -6,14 +6,14 @@ import { breadcrumbSchema, datasDaPagina, ORG_ID } from "@/lib/seo";
 import { altCliente, altSelo } from "@/lib/marcas";
 
 export const metadata: Metadata = {
-  title: "Sistema de Chamados de TI com IA, SLA e Portal | SysAid",
+  title: "Sistema de Chamados de TI: abertura, fila, SLA e portal | SysAid",
   description:
-    "Sistema de chamados que centraliza abertura, priorização e resolução do suporte de TI, com portal, SLA e IA que resolve até 90% dos chamados.",
+    "Sistema de chamados de TI: abrir chamado pelo portal, e-mail ou Teams, fila única com prazo e relatórios prontos. Para quando a planilha não dá mais conta.",
   alternates: { canonical: "/sistema-de-chamados" },
   openGraph: {
-    title: "Sistema de Chamados de TI com IA — SysAid Brasil",
+    title: "Sistema de Chamados de TI: abertura, fila, SLA e portal | SysAid Brasil",
     description:
-      "Abertura, priorização, SLA e portal de autoatendimento em uma só plataforma. +400 empresas no Brasil.",
+      "Abertura de chamados, fila com prioridade, SLA e portal de autoatendimento numa só plataforma, com implantação e suporte em português.",
     locale: "pt_BR",
     type: "website",
   },
@@ -50,6 +50,32 @@ const DORES = [
     t: "Não existe histórico para decidir",
     d: "Sem base de dados, não dá para dizer qual categoria mais consome o time, onde investir ou quanta gente a operação precisa.",
   },
+];
+
+// Dor D1/D3 (pesquisa de dores 12/11/2026): quem ainda controla em planilha.
+// Resposta só com C1, C3 e C5 da lista fechada (13/11/2026); sem "tempo real".
+const SINAIS_PLANILHA = [
+  "Ninguém atualiza a tempo: o chamado foi resolvido ontem e na planilha ainda está aberto.",
+  "A diretoria pergunta quantos chamados estão abertos e a resposta é um chute.",
+  "O pedido do corredor e o que chegou no e-mail pessoal do técnico não entram em lugar nenhum.",
+  "O número do mês só sai montando à mão, na véspera da reunião.",
+  "Quando alguém sai de férias, a fila dele some junto.",
+];
+
+// Dor D2: ferramenta que virou projeto. Resposta só com C4 e C10.
+// Nunca "fácil", "sem esforço" ou "em minutos".
+const SINAIS_PROJETO = [
+  "Para mudar um campo ou uma tela, alguém precisa mexer no código.",
+  "Um alerta de prazo novo leva semanas para sair, porque entra na fila do fornecedor.",
+  "Cada fluxo de aprovação novo vira um pedido ao suporte da própria ferramenta.",
+  "Só uma pessoa do time sabe configurar, e tudo espera por ela.",
+];
+
+const CUSTO_GRATUITO = [
+  "Servidor, banco de dados e backup por conta da própria TI.",
+  "Atualização de versão e compatibilidade de plugin a cada versão nova.",
+  "Correção de segurança, que depende de a versão em uso continuar recebendo atualização.",
+  "As horas do time mantendo a ferramenta de pé, em vez de atender chamado.",
 ];
 
 const RECURSOS = [
@@ -99,6 +125,14 @@ const PASSOS = [
 
 const FAQ = [
   {
+    q: "Como funciona a abertura de chamados?",
+    a: "Os caminhos mais comuns são o portal de autoatendimento, o e-mail e o Microsoft Teams (na versão em nuvem). O pedido cai na mesma fila, ganha categoria, prioridade e um responsável, e o usuário acompanha o andamento pelo portal, sem precisar cobrar o técnico. Ao descrever o problema no portal, ele já vê os artigos da base de conhecimento que respondem aquilo.",
+  },
+  {
+    q: "Como saber se a planilha ainda dá conta?",
+    a: "Três perguntas resolvem. Você consegue dizer agora quantos chamados estão abertos e há quanto tempo? Algum pedido já se perdeu porque chegou por fora da planilha? O relatório do mês sai sem alguém montar à mão? Se alguma resposta for não, a planilha já está custando mais do que parece.",
+  },
+  {
     q: "O que é um sistema de chamados?",
     a: "É a ferramenta que centraliza os pedidos de suporte da empresa em uma fila única, com registro, categoria, responsável, prioridade e prazo. Em vez de o pedido chegar por e-mail, WhatsApp ou conversa de corredor, ele vira um chamado rastreável, com histórico e SLA. É o que permite saber quantos pedidos existem, quem está atendendo o quê e quanto tempo cada coisa leva.",
   },
@@ -120,7 +154,7 @@ const FAQ = [
   },
   {
     q: "Existe sistema de chamados gratuito. Por que pagar?",
-    a: "A licença gratuita não é o custo total. Servidor, atualização de versão, compatibilidade de plugin e as horas da própria equipe mantendo a ferramenta são custos reais que não aparecem na fatura. A conta que importa é quanto a sua TI gasta para manter a ferramenta de pé, e quanto ela deixa de resolver enquanto faz isso.",
+    a: "Para começar, a ferramenta gratuita costuma servir. Mas a licença gratuita não é o custo total: servidor, atualização de versão, compatibilidade de plugin, correção de segurança e as horas da própria equipe mantendo a ferramenta entram na conta. A conta que importa é quanto a sua TI gasta para manter a ferramenta de pé, e quanto ela deixa de resolver enquanto faz isso. O bloco \"Sistema de chamados gratuito vale a pena?\", nesta página, detalha essa conta.",
   },
 ];
 
@@ -140,7 +174,7 @@ const webPageSchema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
   ...datasDaPagina("/sistema-de-chamados"),
-  name: "Sistema de Chamados de TI com IA",
+  name: "Sistema de Chamados de TI: abertura, fila, SLA e portal",
   description: metadata.description,
   inLanguage: "pt-BR",
   publisher: { "@id": ORG_ID },
@@ -265,8 +299,38 @@ export default function SistemaDeChamadosPage() {
           </div>
         </section>
 
+        {/* PLANILHA (dor D1/D3) */}
+        <section className="section section--soft" id="planilha-de-chamados">
+          <div className="container container--narrow">
+            <div className="section-head">
+              <p className="eyebrow">Planilha de chamados</p>
+              <h2>Quando a planilha de chamados deixa de dar conta</h2>
+              <p className="section-head__sub">
+                A planilha resolve enquanto o time é pequeno e os pedidos são
+                poucos. Estes são os sinais de que ela já virou o gargalo.
+              </p>
+            </div>
+            <ul className="sinais">
+              {SINAIS_PLANILHA.map((s) => (
+                <li key={s}>{s}</li>
+              ))}
+            </ul>
+            <div className="texto-corrido">
+              <p>
+                Num sistema de chamados, o pedido que chega por e-mail, pelo
+                portal ou pelo Microsoft Teams (na versão em nuvem) vira chamado
+                na mesma fila, com dono, prioridade e histórico, mesmo quando
+                quem escreve não tem cadastro. O usuário acompanha o andamento
+                no portal sem cobrar o técnico, e os relatórios de volume,
+                cumprimento de prazo e tempo de resolução saem prontos, sem
+                exportar para planilha.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* RECURSOS */}
-        <section className="section section--soft">
+        <section className="section">
           <div className="container">
             <div className="section-head">
               <p className="eyebrow">O que a plataforma entrega</p>
@@ -279,6 +343,40 @@ export default function SistemaDeChamadosPage() {
                   <p>{r.d}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* VIROU PROJETO (dor D2) */}
+        <section className="section section--soft" id="ajuste-vira-projeto">
+          <div className="container container--narrow">
+            <div className="section-head">
+              <p className="eyebrow">Para quem já tem ferramenta</p>
+              <h2>Já tem um sistema de chamados, mas qualquer ajuste vira projeto</h2>
+              <p className="section-head__sub">
+                É a queixa mais comum de quem procura trocar de ferramenta: o
+                sistema existe, mas não acompanha a operação.
+              </p>
+            </div>
+            <ul className="sinais">
+              {SINAIS_PROJETO.map((s) => (
+                <li key={s}>{s}</li>
+              ))}
+            </ul>
+            <div className="texto-corrido">
+              <p>
+                No SysAid, os fluxos de atendimento, com aprovações e tarefas em
+                sequência, são montados na tela, arrastando etapas, a partir de
+                modelos prontos alinhados à ITIL. Pedido repetido ganha fluxo
+                próprio e anda sozinho até alguém precisar agir. A SysAid Brasil
+                acompanha a implantação e dá suporte em português, e o desenho
+                das filas, dos prazos e dos fluxos é feito com o seu time.
+              </p>
+              <p>
+                Comparando com a ferramenta que você usa hoje? Veja{" "}
+                <a href="/movidesk">SysAid x Movidesk</a> e{" "}
+                <a href="/topdesk">SysAid x TopDesk</a>.
+              </p>
             </div>
           </div>
         </section>
@@ -371,8 +469,42 @@ export default function SistemaDeChamadosPage() {
           </div>
         </section>
 
+        {/* GRATUITO */}
+        <section className="section" id="sistema-de-chamados-gratuito">
+          <div className="container container--narrow">
+            <div className="section-head">
+              <p className="eyebrow">Sistema de chamados gratuito</p>
+              <h2>Sistema de chamados gratuito vale a pena?</h2>
+            </div>
+            <div className="texto-corrido">
+              <p>
+                Para começar, muitas vezes vale. Uma ferramenta gratuita tira o
+                pedido do e-mail e cria o primeiro histórico, e isso já é um
+                avanço sobre a planilha. A conta muda quando a operação cresce,
+                porque a licença gratuita não é o custo total:
+              </p>
+            </div>
+            <ul className="sinais">
+              {CUSTO_GRATUITO.map((s) => (
+                <li key={s}>{s}</li>
+              ))}
+            </ul>
+            <div className="texto-corrido">
+              <p>
+                Um exemplo recente: segundo o site IT-Connect (02/10/2026), a
+                versão 10.0.28, de 30/09/2026, foi a última atualização da linha
+                10 do GLPI. Com a chegada da versão nova, as falhas que
+                aparecerem no código da linha 10 deixam de ser corrigidas, e
+                quem roda o GLPI 10 precisa decidir entre migrar de versão ou de
+                ferramenta. Comparamos as duas opções em{" "}
+                <a href="/glpi">SysAid x GLPI</a>.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* FAQ */}
-        <section className="section">
+        <section className="section section--soft">
           <div className="container container--narrow">
             <div className="section-head">
               <p className="eyebrow">Dúvidas frequentes</p>
