@@ -31,7 +31,7 @@ export const PAGINAS: Record<string, Pagina> = {
   "/servicenow": { nome: "SysAid x ServiceNow", publicado: "2026-10-06", modificado: "2026-10-06", prioridade: 0.8, frequencia: "monthly" },
   "/freshservice": { nome: "SysAid x Freshservice", publicado: "2026-10-08", modificado: "2026-10-08", prioridade: 0.8, frequencia: "monthly" },
   "/manageengine": { nome: "SysAid x ManageEngine ServiceDesk Plus", publicado: "2026-11-11", modificado: "2026-11-11", prioridade: 0.8, frequencia: "monthly" },
-  "/cmdb": { nome: "CMDB", publicado: "2026-10-06", modificado: "2026-10-06", prioridade: 0.8, frequencia: "monthly" },
+  "/cmdb": { nome: "CMDB", publicado: "2026-10-06", modificado: "2026-11-22", prioridade: 0.8, frequencia: "monthly" },
 };
 
 const url = (path: string) => (path === "/" ? `${BASE}/` : `${BASE}${path}`);
