@@ -180,6 +180,32 @@ const SYSAID = [
   },
 ];
 
+const RELACOES = [
+  { t: "Depende de", d: "Serviço depende de aplicação, aplicação depende de banco de dados. É a relação que responde “o que para se isso parar”." },
+  { t: "Roda em", d: "Aplicação roda em servidor, servidor roda em host ou em região de nuvem. Liga o lógico ao físico." },
+  { t: "Conecta a", d: "Servidor conecta a switch, filial conecta ao link da operadora. É a camada de rede que quase ninguém modela e que mais surpreende." },
+  { t: "Coberto por", d: "Equipamento coberto por contrato de suporte, software coberto por licença. Responde “quem eu aciono” e “o que venceu”." },
+];
+
+const INDICADORES = [
+  { ind: "Cobertura", como: "Itens dos serviços críticos registrados ÷ itens que a descoberta encontra nesses serviços", mostra: "Se a CMDB enxerga o ambiente que diz mapear" },
+  { ind: "Atualidade", como: "% de itens com dado da descoberta mais recente que o prazo combinado (por exemplo, 7 dias)", mostra: "Se a base está sendo atualizada pela descoberta ou envelhecendo" },
+  { ind: "Precisão", como: "Itens conferidos sem divergência ÷ itens conferidos numa amostra aleatória (mensal ou trimestral)", mostra: "Se o que está registrado bate com o que existe de fato" },
+  { ind: "Itens sem dono", como: "% de itens sem responsável definido na classe ou no próprio item", mostra: "Onde a base vai desatualizar primeiro" },
+  { ind: "Itens órfãos", como: "% de itens sem nenhuma relação com serviço ou outro item", mostra: "Inventário solto, que não ajuda a decidir impacto" },
+  { ind: "Mudanças com item vinculado", como: "Mudanças aprovadas com item de configuração apontado ÷ total de mudanças aprovadas", mostra: "Se a CMDB é usada no processo ou só consultada de vez em quando" },
+];
+
+const MATURIDADE = [
+  { n: "1", t: "Inventário solto", d: "Lista de equipamentos e software, sem relações, atualizada por planilha ou mutirão. Como saber: ninguém consegue responder, pela base, quais serviços um servidor sustenta." },
+  { n: "2", t: "Itens com relações", d: "Os serviços críticos estão mapeados com dependências, e a descoberta atualiza os atributos técnicos. Como saber: dá para navegar do serviço até o servidor, mas o chamado ainda não aponta para o item." },
+  { n: "3", t: "Ligada a chamado e mudança", d: "Incidentes e mudanças apontam para itens de configuração, e a mudança aprovada atualiza o item. Como saber: o indicador de mudanças com item vinculado passa da maioria." },
+  { n: "4", t: "Usada para decidir", d: "O comitê de mudanças aprova olhando o impacto calculado pela CMDB, e problemas recorrentes são investigados pelo histórico do item. Como saber: a CMDB aparece na ata da mudança, não só no cadastro." },
+];
+
+const PARA_QUE_SERVE =
+  "A CMDB serve para a TI decidir com base no mapa real do ambiente: saber o que um incidente derruba, avaliar o impacto de uma mudança antes de aprovar, achar a causa de problemas que se repetem e responder auditoria sem planilha. Sem ela, essas respostas dependem da memória de quem conhece o ambiente.";
+
 const FAQ = [
   {
     q: "O que é CMDB?",
@@ -187,7 +213,7 @@ const FAQ = [
   },
   {
     q: "Para que serve a CMDB?",
-    a: "Serve para tomar decisão de operação com base no mapa real do ambiente: descobrir rapidamente o que um incidente afeta, encontrar a causa raiz de problemas que se repetem, avaliar o impacto de uma mudança antes de aprová-la e saber quem acionar quando um item falha. Sem CMDB, essas respostas dependem da memória de quem conhece o ambiente.",
+    a: PARA_QUE_SERVE,
   },
   {
     q: "Qual a diferença entre CMDB e inventário de TI?",
@@ -208,6 +234,18 @@ const FAQ = [
   {
     q: "Quanto tempo leva para implantar uma CMDB?",
     a: "Depende do escopo, e por isso a recomendação é começar pequeno: um ou dois serviços críticos, com o modelo de dados definido e a descoberta automática ligada, costumam ficar utilizáveis em semanas, não em meses. A CMDB cresce serviço a serviço. Projetos que tentam mapear o ambiente inteiro de uma vez são os que mais demoram e os que mais abandonam a base depois.",
+  },
+  {
+    q: "Como medir a saúde da CMDB?",
+    a: "Com poucos indicadores medidos sempre do mesmo jeito: cobertura (quanto dos itens que a descoberta encontra está registrado), atualidade (quantos itens têm dado recente da descoberta), precisão por amostra (quantos itens conferidos batem com a realidade), itens sem dono, itens órfãos (sem relação) e a porcentagem de mudanças aprovadas com item de configuração vinculado. O último é o que mais diz se a CMDB está viva, porque mede uso, não cadastro.",
+  },
+  {
+    q: "Empresa de médio porte precisa de CMDB?",
+    a: "Precisa de uma CMDB do tamanho do problema dela. Se a TI já sofre com mudança que derruba sistema, incidente em que ninguém sabe o que foi afetado ou auditoria respondida em planilha, vale começar com um a três serviços críticos e descoberta automática ligada, sem projeto de meses. Se o ambiente é pequeno e estável, o inventário de ativos ligado ao service desk pode bastar por um tempo, e a CMDB entra quando as dependências começarem a causar incidente.",
+  },
+  {
+    q: "Preciso de consultoria para implantar CMDB?",
+    a: "Nem sempre. Consultoria ajuda quando o ambiente é grande, há várias fontes de dados para reconciliar (descoberta, nuvem, planilhas antigas) ou a CMDB precisa atender auditoria e governança formal desde o começo. Para começar com poucos serviços críticos, um time interno com dono do processo definido e uma ferramenta com descoberta automática costuma conseguir sozinho. Em qualquer caso, a consultoria entrega o modelo e o primeiro mapa; manter a CMDB viva depois é trabalho do time.",
   },
   {
     q: "A CMDB do ServiceNow é diferente da de outras ferramentas?",
@@ -231,10 +269,10 @@ const articleSchema = {
   "@type": "Article",
   headline: "CMDB: o que é e como usar na gestão de serviços de TI",
   description:
-    "O que é CMDB, o que entra como item de configuração, a CMDB no ITIL 4 e no ITSM, a diferença para gestão de ativos, um roteiro de implantação em seis passos e por que tantas CMDBs ficam desatualizadas.",
+    "O que é CMDB, o que entra como item de configuração, a CMDB no ITIL 4 e no ITSM, a diferença para gestão de ativos, implementação em seis passos, modelagem, governança, indicadores de saúde e maturidade, CMDB por porte de empresa e por que tantas CMDBs ficam desatualizadas.",
   inLanguage: "pt-BR",
   datePublished: "2026-10-06",
-  dateModified: "2026-10-06",
+  dateModified: "2026-11-22",
   author: { "@type": "Organization", "@id": "https://itsm.sysaid.com.br/#organization", name: "SysAid Brasil" },
   publisher: { "@type": "Organization", "@id": "https://itsm.sysaid.com.br/#organization", name: "SysAid Brasil" },
   mainEntityOfPage: "https://itsm.sysaid.com.br/cmdb",
@@ -311,8 +349,9 @@ export default function CmdbPage() {
               A CMDB é o mapa do que sustenta cada serviço da TI e de como
               essas peças se ligam. Neste guia: o que é, o que entra como item
               de configuração, onde ela aparece no ITIL 4 e no ITSM, a
-              diferença para gestão de ativos, como implantar em seis passos e
-              por que tanta CMDB morre desatualizada.
+              diferença para gestão de ativos, como implementar em seis passos,
+              como modelar, governar e medir a saúde da base, e por que tanta
+              CMDB morre desatualizada.
             </p>
             <p className="hero__trust">
               Guia escrito pela SysAid Brasil · Nota 4,5/5 no G2 (750+
@@ -339,6 +378,51 @@ export default function CmdbPage() {
               parar, e quem precisa ser avisado. Ela é uma peça da{" "}
               <a href="/gestao-de-servicos-de-ti">gestão de serviços de TI</a>,
               não um fim em si: só vale o que ela ajuda a decidir.
+            </p>
+          </div>
+        </section>
+
+        {/* PARA QUE SERVE */}
+        <section className="section section--flush-top" id="para-que-serve">
+          <div className="container container--narrow">
+            <div className="section-head">
+              <p className="eyebrow">Na prática</p>
+              <h2>Para que serve a CMDB</h2>
+            </div>
+            <p className="section-head__sub">{PARA_QUE_SERVE}</p>
+            <ul className="uses-list">
+              <li>
+                <strong>Incidente:</strong> mostra na hora quais serviços e
+                usuários são afetados quando um servidor, link ou aplicação
+                para, e quem acionar.
+              </li>
+              <li>
+                <strong>Mudança:</strong> antes de aprovar, lista tudo que
+                depende do item que vai mudar; o comitê decide pelo impacto,
+                não pelo palpite. É assim que a{" "}
+                <a href="/gestao-de-servicos-de-ti">gestão de serviços de TI</a>{" "}
+                reduz mudança que derruba produção.
+              </li>
+              <li>
+                <strong>Problema:</strong> cruza incidentes repetidos com os
+                itens em comum e encurta a busca pela causa raiz.
+              </li>
+              <li>
+                <strong>Auditoria e contratos:</strong> diz o que está coberto
+                por qual contrato e licença, e o que venceu.
+              </li>
+              <li>
+                <strong>Custos e capacidade:</strong> mostra o que sustenta cada
+                serviço de negócio, base para cortar o que não serve a nada.
+              </li>
+            </ul>
+            <p className="section-head__sub">
+              Esses usos só funcionam se a CMDB estiver atualizada, e é aí que a
+              maioria falha (veja{" "}
+              <a href="#cmdb-desatualizada">
+                por que tanta CMDB fica desatualizada
+              </a>
+              ).
             </p>
           </div>
         </section>
@@ -432,8 +516,8 @@ export default function CmdbPage() {
         <section className="section" id="implantacao">
           <div className="container">
             <div className="section-head">
-              <p className="eyebrow">Como implantar</p>
-              <h2>Implantação de CMDB em seis passos</h2>
+              <p className="eyebrow">Como implementar</p>
+              <h2>Implementação de CMDB em seis passos</h2>
               <p className="section-head__sub">
                 Um roteiro pensado para a CMDB continuar certa daqui a um ano,
                 não só no dia da entrega.
@@ -448,6 +532,136 @@ export default function CmdbPage() {
                 </div>
               ))}
             </div>
+            <p className="section-head__sub" style={{ marginTop: 24 }}>
+              O passo 2 é onde mais projeto erra: veja{" "}
+              <a href="#modelagem">como modelar a CMDB</a> logo abaixo. E,
+              para saber se a implementação deu certo, use os{" "}
+              <a href="#governanca">indicadores de saúde</a>.
+            </p>
+          </div>
+        </section>
+
+        {/* MODELAGEM */}
+        <section className="section section--flush-top" id="modelagem">
+          <div className="container container--narrow">
+            <div className="section-head">
+              <p className="eyebrow">Modelo de dados</p>
+              <h2>Modelagem de CMDB: classes, atributos e relações</h2>
+            </div>
+            <p className="section-head__sub">
+              Modelar a CMDB é decidir três coisas antes de importar qualquer
+              dado: quais classes de item existem, quais atributos são
+              obrigatórios em cada uma e quais tipos de relação valem. Comece
+              pelas classes que sustentam os serviços críticos (as{" "}
+              <a href="#itens-de-configuracao">seis classes acima</a> cobrem
+              quase todo caso), com três a cinco atributos obrigatórios por
+              classe: atributo que ninguém atualiza vira campo vazio, e campo
+              vazio tira a confiança na base inteira. As relações são o que
+              transforma inventário em CMDB, e quatro tipos resolvem a maior
+              parte dos casos:
+            </p>
+            <ul className="uses-list">
+              {RELACOES.map((r) => (
+                <li key={r.t}>
+                  <strong>{r.t}:</strong> {r.d}
+                </li>
+              ))}
+            </ul>
+            <p className="section-head__sub">
+              O erro clássico é modelar o ambiente inteiro antes de ter dono
+              para cada classe. O modelo cresce serviço a serviço, junto com
+              quem vai mantê-lo.
+            </p>
+          </div>
+        </section>
+
+        {/* GOVERNANCA E SAUDE */}
+        <section className="section section--soft" id="governanca">
+          <div className="container">
+            <div className="section-head">
+              <p className="eyebrow">Depois de implementar</p>
+              <h2>Governança e saúde da CMDB</h2>
+              <p className="section-head__sub">
+                Governança de CMDB é definir quem responde pelo quê e medir
+                se a base continua confiável. Três papéis bastam para começar:
+                o dono do processo de configuração (responde pela CMDB como um
+                todo e aprova mudança no modelo), um dono por classe de item
+                (mantém os dados daquela classe) e o comitê de mudanças (exige
+                item vinculado em toda mudança). A rotina é reconciliar as
+                fontes de dados e auditar por amostra. A saúde se mede com
+                seis indicadores, sempre calculados do mesmo jeito para dar
+                tendência:
+              </p>
+            </div>
+            <div className="ctable" role="table" aria-label="Indicadores de saúde da CMDB">
+              <div className="ctable__head" role="row">
+                <span role="columnheader">Indicador</span>
+                <span role="columnheader">Como medir</span>
+                <span role="columnheader" className="ctable__us">O que mostra</span>
+              </div>
+              {INDICADORES.map((r) => (
+                <div className="ctable__row" role="row" key={r.ind}>
+                  <span className="ctable__crit" role="cell">{r.ind}</span>
+                  <span className="ctable__them" role="cell" data-label="Como medir">{r.como}</span>
+                  <span className="ctable__mine" role="cell">{r.mostra}</span>
+                </div>
+              ))}
+            </div>
+            <p className="ctable__note">
+              Não existe número universal de “CMDB saudável”: o que importa é
+              a tendência mês a mês nos serviços críticos. Atualidade caindo
+              costuma ser descoberta parada; itens sem dono subindo, alguém
+              que saiu do time sem passar a classe adiante.
+            </p>
+
+            <div className="section-head" style={{ marginTop: 56 }}>
+              <h3 id="maturidade">Maturidade de CMDB em quatro níveis</h3>
+              <p className="section-head__sub">
+                A maturidade diz o quanto a CMDB já ajuda a decidir. Quase
+                toda empresa que começa está no nível 1; o salto que mais rende
+                é do 2 para o 3, quando o chamado e a mudança passam a apontar
+                para o item.
+              </p>
+            </div>
+            <div className="grid-2">
+              {MATURIDADE.map((m) => (
+                <div className="step" key={m.n}>
+                  <span className="step__n">Nível {m.n}</span>
+                  <h3>{m.t}</h3>
+                  <p>{m.d}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* POR PORTE */}
+        <section className="section" id="por-porte">
+          <div className="container container--narrow">
+            <div className="section-head">
+              <p className="eyebrow">Para quem é</p>
+              <h2>CMDB por porte: a média empresa precisa? E a grande?</h2>
+            </div>
+            <p className="section-head__sub">
+              <strong>Média empresa:</strong> precisa de CMDB quando mudança
+              derruba sistema, incidente chega sem ninguém saber o que foi
+              afetado ou auditoria é respondida em planilha. O caminho é
+              começar por um a três serviços críticos, com descoberta
+              automática ligada e o service desk apontando para os itens,
+              sem projeto de meses. Se o ambiente é pequeno e estável, o
+              inventário de ativos ligado aos chamados pode bastar por um
+              tempo.
+            </p>
+            <p className="section-head__sub">
+              <strong>Grande empresa:</strong> a questão deixa de ser
+              “precisa?” e passa a ser “quantas fontes de verdade existem?”.
+              Descoberta de rede, consoles de nuvem, ferramentas de
+              monitoramento e planilhas antigas trazem o mesmo item de jeitos
+              diferentes, então reconciliação (qual fonte manda em cada
+              atributo), dono formal por classe e os indicadores de saúde
+              acima deixam de ser boa prática e viram condição para a CMDB
+              ser usada na aprovação de mudança.
+            </p>
           </div>
         </section>
 
