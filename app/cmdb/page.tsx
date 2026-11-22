@@ -199,7 +199,7 @@ const INDICADORES = [
 const MATURIDADE = [
   { n: "1", t: "Inventário solto", d: "Lista de equipamentos e software, sem relações, atualizada por planilha ou mutirão. Como saber: ninguém consegue responder, pela base, quais serviços um servidor sustenta." },
   { n: "2", t: "Itens com relações", d: "Os serviços críticos estão mapeados com dependências, e a descoberta atualiza os atributos técnicos. Como saber: dá para navegar do serviço até o servidor, mas o chamado ainda não aponta para o item." },
-  { n: "3", t: "Ligada a chamado e mudança", d: "Incidentes e mudanças apontam para itens de configuração, e a mudança aprovada atualiza o item. Como saber: o indicador de mudanças com item vinculado passa da maioria." },
+  { n: "3", t: "Ligada a chamado e mudança", d: "Incidentes e mudanças apontam para itens de configuração, e a mudança aprovada atualiza o item. Como saber: mais da metade das mudanças aprovadas já tem item de configuração vinculado." },
   { n: "4", t: "Usada para decidir", d: "O comitê de mudanças aprova olhando o impacto calculado pela CMDB, e problemas recorrentes são investigados pelo histórico do item. Como saber: a CMDB aparece na ata da mudança, não só no cadastro." },
 ];
 
