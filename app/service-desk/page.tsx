@@ -6,14 +6,14 @@ import { datasDaPagina } from "@/lib/seo";
 import { altCliente, altSelo } from "@/lib/marcas";
 
 export const metadata: Metadata = {
-  title: "Service Desk: o que é, o que faz e como escolher | SysAid",
+  title: "Service Desk: o que é, o que faz, estrutura e indicadores | SysAid",
   description:
-    "Service desk é o ponto único de contato entre usuários e TI: o que faz, a diferença para help desk, os processos da ITIL e como escolher a ferramenta.",
+    "Service desk (central de serviços) é o ponto único de contato entre usuários e TI: o que faz, como funciona o atendimento, modelos, indicadores e como escolher o sistema de service desk.",
   alternates: { canonical: "/service-desk" },
   openGraph: {
-    title: "Service Desk: o que é, o que faz e como escolher",
+    title: "Service Desk: o que é, o que faz, estrutura e indicadores",
     description:
-      "O ponto único de contato entre os usuários e a TI: definição, funções, diferença para help desk e critérios para escolher a ferramenta.",
+      "A central de serviços de TI explicada: definição, fluxo do atendimento, modelos (interno, terceirizado, híbrido), indicadores com fórmula e critérios para escolher o sistema.",
     locale: "pt_BR",
     type: "article",
   },
@@ -100,6 +100,144 @@ const PROCESSOS = [
   },
 ];
 
+const FLUXO = [
+  {
+    n: "01",
+    t: "Entrada pelo canal",
+    d: "O usuário abre a demanda pelo portal, e-mail, Teams, telefone ou chat. Seja qual for o canal, ela cai na mesma fila, com quem pediu, quando e o quê.",
+  },
+  {
+    n: "02",
+    t: "Registro e categorização",
+    d: "O chamado ganha número, categoria (incidente ou requisição, e de qual serviço) e os dados que o analista vai precisar. Categoria bem escolhida é o que permite medir e automatizar depois.",
+  },
+  {
+    n: "03",
+    t: "Priorização por impacto e urgência",
+    d: "Impacto é quanta gente ou quanto do negócio é afetado; urgência é quanto tempo dá para esperar. O cruzamento dos dois define a prioridade e, com ela, o prazo do SLA.",
+  },
+  {
+    n: "04",
+    t: "Resolução no primeiro contato ou escalonamento",
+    d: "O analista do primeiro nível resolve o que está no escopo dele, com a base de conhecimento. O que exige especialista sobe para o segundo ou terceiro nível com o histórico completo.",
+  },
+  {
+    n: "05",
+    t: "Solução e confirmação com o usuário",
+    d: "A solução é registrada e o usuário confirma que o problema acabou. Chamado fechado sem confirmação é o que mais gera reabertura.",
+  },
+  {
+    n: "06",
+    t: "Encerramento, pesquisa e conhecimento",
+    d: "O chamado é encerrado, o usuário avalia o atendimento e a solução que funcionou vira artigo na base de conhecimento, para o próximo caso igual ser resolvido mais rápido ou pelo próprio usuário.",
+  },
+];
+
+const MODELOS = [
+  {
+    t: "Centralizado",
+    d: "Um único time atende a empresa inteira, de um lugar só. É o modelo mais comum e o mais fácil de padronizar e medir. Funciona bem enquanto o atendimento remoto resolve quase tudo.",
+  },
+  {
+    t: "Local",
+    d: "Cada unidade ou filial tem o próprio time de atendimento. Faz sentido quando há muito suporte presencial, idioma ou fuso diferente, mas custa mais e tende a gerar processos diferentes em cada lugar.",
+  },
+  {
+    t: "Virtual",
+    d: "O time está espalhado, mas trabalha na mesma ferramenta e na mesma fila, como se fosse um só. Para o usuário, a porta é única; para a TI, a carga se distribui entre pessoas em lugares diferentes.",
+  },
+  {
+    t: "Follow the sun",
+    d: "Times em fusos diferentes passam a fila de um para o outro ao fim do expediente, para o atendimento cobrir as 24 horas sem turno noturno. É modelo de empresa com operação em vários países.",
+  },
+];
+
+const SOURCING = [
+  {
+    t: "Interno",
+    d: "Time próprio, que conhece os sistemas e as pessoas da empresa. Dá mais controle e contexto, mas a empresa absorve sozinha a variação de volume, as férias e a rotatividade.",
+  },
+  {
+    t: "Terceirizado",
+    d: "Um fornecedor opera o atendimento, quase sempre o primeiro nível. Ganha escala e cobertura de horário. O que não se terceiriza: o dono do processo, o catálogo de serviços e a gestão do nível de serviço, que continuam sendo da TI da empresa.",
+  },
+  {
+    t: "Híbrido",
+    d: "O fornecedor faz o primeiro nível e o time interno fica com o segundo e o terceiro, ou com os serviços críticos. É o arranjo mais frequente em empresa média e grande, e só funciona com os dois lados na mesma ferramenta.",
+  },
+];
+
+const INDICADORES = [
+  {
+    t: "Resolução no primeiro contato (FCR)",
+    f: "chamados resolvidos no primeiro contato ÷ total de chamados × 100",
+    d: "Mostra quanto o primeiro nível resolve sem escalar. Sobe com base de conhecimento boa e acesso às ferramentas certas.",
+  },
+  {
+    t: "Tempo médio de primeira resposta",
+    f: "soma dos tempos até a primeira resposta ÷ número de chamados",
+    d: "É o que o usuário sente primeiro. Resposta automática não conta: o relógio para quando uma pessoa ou a IA trata o pedido de fato.",
+  },
+  {
+    t: "Tempo médio de resolução (MTTR)",
+    f: "soma dos tempos de abertura até a solução ÷ chamados resolvidos",
+    d: "Leia por prioridade e por categoria. A média geral esconde o incidente crítico que demorou um dia inteiro.",
+  },
+  {
+    t: "Cumprimento de SLA",
+    f: "chamados resolvidos dentro do prazo ÷ chamados resolvidos × 100",
+    d: "É o número que se reporta às áreas. Conte em horário útil, como o SLA foi acordado, e separe por tipo de chamado.",
+  },
+  {
+    t: "Backlog e idade do backlog",
+    f: "chamados em aberto no fim do período, e há quantos dias cada um está aberto",
+    d: "Fila que cresce semana a semana indica falta de gente ou de automação. Chamado muito antigo indica dono indefinido.",
+  },
+  {
+    t: "Taxa de reabertura",
+    f: "chamados reabertos ÷ chamados encerrados × 100",
+    d: "Mede se o que foi fechado estava resolvido de verdade. Reabertura alta costuma andar junto com FCR alto demais.",
+  },
+  {
+    t: "Satisfação do usuário (CSAT)",
+    f: "respostas positivas ÷ respostas da pesquisa × 100",
+    d: "Pesquisa curta, enviada no encerramento. Comentário negativo vale mais do que a nota: é onde aparece o processo quebrado.",
+  },
+  {
+    t: "Custo por chamado",
+    f: "custo total da operação no período ÷ chamados atendidos no período",
+    d: "Inclui pessoas, ferramenta e infraestrutura. É o número que justifica automação e autoatendimento: cada chamado evitado tem preço.",
+  },
+];
+
+const PASSOS = [
+  {
+    n: "01",
+    t: "Defina o catálogo mínimo",
+    d: "Liste os serviços que a TI entrega e os pedidos mais comuns de cada um. Começar com 15 a 30 itens bem descritos vale mais do que um catálogo enorme que ninguém mantém.",
+  },
+  {
+    n: "02",
+    t: "Faça todos os canais caírem numa fila",
+    d: "Portal, e-mail, Teams e telefone abrindo chamado no mesmo lugar. Enquanto existir pedido por mensagem direta para o analista, a operação não é medida inteira.",
+  },
+  {
+    n: "03",
+    t: "Escreva categorias e matriz de prioridade",
+    d: "Poucas categorias, que o analista escolhe sem dúvida, e uma matriz de impacto por urgência que todo mundo entende. É o que torna o relatório confiável.",
+  },
+  {
+    n: "04",
+    t: "Acorde SLA e caminhos de escalonamento",
+    d: "Prazo por prioridade e por tipo de pedido, combinado com as áreas, e quem recebe o chamado quando o primeiro nível não resolve. Com alerta antes de vencer, não depois.",
+  },
+  {
+    n: "05",
+    t: "Monte a base de conhecimento e o autoatendimento",
+    d: "Cada solução repetida vira artigo, e os pedidos previsíveis viram formulário no portal com aprovação automática. A partir daí, meça com os indicadores acima e ajuste mês a mês.",
+  },
+];
+
 const CRITERIOS = [
   {
     t: "Ponto único de contato de verdade",
@@ -153,8 +291,24 @@ const FAQ = [
     a: "Não é obrigatório. A ITIL é uma biblioteca de boas práticas, não uma norma de cumprimento obrigatório. Ela é útil porque dá vocabulário comum e um caminho já testado, mas a adoção é gradual e adaptada ao tamanho da operação. A maioria das empresas começa por gestão de incidentes e requisições, que é onde está o volume, e incorpora os outros processos conforme a necessidade aparece.",
   },
   {
-    q: "Qual ferramenta de service desk escolher?",
+    q: "Qual sistema de service desk escolher?",
     a: "Os critérios que mais pesam são: canais de abertura caindo em fila única, catálogo de serviços com automação para os pedidos repetitivos, gestão de ativos na mesma base do chamado, SLA com escalonamento automático, relatórios prontos em painel e inteligência artificial capaz de resolver solicitações sozinha, não apenas sugerir texto. Vale avaliar também o custo total de operação, que inclui infraestrutura, atualização e as horas da própria equipe mantendo a ferramenta, e não só o preço da licença.",
+  },
+  {
+    q: "O que é central de serviços na ITIL?",
+    a: "Central de serviços é o nome que a ITIL 4 em português dá à prática de service desk: o ponto único de contato entre o provedor de serviços de TI e os usuários. Ela capta a demanda, registra, resolve o que é possível no primeiro contato, encaminha o resto para os times especialistas e mantém o usuário informado. Na ITIL 4, a central de serviços é uma das práticas de gerenciamento de serviço, ao lado de gestão de incidentes, de requisições, de problemas e de mudanças.",
+  },
+  {
+    q: "Quais indicadores medir no service desk?",
+    a: "Os mais usados são: resolução no primeiro contato (FCR), tempo médio de primeira resposta, tempo médio de resolução (MTTR), cumprimento de SLA, tamanho e idade do backlog, taxa de reabertura, satisfação do usuário (CSAT) e custo por chamado. Mais do que o valor absoluto, vale acompanhar a tendência mês a mês e abrir cada número por prioridade e por categoria, porque a média geral esconde os casos que mais incomodam o negócio.",
+  },
+  {
+    q: "Vale a pena terceirizar o service desk?",
+    a: "Depende do volume, do horário de cobertura e da maturidade da operação. Terceirizar o primeiro nível costuma fazer sentido quando o volume oscila muito ou quando é preciso atender fora do horário comercial. O que não se terceiriza é a gestão: o dono do processo, o catálogo de serviços e o acompanhamento do nível de serviço continuam sendo responsabilidade da TI da empresa. O modelo híbrido, com o fornecedor no primeiro nível e o time interno no segundo e no terceiro, é o mais comum, e exige que os dois lados trabalhem no mesmo sistema de service desk.",
+  },
+  {
+    q: "Qual a diferença entre service desk e central de atendimento ao cliente?",
+    a: "O service desk atende os usuários da própria empresa nas demandas de tecnologia: o colaborador que perdeu acesso, precisa de um equipamento ou encontrou um sistema fora do ar. A central de atendimento ao cliente (SAC) atende quem compra da empresa, sobre produto, pedido ou cobrança. As duas usam ideias parecidas, como fila, prazo e base de conhecimento, mas o público, os processos e as ferramentas são diferentes.",
   },
 ];
 
@@ -172,9 +326,9 @@ const faqSchema = {
 const articleSchema = {
   "@context": "https://schema.org",
   "@type": "Article",
-  headline: "Service Desk: o que é, o que faz e como escolher",
+  headline: "Service Desk: o que é, o que faz, estrutura e indicadores",
   description:
-    "Definição de service desk, o que a função faz na prática, a diferença para help desk, os processos da ITIL envolvidos e os critérios para escolher a ferramenta.",
+    "Definição de service desk (central de serviços), o que a função faz, como funciona o atendimento, modelos de estrutura, indicadores com fórmula, como montar em cinco passos e os critérios para escolher o sistema.",
   inLanguage: "pt-BR",
   // Aponta pro Organization declarado no layout (@id) em vez de repetir a entidade.
   author: { "@type": "Organization", "@id": "https://itsm.sysaid.com.br/#organization", name: "SysAid Brasil" },
@@ -236,11 +390,12 @@ export default function ServiceDeskPage() {
             </h1>
             <p className="hero__sub">
               Service desk é a função que recebe tudo que a empresa precisa da
-              tecnologia — incidente, dúvida, pedido de acesso, solicitação de
-              mudança — e transforma cada demanda em registro com categoria,
+              tecnologia (incidente, dúvida, pedido de acesso, solicitação de
+              mudança) e transforma cada demanda em registro com categoria,
               responsável, prioridade e prazo. Neste guia: o que é, o que faz na
-              prática, a diferença para o help desk, os processos da ITIL
-              envolvidos e como escolher a ferramenta.
+              prática, como funciona o atendimento, os modelos de estrutura, os
+              indicadores que valem a pena medir e como escolher o sistema de
+              service desk.
             </p>
             <p className="hero__trust">
               Guia escrito pela SysAid Brasil · Mais de 400 empresas no país
@@ -257,15 +412,16 @@ export default function ServiceDeskPage() {
               <h2>O que é service desk</h2>
             </div>
             <p className="section-head__sub">
-              Service desk (em português, central de serviços de TI) é o ponto
-              único de contato entre os usuários e a área de TI. Em vez de o pedido chegar por e-mail para um analista,
+              <strong>Service desk, ou central de serviços, é o ponto único de
+              contato entre os usuários e a área de TI.</strong> &ldquo;Central de
+              serviços&rdquo; é o nome que a ITIL 4 em português dá à prática. Em vez de o pedido chegar por e-mail para um analista,
               mensagem para outro e conversa de corredor com um terceiro, tudo
               entra por um mesmo canal e vira um registro rastreável. O termo
               vem da ITIL e descreve ao mesmo tempo o time, o processo e a
               ferramenta que sustentam esse atendimento. A consequência prática
               é que a TI passa a saber quantos pedidos existem, quem está
-              atendendo o quê, quanto tempo cada coisa leva e o que se repete —
-              e é esse conjunto de respostas que separa uma operação medida de
+              atendendo o quê, quanto tempo cada coisa leva e o que se repete.
+              É esse conjunto de respostas que separa uma operação medida de
               uma operação que só reage. O alicerce técnico dessa função é o{" "}
               <a href="/sistema-de-chamados">sistema de chamados</a>, e a
               disciplina maior que a organiza é a{" "}
@@ -305,8 +461,39 @@ export default function ServiceDeskPage() {
           </div>
         </section>
 
-        {/* HELP DESK x SERVICE DESK */}
+        {/* FLUXO DO ATENDIMENTO */}
         <section className="section">
+          <div className="container">
+            <div className="section-head">
+              <p className="eyebrow">Passo a passo</p>
+              <h2>Como funciona o atendimento no service desk</h2>
+              <p className="section-head__sub">
+                Todo chamado percorre o mesmo caminho, da entrada ao
+                encerramento. O fluxo abaixo vale tanto para incidente quanto
+                para requisição; o que muda é a categoria, a prioridade e quem
+                resolve.
+              </p>
+            </div>
+            <div className="grid-3">
+              {FLUXO.map((f) => (
+                <div className="step" key={f.n}>
+                  <span className="step__n">{f.n}</span>
+                  <h3>{f.t}</h3>
+                  <p>{f.d}</p>
+                </div>
+              ))}
+            </div>
+            <p className="section-head__sub" style={{ marginTop: "2rem" }}>
+              O service desk é o primeiro nível de atendimento. O segundo e o
+              terceiro níveis ficam com os times especialistas (infraestrutura,
+              sistemas, fornecedores), e a divisão entre N1, N2 e N3 está
+              detalhada no guia de <a href="/help-desk">help desk</a>.
+            </p>
+          </div>
+        </section>
+
+        {/* HELP DESK x SERVICE DESK */}
+        <section className="section section--soft">
           <div className="container">
             <div className="section-head">
               <p className="eyebrow">A confusão mais comum</p>
@@ -332,7 +519,7 @@ export default function ServiceDeskPage() {
         </section>
 
         {/* PROCESSOS ITIL */}
-        <section className="section section--soft">
+        <section className="section">
           <div className="container">
             <div className="section-head">
               <p className="eyebrow">Os processos</p>
@@ -347,6 +534,99 @@ export default function ServiceDeskPage() {
             <div className="grid-3">
               {PROCESSOS.map((p) => (
                 <div className="card" key={p.t}>
+                  <h3>{p.t}</h3>
+                  <p>{p.d}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ESTRUTURA E MODELOS */}
+        <section className="section section--soft">
+          <div className="container">
+            <div className="section-head">
+              <p className="eyebrow">Como se organiza</p>
+              <h2>Estrutura e modelos de service desk</h2>
+              <p className="section-head__sub">
+                Não existe um desenho único. A estrutura depende de onde estão
+                os usuários, de quanto suporte precisa ser presencial e do
+                horário que a operação tem que cobrir. Os quatro modelos
+                clássicos:
+              </p>
+            </div>
+            <div className="grid-2">
+              {MODELOS.map((m) => (
+                <div className="card" key={m.t}>
+                  <h3>{m.t}</h3>
+                  <p>{m.d}</p>
+                </div>
+              ))}
+            </div>
+            <div className="section-head" style={{ marginTop: "3rem" }}>
+              <h3>Interno, terceirizado ou híbrido</h3>
+              <p className="section-head__sub">
+                A outra decisão é quem opera. Contratar um serviço de service
+                desk resolve escala e horário, mas não tira da TI a
+                responsabilidade pelo resultado.
+              </p>
+            </div>
+            <div className="grid-3">
+              {SOURCING.map((m) => (
+                <div className="card" key={m.t}>
+                  <h3>{m.t}</h3>
+                  <p>{m.d}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* INDICADORES */}
+        <section className="section">
+          <div className="container">
+            <div className="section-head">
+              <p className="eyebrow">Como se mede</p>
+              <h2>Indicadores de service desk: o que medir e como calcular</h2>
+              <p className="section-head__sub">
+                Não há número certo que sirva para toda empresa: o que importa é
+                medir sempre do mesmo jeito, abrir por prioridade e por
+                categoria e acompanhar a tendência. Estes são os oito
+                indicadores que mais ajudam a decidir.
+              </p>
+            </div>
+            <div className="grid-2">
+              {INDICADORES.map((i) => (
+                <div className="card" key={i.t}>
+                  <h3>{i.t}</h3>
+                  <p style={{ marginBottom: "0.75rem" }}>
+                    <em>{i.f}</em>
+                  </p>
+                  <p>{i.d}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* COMO MONTAR */}
+        <section className="section section--soft">
+          <div className="container">
+            <div className="section-head">
+              <p className="eyebrow">Do zero ou reestruturando</p>
+              <h2>Como montar um service desk em cinco passos</h2>
+              <p className="section-head__sub">
+                A ordem importa: ferramenta sem catálogo e sem regra de
+                prioridade só organiza a bagunça em outro lugar. O alicerce é um{" "}
+                <a href="/sistema-de-chamados">sistema de chamados</a> bem
+                configurado; o caminho maior é a{" "}
+                <a href="/gestao-de-servicos-de-ti">gestão de serviços de TI</a>.
+              </p>
+            </div>
+            <div className="grid-3">
+              {PASSOS.map((p) => (
+                <div className="step" key={p.n}>
+                  <span className="step__n">{p.n}</span>
                   <h3>{p.t}</h3>
                   <p>{p.d}</p>
                 </div>
@@ -395,7 +675,14 @@ export default function ServiceDeskPage() {
           <div className="container">
             <div className="section-head">
               <p className="eyebrow">Na hora de escolher</p>
-              <h2>Seis critérios para avaliar uma ferramenta de service desk</h2>
+              <h2>Seis critérios para escolher um sistema de service desk</h2>
+              <p className="section-head__sub">
+                Software de service desk existe de todo tamanho e preço. Os
+                critérios abaixo separam o sistema que sustenta a operação do
+                que só registra chamado. Quem está comparando com plataformas
+                maiores encontra a análise no guia sobre{" "}
+                <a href="/servicenow">ServiceNow</a>.
+              </p>
             </div>
             <div className="grid-3">
               {CRITERIOS.map((c) => (
