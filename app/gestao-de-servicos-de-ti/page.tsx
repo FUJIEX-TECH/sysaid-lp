@@ -193,7 +193,7 @@ const SOFTWARE = [
   },
   {
     t: "Conhecimento",
-    d: "Base de artigos que aparece para o usuário no portal antes de ele abrir o chamado e para o técnico dentro do chamado, com o que mais resolve medido.",
+    d: "Base de artigos que aparece para o usuário no portal antes de ele abrir o chamado e para o técnico dentro do chamado, medindo quais artigos de fato resolvem.",
   },
 ];
 
