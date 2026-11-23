@@ -6,9 +6,9 @@ import { datasDaPagina } from "@/lib/seo";
 import { altCliente } from "@/lib/marcas";
 
 export const metadata: Metadata = {
-  title: "Gestão de Serviços de TI: ITIL 4 e como implantar | SysAid",
+  title: "Gestão de Serviços de TI: processos, ITIL 4 e software | SysAid",
   description:
-    "Gestão de serviços de TI na prática: cadeia de valor e dimensões da ITIL 4, práticas essenciais, o que mudou desde a v3 e um roteiro de implantação.",
+    "Gestão (ou gerenciamento) de serviços de TI na prática: ITIL 4, práticas essenciais, gestão de demanda, o que um software precisa cobrir e como implantar.",
   alternates: { canonical: "/gestao-de-servicos-de-ti" },
   openGraph: {
     title: "Gestão de Serviços de TI: Processos, ITIL 4 e Como Implantar",
@@ -151,6 +151,52 @@ const PRATICAS = [
   },
 ];
 
+const DEMANDA = [
+  {
+    t: "Demanda não é incidente",
+    d: "Incidente é algo que parou. Demanda é tudo o que a área de TI recebe para fazer: pedido de acesso, equipamento novo, sistema para uma área, projeto. Misturar os dois na mesma fila esconde quanto do tempo da equipe vai para cada coisa.",
+  },
+  {
+    t: "O catálogo é a porta de entrada",
+    d: "Pedido previsível entra por um item de catálogo, com formulário, aprovação e prazo. O que não cabe no catálogo é sinal de serviço que ainda não existe, e vira pauta de planejamento.",
+  },
+  {
+    t: "Padrões de demanda e capacidade",
+    d: "Fechamento de mês, contratação em lote, troca de sistema: a demanda tem sazonalidade. Com o histórico de chamados dá para prever o pico e dimensionar a equipe antes de o SLA estourar.",
+  },
+  {
+    t: "Prioridade de projeto com critério",
+    d: "Pedidos grandes, que viram projeto, entram numa fila separada e são priorizados por valor para o negócio e esforço, com o patrocinador da área na decisão. A TI deixa de ser quem diz não e passa a ser quem mostra a fila.",
+  },
+];
+
+const SOFTWARE = [
+  {
+    t: "Incidentes",
+    d: "Abertura por portal, e-mail e chat caindo na mesma fila; matriz de impacto × urgência; SLA com alerta antes de vencer e escalonamento automático.",
+  },
+  {
+    t: "Requisições",
+    d: "Catálogo de serviços com formulário por item, fluxo de aprovação configurável e automação das tarefas repetidas (criar acesso, liberar software).",
+  },
+  {
+    t: "Problemas",
+    d: "Vínculo de vários incidentes a um registro de problema, registro de erro conhecido e relatório de recorrência por categoria e por ativo.",
+  },
+  {
+    t: "Mudanças",
+    d: "Tipos de mudança (padrão, normal, emergencial) com aprovação diferente para cada um, calendário de mudanças e análise de impacto pelos itens afetados.",
+  },
+  {
+    t: "Ativos e configuração",
+    d: "Inventário automático das máquinas e uma base de configuração (CMDB) que mostra do que cada serviço depende, ligada aos chamados.",
+  },
+  {
+    t: "Conhecimento",
+    d: "Base de artigos que aparece para o usuário no portal antes de ele abrir o chamado e para o técnico dentro do chamado, com o que mais resolve medido.",
+  },
+];
+
 const IMPLANTAR = [
   {
     n: "01",
@@ -232,8 +278,16 @@ const FAQ = [
     a: "Em cinco passos: medir o ponto de partida (volume, canais, tempo de atendimento); fechar os canais paralelos num canal oficial de abertura; definir uma matriz de prioridade e um SLA por categoria; transformar os pedidos mais repetidos em itens de catálogo; e revisar os números todo mês para decidir a próxima prática a implantar. Começar pequeno não é o erro; o erro é desenhar dezenas de processos antes de ter o dado que mostra quais deles fazem falta.",
   },
   {
-    q: "Qual ferramenta usar para a gestão de serviços de TI?",
-    a: "Uma ferramenta de gestão de serviços de TI (ou plataforma de ITSM) precisa de, no mínimo: canal único de abertura, catálogo de serviços, matriz de prioridade, SLA com escalonamento, base de conhecimento, gestão de ativos e relatórios prontos. O diferencial atual está na automação com inteligência artificial, que resolve parte dos chamados sozinha em vez de apenas organizar a fila. A SysAid, por exemplo, resolve até 90% dos chamados antes de eles virarem ticket.",
+    q: "O que é gestão de demanda de TI?",
+    a: "Gestão de demanda de TI é a prática de entender, prever e organizar tudo o que a área de TI recebe para fazer, antes de o pedido virar chamado ou projeto. Ela separa demanda de incidente, usa o catálogo de serviços como porta de entrada dos pedidos previsíveis, lê o histórico para antecipar picos de volume e prioriza os pedidos grandes por valor para o negócio. Na ITIL 4, o tema aparece nas práticas de gerenciamento de relacionamento, de catálogo de serviços e de capacidade e desempenho.",
+  },
+  {
+    q: "Qual a diferença entre gerenciamento de TI e gerenciamento de serviços de TI?",
+    a: "Gerenciamento de TI é o termo amplo: cobre infraestrutura, segurança, orçamento, contratos, equipe e projetos da área. Gerenciamento de serviços de TI é a parte que olha para o que a TI entrega ao usuário, organizada como serviços com catálogo, prazo e qualidade medida. Uma empresa pode ter boa gestão de infraestrutura e nenhuma gestão de serviços: os servidores funcionam, mas ninguém sabe quanto tempo um pedido leva.",
+  },
+  {
+    q: "Qual software de gerenciamento de serviços de TI usar?",
+    a: "Um software de gerenciamento de serviços de TI (ou plataforma de ITSM) precisa de, no mínimo: canal único de abertura, catálogo de serviços, matriz de prioridade, SLA com escalonamento, base de conhecimento, gestão de ativos e relatórios prontos. O diferencial atual está na automação com inteligência artificial, que resolve parte dos chamados sozinha em vez de apenas organizar a fila. A SysAid, por exemplo, resolve até 90% dos chamados antes de eles virarem ticket.",
   },
 ];
 
@@ -314,10 +368,11 @@ export default function GestaoDeServicosDeTiPage() {
               <span className="hl">processos, ITIL 4</span> e como implantar
             </h1>
             <p className="hero__sub">
-              Saber o que é gestão de serviços de TI é a parte fácil. Este guia
-              é sobre fazer: como a ITIL 4 organiza o trabalho em uma cadeia de
+              Saber o que é gestão, ou gerenciamento, de serviços de TI é a
+              parte fácil. Este guia é sobre fazer: como a ITIL 4 organiza o trabalho em uma cadeia de
               valor e quatro dimensões, quais práticas sustentam uma operação
-              de verdade, o que mudou desde a ITIL v3 e um roteiro de
+              de verdade, como tratar a demanda antes do chamado, o que um
+              software de gerenciamento precisa cobrir e um roteiro de
               implantação em cinco passos para sair do atendimento por
               demanda.
             </p>
@@ -477,8 +532,33 @@ export default function GestaoDeServicosDeTiPage() {
           </div>
         </section>
 
-        {/* COMO IMPLANTAR */}
+        {/* GESTAO DE DEMANDA */}
         <section className="section">
+          <div className="container">
+            <div className="section-head">
+              <p className="eyebrow">Antes do chamado</p>
+              <h2>Gestão de demanda de TI: o que entra antes do chamado</h2>
+              <p className="section-head__sub">
+                A maior parte das filas lotadas não é falta de gente: é demanda
+                que chega sem forma, sem prazo e sem critério de prioridade. A
+                gestão de demanda organiza o que a TI recebe antes de virar{" "}
+                <a href="/sistema-de-chamados">chamado</a>, para que a equipe
+                saiba o que vem, quanto vem e o que fazer primeiro.
+              </p>
+            </div>
+            <div className="grid-2">
+              {DEMANDA.map((c) => (
+                <div className="card" key={c.t}>
+                  <h3>{c.t}</h3>
+                  <p>{c.d}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* COMO IMPLANTAR */}
+        <section className="section section--soft">
           <div className="container">
             <div className="section-head">
               <p className="eyebrow">Roteiro</p>
@@ -501,7 +581,7 @@ export default function GestaoDeServicosDeTiPage() {
         </section>
 
         {/* ESTAGIOS ITIL v3 */}
-        <section className="section section--soft">
+        <section className="section">
           <div className="container">
             <div className="section-head">
               <p className="eyebrow">Ainda cai em prova</p>
@@ -526,7 +606,7 @@ export default function GestaoDeServicosDeTiPage() {
         </section>
 
         {/* CARREIRA */}
-        <section className="section">
+        <section className="section section--soft">
           <div className="container">
             <div className="section-head">
               <p className="eyebrow">Quem trabalha com isso</p>
@@ -539,6 +619,33 @@ export default function GestaoDeServicosDeTiPage() {
             </div>
             <div className="grid-3">
               {CARREIRA.map((c) => (
+                <div className="card" key={c.t}>
+                  <h3>{c.t}</h3>
+                  <p>{c.d}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* SOFTWARE */}
+        <section className="section">
+          <div className="container">
+            <div className="section-head">
+              <p className="eyebrow">Na hora de escolher</p>
+              <h2>Software de gerenciamento de serviços de TI: o que precisa cobrir</h2>
+              <p className="section-head__sub">
+                Um bom jeito de avaliar uma ferramenta é pela prática que ela
+                sustenta, não pela lista de funções. Para cada uma das seis
+                práticas acima, o recurso que não pode faltar. Para as
+                perguntas de contrato e implantação, veja as{" "}
+                <a href="/o-que-e-itsm">três perguntas antes de contratar</a>{" "}
+                no guia de ITSM; para a base de configuração, o guia de{" "}
+                <a href="/cmdb">CMDB</a>.
+              </p>
+            </div>
+            <div className="grid-3">
+              {SOFTWARE.map((c) => (
                 <div className="card" key={c.t}>
                   <h3>{c.t}</h3>
                   <p>{c.d}</p>
