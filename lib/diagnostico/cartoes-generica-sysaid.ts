@@ -51,6 +51,7 @@ const ATOS_FIXOS: Partial<Record<DorId, { hoje: string; quebra: string }>> = {
   complexidade: { hoje: "o time resolve por fora da ferramenta", quebra: "qualquer ajuste vira projeto" },
   sla: { hoje: "o chamado entra e ninguém acompanha o prazo", quebra: "o prazo estoura sem ninguém ver" },
   relatorio: { hoje: "a diretoria pede o número", quebra: "o número chega depois, montado na planilha" },
+  suporte: { hoje: "o sistema oscila e a TI abre chamado no fornecedor", quebra: "o suporte demora, e o usuário espera" },
 };
 export function atosDaDor(ctx: Contexto, dor: DorId, comHaiku: boolean): { hoje: string; quebra: string } {
   const chip = DORES[dor].rotulosChip;
@@ -146,7 +147,7 @@ export const REGUA: DadosMedidor["niveis"] = [
   { rotulo: "Medido", texto: "Indicadores por equipe e serviço, problemas e mudanças tratados, cada máquina ligada ao chamado." },
   { rotulo: "Automatizado", texto: "O simples se resolve sozinho, fluxos rodam sem mão humana e outras áreas atendem do mesmo jeito." },
 ];
-const DEGRAU: Record<DorId, number> = { perda: 1, complexidade: 2, sla: 2, relatorio: 2, ativos: 3, automacao: 3, ia: 3, custo: 2, esm: 4 };
+const DEGRAU: Record<DorId, number> = { perda: 1, complexidade: 2, sla: 2, relatorio: 2, ativos: 3, automacao: 3, ia: 3, custo: 2, esm: 4, suporte: 2 };
 export function maturidadeSysaid(ctx: Contexto): DadosMedidor | null {
   const d = dorPrincipal(ctx);
   if (!d) return null;
@@ -155,7 +156,7 @@ export function maturidadeSysaid(ctx: Contexto): DadosMedidor | null {
   return { niveis: REGUA, atual, alvo, rotuloAtual: "hoje", rotuloAlvo: "com as etapas 1 e 2" };
 }
 
-const ETAPA2: Record<DorId, CapacidadeId> = { perda: "C5", complexidade: "C4", sla: "C3", relatorio: "C3", ativos: "C7", automacao: "C4", custo: "C5", ia: "C6", esm: "C8" };
+const ETAPA2: Record<DorId, CapacidadeId> = { perda: "C5", complexidade: "C4", sla: "C3", relatorio: "C3", ativos: "C7", automacao: "C4", custo: "C5", ia: "C6", esm: "C8", suporte: "C10" };
 export function etapasSysaid(ctx: Contexto): DadosLinhaTempo | null {
   const d = dorPrincipal(ctx);
   if (!d) return null;

@@ -51,7 +51,7 @@ export function useConversa({ config, persistencia, onEvento, comEntrega = false
   const [fim, setFim] = useState<Fim>(null);
   const [maisOpcoes, setMaisOpcoes] = useState(false);
   // de onde a pessoa veio (lido uma vez; no SSR, só o caminho raiz)
-  const [sinais] = useState<Sinais>(() => (typeof window === "undefined" ? sinaisDoCaminho("/") : lerSinais(config.origens.lembrar)));
+  const [sinais] = useState<Sinais>(() => (typeof window === "undefined" ? sinaisDoCaminho("/") : lerSinais(config.origens.lembrar, config.origens.sinaisExtras)));
   // empresa pelo domínio do e-mail: undefined = não pedida; null = pedida e não veio
   const [empresa, setEmpresa] = useState<Empresa | null | undefined>(undefined);
   const dominioPedido = useRef<string>("");

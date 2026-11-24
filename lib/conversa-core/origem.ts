@@ -12,7 +12,7 @@ const LEMBRAR_TTL = 2 * 60 * 60 * 1000;
 // Lê os sinais da página atual. Com `lembrar`, guarda no sessionStorage a 1ª
 // página e os UTMs da sessão: o anúncio cai na LP, a pessoa clica e chega no
 // chat sem os parâmetros, e mesmo assim sabemos de onde veio.
-export function lerSinais(lembrar?: string): Sinais {
+export function lerSinais(lembrar?: string, extras?: () => Record<string, string>): Sinais {
   const url = new URL(window.location.href);
   const parametros: Record<string, string> = {};
   url.searchParams.forEach((v, k) => {
@@ -39,6 +39,17 @@ export function lerSinais(lembrar?: string): Sinais {
       }
     } catch {
       // sem storage (modo privado etc.): só a página atual
+    }
+  }
+
+  // 24/11/2026: nada na URL nem lembrado na sessão: o que o site do cliente guardou
+  // (ex.: UTM do pouso na LP há dias, gclid do cookie do Google). Nunca inventa origem.
+  if (!Object.keys(utm).length && extras) {
+    try {
+      const e = extras();
+      for (const k of UTM) if (e[k]) utm[k] = String(e[k]).slice(0, 200);
+    } catch {
+      // sem extras
     }
   }
 

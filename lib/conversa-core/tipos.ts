@@ -799,6 +799,10 @@ export type ConfigConversa = {
     // chave do sessionStorage pra lembrar os sinais da 1ª página (ex.: anúncio caiu
     // na LP, a pessoa clicou e veio pro chat); vazio = não lembra
     lembrar?: string;
+    // 24/11/2026: sinais guardados fora do núcleo (ex.: UTM/gclid que o site do
+    // cliente guarda por 30 dias, cookie do Google). Só entram quando a URL e a
+    // página lembrada não trazem campanha. Função da config, roda no navegador.
+    sinaisExtras?: () => Record<string, string>;
   };
   catalogos?: Record<string, Opcao[]>;
   abertura: Texto[];

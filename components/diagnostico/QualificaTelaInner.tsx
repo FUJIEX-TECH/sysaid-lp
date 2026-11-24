@@ -21,11 +21,12 @@ const TEXTOS = {
 // trava: só existe a marca "sysaid_lead" no sessionStorage se o envio gravou e
 // não caiu no honeypot (persistencia.ts). Monta só quando o envio deu certo E o
 // mapa foi liberado; se um dia o envio redirecionar, a /obrigado cuida.
-// 13/11/2026: a configuração sai da origem (escolher-config.ts): busca genérica
-// = fluxo novo com documento; comparativa, marca e preço = fluxo de sempre.
+// 13/11/2026: a configuração sai da origem (escolher-config.ts). 24/11/2026: toda
+// origem (genérica, comparativa, marca, preço) usa o fluxo consultivo com documento;
+// a 1ª pergunta e os chips mudam com a campanha (origens-sysaid.ts).
 // A conversa inteira vai pro /admin/qualifica (persistência).
 export default function QualificaTelaInner() {
-  const config = useMemo(() => escolherConfig(lerSinais(configSysaid.origens.lembrar)), []);
+  const config = useMemo(() => escolherConfig(lerSinais(configSysaid.origens.lembrar, configSysaid.origens.sinaisExtras)), []);
   const persistencia = useMemo(
     () =>
       config.id === configSysaidGenerica.id

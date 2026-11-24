@@ -220,6 +220,7 @@ export const DORES_JEV_GENERICA: Record<string, string> = {
   custo: "a conta da ferramenta só sobe; módulos, IA ou itens cobrados à parte; plano de cima",
   ia: "quer IA no atendimento; muita pergunta repetida que não precisava virar chamado",
   esm: "outras áreas (RH, Facilities, Financeiro) também recebem pedidos e atendem cada uma do seu jeito",
+  suporte: "a ferramenta de hoje oscila, cai, trava ou fica lenta, ou o suporte do fornecedor demora, não responde, fica longe ou em outro idioma",
   vaga: "o texto não descreve um problema claro de atendimento de TI, ou não dá pra saber",
 };
 export const SITUACAO_JEV_GENERICA: Record<string, string> = {
@@ -306,6 +307,7 @@ Exemplos:
 - Categoria fila invisível, texto "o pessoal pede no zap, manda e-mail e ainda aparece na minha mesa" → implicacao "Se o pedido vem pelo zap, por e-mail e na sua mesa, imagino que parte do dia vai em procurar e repassar, e o mais urgente fura a fila." · anotacoes ["pede no zap", "aparece na minha mesa", "e-mail que ninguém viu"]
 - Categoria ferramenta que virou projeto, texto "a ferramenta é cheia de plugin e só o fulano sabe atualizar" → implicacao "Se só uma pessoa sabe atualizar a ferramenta, imagino que cada ajuste espera por ela, e o time contorna com o que dá." · anotacoes ["cheia de plugin", "só o fulano sabe", "atualizar fica parado"]
 - Categoria prazo sem alarme, texto "chamado vence e eu só fico sabendo quando o usuário liga bravo" → implicacao "Se o chamado vence sem ninguém avisar, imagino que o atraso aparece pela ligação do usuário, e o dia vira correr atrás." · anotacoes ["chamado vence", "usuário liga bravo", "só fico sabendo depois"]
+- Categoria suporte sem retorno, texto "o sistema cai toda hora e o suporte leva dias pra responder" → implicacao "Se o sistema cai e o suporte leva dias, imagino que a TI fica na frente do usuário sem resposta, e o problema do fornecedor vira fila de vocês." · anotacoes ["o sistema cai", "suporte leva dias", "usuário sem resposta"]
 - Categoria gestão pelo retrovisor, texto "todo fechamento eu passo dias juntando planilha pro diretor" → implicacao "Então o número do diretor só sai depois de juntar planilha à mão, e no fechamento o time para pra montar relatório." · anotacoes ["pro diretor", "juntando planilha", "todo fechamento"]
 
 Regras fixas:

@@ -4,7 +4,7 @@ import { verifyCookie, ADMIN_COOKIE } from "@/lib/auth";
 import { lerConversa } from "@/lib/qualifica-db";
 import type { Turno } from "@/lib/conversa-core";
 import LoginForm from "../../LoginForm";
-import { dataBR, horariosTexto, PAPEL_ROTULO, PEDIDO_ROTULO, FLUXO_ROTULO } from "../formato";
+import { dataBR, horariosTexto, origemDe, PAPEL_ROTULO, PEDIDO_ROTULO, FLUXO_ROTULO } from "../formato";
 import "../../admin.css";
 
 export const dynamic = "force-dynamic";
@@ -41,6 +41,8 @@ export default async function AdminQualificaDetalhe({ params }: { params: Promis
   // 18/11/2026: objeção de custo (reclamou do custo ou pediu preço), pro comercial ver de cara
   const objecao = derivados.objecao_custo as { reclama?: string | null; pede?: string | null } | null | undefined;
   const conta = derivados.conta as { medido?: boolean; diasTexto?: string; hMesTexto?: string; horasTexto?: string; volume?: string } | null;
+  // 24/11/2026: de onde veio (campanha, concorrente, termo), pro comercial abrir a conversa já no assunto
+  const origem = origemDe(c);
 
   return (
     <div className="admin">
@@ -51,6 +53,12 @@ export default async function AdminQualificaDetalhe({ params }: { params: Promis
           <p className="admin__sub">
             {c.company ? `${c.company} · ` : ""}
             {dataBR(c.created_at)} (Brasília) · {c.completo ? "conversa completa" : "parou no meio"} · {FLUXO_ROTULO[c.fluxo ?? ""] ?? c.fluxo}
+          </p>
+          <p className="qd__sinal" role="note">
+            <span className={`pill pill--origem-${origem.origem || "x"}`}>{origem.rotulo || "origem não lida"}</span>
+            {origem.termo && <span>Termo: “{origem.termo}”</span>}
+            {origem.campanha && <span>Campanha: {origem.campanha}</span>}
+            {!origem.termo && !origem.campanha && origem.canal && <span>{origem.canal}</span>}
           </p>
           {objecao && (objecao.reclama || objecao.pede) && (
             <p className="qd__sinal" role="note">
@@ -121,7 +129,21 @@ export default async function AdminQualificaDetalhe({ params }: { params: Promis
               {linha("Horários", horariosTexto(c.horarios))}
               {c.horarios_validos === false && linha("Atenção", `horários fora das regras: ${respostas.reuniao_orcamento ?? respostas.reuniao}`)}
               {linha("Lead", c.lead_id ? `#${c.lead_id} (${c.completion ?? "?"})` : null)}
-              {linha("Termo / campanha", [c.utm_term, c.utm_campaign].filter(Boolean).join(" · "))}
+            </dl>
+          </section>
+          <section className="qd__bloco" aria-label="De onde veio">
+            <h2>De onde veio</h2>
+            <dl className="qd__dados">
+              {linha("Origem", origem.rotulo)}
+              {linha("Concorrente da campanha", origem.concorrente)}
+              {linha("Canal", origem.canal)}
+              {linha("Intenção lida no termo", origem.intencao === "preco" ? "preço" : origem.intencao === "troca" ? "troca" : null)}
+              {linha("Termo", origem.termo)}
+              {linha("Campanha", origem.campanha)}
+              {linha("Clique pago (gclid)", origem.gclid ? "sim" : null)}
+              {linha("Página de entrada", origem.entrada)}
+              {linha("Página do chat", origem.caminho)}
+              {linha("Referrer", origem.referrer)}
             </dl>
           </section>
           <section className="qd__bloco" aria-label="O caso">

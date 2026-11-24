@@ -22,6 +22,7 @@ import { listaNatural, partesMultipla } from "../conversa-core/selecao";
 import { decidirReacao } from "../conversa-core/reacoes";
 import type { Contexto, EtapaConfig, MascaraConfig, Opcao, RegrasHorario } from "../conversa-core/tipos";
 import { ETAPAS_CUSTO_GENERICA, REACAO_CUSTO_GENERICA, type TipoCusto } from "./custo-sysaid";
+import { CHIP_BRAND_MODULOS, CHIP_DOR_ORIGENS, chipsDaOrigem, rotuloOrigem } from "./origens-sysaid";
 
 // --------------------------------------------------------------------------
 // 1. Capacidades (lista fechada, seção 1 do arquivo de conteúdo). A coluna
@@ -107,9 +108,9 @@ export const CAPACIDADES: Record<CapacidadeId, Capacidade> = {
 // 2. Dores (seções 1.2, 2 e 4). As 4 do chip têm cena própria; as de texto
 //    livre usam a cena 1 (fila invisível), com os rótulos do lead.
 // --------------------------------------------------------------------------
-export type DorId = "perda" | "complexidade" | "sla" | "relatorio" | "ativos" | "automacao" | "custo" | "ia" | "esm";
+export type DorId = "perda" | "complexidade" | "sla" | "relatorio" | "ativos" | "automacao" | "custo" | "ia" | "esm" | "suporte";
 export const DORES_CHIP: DorId[] = ["perda", "complexidade", "sla", "relatorio"];
-export const TODAS_DORES: DorId[] = ["perda", "complexidade", "sla", "relatorio", "ativos", "automacao", "custo", "ia", "esm"];
+export const TODAS_DORES: DorId[] = ["perda", "complexidade", "sla", "relatorio", "ativos", "automacao", "custo", "ia", "esm", "suporte"];
 
 type Dor = {
   chip?: string; // o texto do chip (passo 1)
@@ -223,10 +224,40 @@ export const DORES: Record<DorId, Dor> = {
     rotulosChip: ["pedido pro rh", "cada área do seu jeito", "sem prazo nem histórico"],
     situacaoCurta: "Atendimento de TI hoje",
   },
+  // 24/11/2026 (pesquisa D5, concentrada em quem sai do Movidesk): instabilidade e suporte do
+  // fornecedor. Quem disse foi o lead, no chip; a fala nunca acusa o concorrente.
+  suporte: {
+    nome: "suporte sem retorno",
+    nomeFala: "A gente chama isso de suporte sem retorno: o sistema oscila ou trava, e quem devia resolver demora. O comum é a TI ficar na frente do usuário sem resposta, segurando um problema que não é dela.",
+    implicacao: "Se o sistema oscila e o suporte demora, imagino que a TI fica na frente do usuário sem resposta, e o problema do fornecedor vira fila de vocês.",
+    capacidades: ["C10", "C2", "C1"],
+    fragmento: "o suporte respondesse em português, no mesmo dia",
+    cena: "sla",
+    rotulosChip: ["o sistema oscila", "chamado no fornecedor", "o suporte demora"],
+    situacaoCurta: "Ferramenta atual",
+  },
 };
 
-export const CHIP_DOR: Record<string, DorId> = Object.fromEntries(DORES_CHIP.map((d) => [DORES[d].chip!, d]));
+// os 4 chips da busca genérica + os chips por origem (comparativa por concorrente, marca): texto → dor
+export const CHIP_DOR: Record<string, DorId> = { ...Object.fromEntries(DORES_CHIP.map((d) => [DORES[d].chip!, d])), ...CHIP_DOR_ORIGENS };
 export const OPCOES_DOR_CHIP: Opcao[] = DORES_CHIP.map((d) => ({ valor: d, rotulo: DORES[d].chip! }));
+
+// 24/11/2026: as outras dores ("Tem mais" e "pra eu não chutar") na voz da origem: na comparativa,
+// os chips do concorrente (valor = dor); na marca e na genérica, os 4 de sempre
+export function opcoesDorOrigem(ctx: Contexto): Opcao[] {
+  const chips = chipsDaOrigem(ctx.origem, ctx.variaveis.slug);
+  if (!chips.length) return OPCOES_DOR_CHIP;
+  const vistos = new Set<DorId>();
+  const lista: Opcao[] = [];
+  for (const c of chips) {
+    if (vistos.has(c.dor)) continue;
+    vistos.add(c.dor);
+    lista.push({ valor: c.dor, rotulo: c.texto });
+  }
+  for (const o of OPCOES_DOR_CHIP) if (!vistos.has(o.valor as DorId)) lista.push(o);
+  return lista.slice(0, 5);
+}
+export const opcoesDoresMais = (ctx: Contexto): Opcao[] => opcoesDorOrigem(ctx).filter((o) => o.valor !== dorAtual(ctx));
 
 // --------------------------------------------------------------------------
 // 3. Consequência → need-payoff (seção 1.3, pares um a um)
@@ -355,10 +386,15 @@ export function objecaoCusto(ctx: Contexto): ObjecaoCusto {
   }
   return o;
 }
+// 24/11/2026: quem veio por termo de preço ("movidesk preço") já pediu preço antes de chegar
+export const veioPorPreco = (ctx: Contexto) => ctx.variaveis.intencao === "preco";
+export const pediuPreco = (ctx: Contexto) => objecaoCusto(ctx).pede !== null || veioPorPreco(ctx);
 const temObjecao = (ctx: Contexto) => {
   const o = objecaoCusto(ctx);
-  return o.reclama !== null || o.pede !== null;
+  return o.reclama !== null || o.pede !== null || veioPorPreco(ctx);
 };
+// 24/11/2026: cliente da SysAid querendo módulo novo (chip da marca)
+export const clienteSysaid = (ctx: Contexto) => (ctx.respostas.situacao_texto ?? "").trim() === CHIP_BRAND_MODULOS;
 
 // a dor de mais valor (o Jev escolhe quando há mais de uma; sem Jev, a da vez)
 export function dorPrincipal(ctx: Contexto): DorId | null {
@@ -400,9 +436,11 @@ export function payoffTexto(ctx: Contexto): string {
     .join(" ");
 }
 
-// tem ferramenta? (chip 2 = sim; texto livre = Jev; o resto não se sabe)
+// tem ferramenta? (veio da comparativa = usa o concorrente; chip de ferramenta = sim; texto livre = Jev; o resto não se sabe)
 export function temFerramenta(ctx: Contexto): "sim" | "nao" | "" {
-  if (dorP1(ctx) === "complexidade" && CHIP_DOR[(ctx.respostas.situacao_texto ?? "").trim()]) return "sim";
+  if (ctx.variaveis.concorrente) return "sim";
+  const chip = CHIP_DOR[(ctx.respostas.situacao_texto ?? "").trim()];
+  if (chip && (dorP1(ctx) === "complexidade" || dorP1(ctx) === "suporte")) return "sim";
   const s = dado(ctx, "implicacao", "situacao");
   if (s === "tem_ferramenta" || s === "cliente") return "sim";
   if (s === "sem_fila") return "nao";
@@ -420,11 +458,13 @@ export function ferramentaNome(ctx: Contexto): string {
   if (r.ferramenta === "outra") return (r.ferramenta_outra ?? "").trim();
   const chip = FERRAMENTAS_CHIP.find((f) => f.valor === r.ferramenta);
   if (chip) return chip.rotulo;
+  // 24/11/2026: veio da comparativa (anúncio, página ou ?de=): a ferramenta é o concorrente da campanha
+  if (ctx.variaveis.concorrente) return ctx.variaveis.concorrente;
   return dado(ctx, "implicacao", "ferramenta_nome") ?? "";
 }
-// o passo da ferramenta só aparece quando ele disse que tem e não disse qual
+// o passo da ferramenta só aparece quando ele disse que tem e não disse qual (nem a campanha disse)
 export function perguntaFerramenta(ctx: Contexto): boolean {
-  return temFerramenta(ctx) === "sim" && !dado(ctx, "implicacao", "ferramenta_nome");
+  return temFerramenta(ctx) === "sim" && !ctx.variaveis.concorrente && !dado(ctx, "implicacao", "ferramenta_nome");
 }
 
 // --------------------------------------------------------------------------
@@ -672,9 +712,19 @@ export function derivados(ctx: Contexto): Record<string, unknown> {
     pedido: pedido(ctx.respostas),
     horarios: horariosPedidos(ctx.respostas) || null,
     objecao_custo: objecaoDerivada(ctx),
-    sinais: temObjecao(ctx) ? ["objeção de custo"] : [],
+    sinais: [...(temObjecao(ctx) ? ["objeção de custo"] : []), ...(veioPorPreco(ctx) ? ["veio por termo de preço"] : []), ...(clienteSysaid(ctx) ? ["já é cliente SysAid"] : [])],
     papel: ctx.respostas.papel ?? null,
     cargo: ctx.respostas.cargo && ctx.respostas.cargo !== "pulou" ? ctx.respostas.cargo : null,
+    // 24/11/2026: de onde veio (campanha), pro /admin filtrar por origem, concorrente e termo
+    origem: ctx.origem,
+    origem_rotulo: rotuloOrigem(ctx.origem, ctx.variaveis),
+    concorrente: ctx.variaveis.concorrente ?? null,
+    canal: ctx.variaveis.canal ?? null,
+    intencao: ctx.variaveis.intencao ?? null,
+    termo: ctx.sinais?.utm_term ?? null,
+    campanha: ctx.sinais?.utm_campaign ?? null,
+    entrada: ctx.sinais?.entrada || null,
+    cliente_sysaid: clienteSysaid(ctx),
   };
 }
 
@@ -686,7 +736,9 @@ function objecaoDerivada(ctx: Contexto): { reclama: string | null; pede: string 
 // o que vai em `notes` no lead parcial (nasce no e-mail; nunca vai pro RD Station)
 export function notasGenerica(ctx: Contexto): string {
   const r = ctx.respostas;
-  const linhas: string[] = ["Qualifica v2 · busca genérica"];
+  const origem = [rotuloOrigem(ctx.origem, ctx.variaveis), ctx.sinais?.utm_term ? `termo: ${ctx.sinais.utm_term}` : "", ctx.variaveis.canal ?? ""].filter(Boolean).join(" · ");
+  const linhas: string[] = [`Qualifica v2 · ${origem || "busca genérica"}`];
+  if (clienteSysaid(ctx)) linhas.push("Já é cliente SysAid (quer conhecer módulos novos)");
   if (r.situacao_texto) linhas.push(`Problema: ${r.situacao_texto}`);
   const p = dorPrincipal(ctx);
   if (p) linhas.push(`Dor principal: ${DORES[p].nome}`);
@@ -725,7 +777,7 @@ export function termosConcorrente(doLead: (string | null | undefined)[]): string
   return [...CONCORRENTES_PDF, ...nomes].filter((t) => !/sysaid/i.test(t));
 }
 export function termosPdf(ctx: Contexto): string[] {
-  return termosConcorrente([ferramentaNome(ctx), ctx.respostas.ferramenta_outra, dado(ctx, "implicacao", "ferramenta_nome")]);
+  return termosConcorrente([ferramentaNome(ctx), ctx.respostas.ferramenta_outra, dado(ctx, "implicacao", "ferramenta_nome"), ctx.variaveis.concorrente]);
 }
 const FERRAMENTA = "ferramenta atual";
 export const MASCARA_PDF: MascaraConfig = {

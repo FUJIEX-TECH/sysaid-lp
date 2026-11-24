@@ -11,6 +11,7 @@ import type { Contexto } from "../conversa-core/tipos";
 import { CONSEQUENCIAS, DORES, perguntaPayoff, revelacao } from "./generica-sysaid";
 import { FALA_PEDE, FALA_RECLAMA, REACAO_CUSTO_ANTERIOR, REACAO_CUSTO_GENERICA } from "./custo-sysaid";
 import { CARTOES_GENERICA } from "./cartoes-generica-sysaid";
+import { ABERTURA_ORIGENS, CHIPS_BRAND, CHIPS_COMPARATIVA, FRASE_CABECALHO_ORIGENS, OPCOES_MODULOS, PERGUNTA1_ORIGENS, PLACEHOLDER1_ORIGENS } from "./origens-sysaid";
 import { SYSTEM_IMPLICACAO, SYSTEM_PALPITE, travaObjecao } from "./servidor-sysaid";
 
 const PROIBIDO = /reuni[aã]o|reuni[oõ]es|\bagenda|hor[aá]rios?\b|comercial|especialista|no fim desta conversa|escolhe o hor/i;
@@ -66,6 +67,20 @@ describe("nada de reunião antes do fechamento (regra do Fernando, 18/11/2026)",
       ...CARTOES_GENERICA.filter((k) => !k.soNaEntrega).flatMap((k) => [k.fala, k.rotulo, k.titulo].map((t) => (typeof t === "string" ? t : ""))),
     ];
     semReuniao(textos, "generica-sysaid / cartões da conversa");
+  });
+  test("conversa por campanha (24/11/2026): chips, aberturas, perguntas e placeholders de toda origem", () => {
+    const casos = (t: unknown): string[] => (typeof t === "string" ? [t] : [(t as { padrao: string }).padrao, ...(t as { casos: { texto: string }[] }).casos.map((c) => c.texto)]);
+    const textos = [
+      ...Object.values(CHIPS_COMPARATIVA).flat().map((c) => c.texto),
+      ...CHIPS_BRAND.map((c) => c.texto),
+      ...OPCOES_MODULOS.map((o) => o.rotulo),
+      ...ABERTURA_ORIGENS.flatMap(casos),
+      ...casos(FRASE_CABECALHO_ORIGENS),
+      ...casos(PERGUNTA1_ORIGENS),
+      ...casos(PLACEHOLDER1_ORIGENS),
+    ];
+    semReuniao(textos, "origens-sysaid");
+    semReuniao(literais(entre(ler("./origens-sysaid.ts"), "// 2. Chips", "export function rotuloOrigem")), "origens-sysaid (arquivo)");
   });
   test("reações de custo: falas fixas sem reunião e a trava do Haiku reprova reunião", () => {
     for (const r of [REACAO_CUSTO_GENERICA, REACAO_CUSTO_ANTERIOR])

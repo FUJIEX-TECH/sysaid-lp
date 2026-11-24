@@ -186,3 +186,9 @@
 .qd__acao:hover { background: #12503f; }
 .qd__json { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.75rem; background: var(--bg-soft); border-radius: var(--radius-sm); padding: 10px; max-height: 320px; overflow: auto; white-space: pre-wrap; word-break: break-word; margin: 0; }
 .qd__ressalva { font-size: 0.82rem; color: var(--ink-400); margin: 8px 0 0; }
+
+/* 24/11/2026: origem (campanha) no /admin/qualifica */
+.pill--origem-comparativa { background: #e8f0fe; color: #1a4fb3; }
+.pill--origem-brand { background: #f1e8fe; color: #5b2db3; }
+.pill--origem-generica { background: #e9f5ef; color: #175d4a; }
+.pill--origem-x { background: #eee; color: #555; }

@@ -67,6 +67,9 @@ import {
 } from "@/lib/diagnostico/cartoes-generica-sysaid";
 import { geradoValido } from "@/lib/conversa-core";
 import { REACAO_CUSTO_GENERICA } from "@/lib/diagnostico/custo-sysaid";
+// 24/11/2026: a conversa começa no assunto da campanha (origens-sysaid.ts)
+import { ABERTURA_ORIGENS, CHIP_BRAND_MODULOS, CHIP_BRAND_SUPORTE, FRASE_CABECALHO_ORIGENS, LINK_SUPORTE, OPCOES_MODULOS, PERGUNTA1_ORIGENS, PLACEHOLDER1_ORIGENS, atalhosPorOrigem } from "@/lib/diagnostico/origens-sysaid";
+import { opcoesDorOrigem, opcoesDoresMais, pediuPreco } from "@/lib/diagnostico/generica-sysaid";
 
 const base = configSysaid;
 const LLM_LIGADO = process.env.NEXT_PUBLIC_DIAG_LLM === "1";
@@ -149,11 +152,12 @@ function entradaLeitura(ctx: Contexto): Record<string, string> {
 export const configSysaidGenerica: ConfigConversa = {
   ...base,
   id: "sysaid-generica-v2",
-  cabecalho: { ...base.cabecalho, frase: "Atendimento de TI sem chamado perdido." },
+  cabecalho: { ...base.cabecalho, frase: FRASE_CABECALHO_ORIGENS },
   totalPassos: 10,
 
-  // [fixo] seção 2, passo 0 (sem exclamação, padrão da casa; "quanto tempo isso tira do time": o cartão é em horas)
-  abertura: ["Oi. Vamos achar o melhor caminho pra sua TI.", "No fim você leva o mapa do seu caso: quanto tempo isso tira do time e por onde começar."],
+  // seção 2, passo 0 (sem exclamação, padrão da casa; "quanto tempo isso tira do time": o cartão é em horas).
+  // 24/11/2026: muda com a origem (comparativa cita o concorrente, marca, preço): origens-sysaid.ts
+  abertura: ABERTURA_ORIGENS,
 
   variaveis: {
     ...base.variaveis,
@@ -189,7 +193,9 @@ export const configSysaidGenerica: ConfigConversa = {
     // o mapa da lateral (seção 2, passo 16), rótulos curtos que cabem em 260 px
     mapa_onde: (ctx) => {
       const e = empresaDe(ctx);
-      if (e) return e;
+      const c = ctx.variaveis.concorrente;
+      if (e) return c ? `${e} · ${c} hoje` : e;
+      if (c) return `${c} hoje`;
       const d = dorP1(ctx);
       return d ? DORES[d].situacaoCurta : "";
     },
@@ -217,7 +223,8 @@ export const configSysaidGenerica: ConfigConversa = {
       const custo = o.reclama !== null || o.pede !== null;
       return [...(custo ? ["Mais acessível"] : []), ...capacidadesDoCaso(ctx, custo ? 2 : 3).map((x) => x.cap.curto)].join(" · ");
     },
-    objecao_preco: (ctx) => (objecaoCusto(ctx).pede !== null ? "sim" : ""),
+    // 24/11/2026: também quem veio por termo de preço ("movidesk preço")
+    objecao_preco: (ctx) => (pediuPreco(ctx) ? "sim" : ""),
     mapa_passo: (ctx) => {
       const p = pedido(ctx.respostas);
       return p === "reuniao" ? "Reunião com o especialista" : p === "orcamento" ? "Orçamento na reunião" : p === "whatsapp" ? "Conversa pelo WhatsApp" : ""; // pos-fechamento: só aparece depois do passo dos horários
@@ -225,26 +232,32 @@ export const configSysaidGenerica: ConfigConversa = {
   },
 
   etapas: [
-    // 1 · Problema: chips + texto [fixo, Jev]
+    // 1 · Problema: chips + texto [fixo, Jev]. 24/11/2026: a pergunta e os chips são da
+    // campanha (comparativa: as dores de quem sai daquele concorrente; marca: suporte,
+    // módulos novos, outra ferramenta, sem fila; preço: a pergunta de sempre, "antes do investimento")
     {
       id: "situacao_texto",
       passo: 1,
       tipo: "texto",
       input: "textarea",
-      texto: "Qual é o maior problema no atendimento de TI aí hoje?",
-      placeholder: "Ou escreve do seu jeito",
-      atalhos: CHIPS_DOR,
+      texto: PERGUNTA1_ORIGENS,
+      placeholder: PLACEHOLDER1_ORIGENS,
+      atalhos: atalhosPorOrigem(CHIPS_DOR),
       validar: [{ regra: "minCaracteres", valor: 10, mensagem: "Conta um pouco mais, ou toca numa das opções." }],
       recuperarAoCorrigir: true,
     },
     {
-      // texto livre e o Jev não decidiu (vaga, ou geração fora): a lista
+      // texto livre e o Jev não decidiu (vaga, ou geração fora): a lista.
+      // 24/11/2026: cliente da SysAid que quer módulo novo escolhe aqui o que quer evoluir
       id: "dor_lista",
       passo: 1,
       tipo: "escolha",
       quando: { todas: [{ campo: "situacao_texto", definido: true }, { variavel: "dor_p1_auto", definida: false }] },
-      texto: "Pra eu não chutar: qual destas chega mais perto?",
-      opcoes: OPCOES_DOR_CHIP,
+      texto: {
+        padrao: "Pra eu não chutar: qual destas chega mais perto?",
+        casos: [{ quando: { campo: "situacao_texto", igual: CHIP_BRAND_MODULOS }, texto: "Boa. O que vocês querem evoluir primeiro?" }],
+      },
+      opcoes: { padrao: { calcular: opcoesDorOrigem }, casos: [{ quando: { campo: "situacao_texto", igual: CHIP_BRAND_MODULOS }, opcoes: OPCOES_MODULOS }] },
     },
     // 2 · Cena + implicação + "É isso?" (a cena é um cartão depois do passo 1: cartoes-generica-sysaid.ts)
     {
@@ -282,7 +295,7 @@ export const configSysaidGenerica: ConfigConversa = {
       tipo: "escolha",
       quando: { todas: [{ campo: "implicacao", igual: "nao" }, { campo: "dor_releitura", definido: true }, { variavel: "dor_releitura_jev", definida: false }] },
       texto: "Pra eu não chutar: qual destas chega mais perto?",
-      opcoes: OPCOES_DOR_CHIP,
+      opcoes: { calcular: opcoesDorOrigem },
     },
     {
       // a dor nova, com a implicação de reserva (sem Haiku) e a cena dela
@@ -304,7 +317,7 @@ export const configSysaidGenerica: ConfigConversa = {
       tipo: "multipla",
       quando: { alguma: [{ campo: "implicacao", igual: "mais" }, { campo: "implicacao2", igual: "mais" }] },
       texto: "O que mais pesa aí? Pode marcar mais de um.",
-      opcoes: { calcular: (ctx) => OPCOES_DOR_CHIP.filter((o) => o.valor !== dorAtual(ctx)) },
+      opcoes: { calcular: opcoesDoresMais },
       multipla: { confirmar: "Continuar", min: 1, texto: { placeholder: "Outra coisa" } },
     },
     // 3 · Consequência (implicação perguntada). Pula quando o Jev leu a consequência no texto livre
@@ -408,6 +421,7 @@ export const configSysaidGenerica: ConfigConversa = {
           { quando: { variavel: "dor_principal", igual: "complexidade" }, texto: "Numa semana normal, quanto tempo vai em manter e contornar a ferramenta?" },
           { quando: { variavel: "dor_principal", igual: "sla" }, texto: "Numa semana normal, quanto tempo vai em correr atrás de chamado atrasado?" },
           { quando: { variavel: "dor_principal", igual: "relatorio" }, texto: "Todo mês, quanto tempo leva montar os números que a diretoria pede?" },
+          { quando: { variavel: "dor_principal", igual: "suporte" }, texto: "Numa semana normal, quanto tempo o time perde com o sistema fora ou esperando o suporte?" },
         ],
       },
       opcoes: { padrao: TEMPO_SEMANA, casos: [{ quando: { variavel: "dor_principal", igual: "relatorio" }, opcoes: TEMPO_MES }] },
@@ -462,7 +476,16 @@ export const configSysaidGenerica: ConfigConversa = {
     },
   ],
 
-  encerramentos: [],
+  // 24/11/2026: cliente da SysAid pedindo suporte (chip da marca) vai pro portal, sem passar pelo fluxo
+  encerramentos: [
+    {
+      id: "suporte",
+      quando: { campo: "situacao_texto", igual: CHIP_BRAND_SUPORTE },
+      texto: "Pra suporte, o caminho mais rápido é o portal:",
+      link: { href: LINK_SUPORTE, rotulo: "abrir o suporte SysAid" },
+      complemento: ". Se quiser conhecer módulos novos, toca na sua resposta acima pra mudar.",
+    },
+  ],
   recomendacao: undefined,
 
   paineis: [
@@ -600,7 +623,8 @@ export const configSysaidGenerica: ConfigConversa = {
       { id: "medio", minimo: 6 },
       { id: "fraco", minimo: 0 },
     ],
-    rotulos: [],
+    // 24/11/2026: cliente da SysAid querendo módulo novo = médio pro gerente de conta
+    rotulos: [{ rotulo: "cliente", quando: { campo: "situacao_texto", igual: CHIP_BRAND_MODULOS } }],
     rotaPorRotulo: { fora: "fora", cotando: "cotando", cliente: "medio", incoerente: "fraco" },
     precedenciaRotulos: ["fora", "cliente", "cotando", "incoerente"],
   },

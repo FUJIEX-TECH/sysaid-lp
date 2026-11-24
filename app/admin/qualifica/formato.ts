@@ -22,3 +22,30 @@ export function horariosTexto(h: { data: string; hora: string }[] | null | undef
     })
     .join(" ou ");
 }
+
+// 24/11/2026: de onde o lead veio (campanha), lido do que a conversa gravou em `dados`
+// (variaveis da origem + sinais crus) com reserva na tabela leads (utm_term, utm_campaign)
+export const ORIGEM_ROTULO: Record<string, string> = { comparativa: "Comparativa", brand: "Marca (SysAid)", generica: "Busca genérica" };
+export type OrigemLida = { origem: string; rotulo: string; concorrente: string; canal: string; intencao: string; termo: string; campanha: string; entrada: string; referrer: string; caminho: string; gclid: boolean };
+export function origemDe(c: { origem?: string | null; utm_term?: string | null; utm_campaign?: string | null; dados?: Record<string, unknown> | null }): OrigemLida {
+  const v = ((c.dados?.variaveis ?? {}) as Record<string, string | null>) || {};
+  const s = ((c.dados?.sinais ?? {}) as Record<string, string | undefined>) || {};
+  const origem = c.origem ?? "";
+  const concorrente = v.concorrente ?? "";
+  const intencao = v.intencao ?? "";
+  const base = ORIGEM_ROTULO[origem] ?? origem;
+  const rotulo = origem === "comparativa" ? `${base} · ${concorrente || "?"}` : origem === "generica" && intencao === "preco" ? `${base} · preço` : base;
+  return {
+    origem,
+    rotulo,
+    concorrente,
+    canal: v.canal ?? "",
+    intencao,
+    termo: s.utm_term ?? c.utm_term ?? "",
+    campanha: s.utm_campaign ?? c.utm_campaign ?? "",
+    entrada: s.entrada ?? "",
+    referrer: s.referrer ?? "",
+    caminho: s.caminho ?? "",
+    gclid: !!s.gclid,
+  };
+}

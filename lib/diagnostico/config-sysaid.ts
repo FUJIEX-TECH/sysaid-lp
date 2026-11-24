@@ -17,12 +17,16 @@
 
 import { REACAO_CUSTO_ANTERIOR } from "@/lib/diagnostico/custo-sysaid";
 import { MASCARA_PDF, termosConcorrente } from "@/lib/diagnostico/generica-sysaid";
-import type { ConfigConversa, Contexto, Opcao, OrigemRegra } from "@/lib/conversa-core";
+import { LINK_SUPORTE, ORIGENS_SYSAID } from "@/lib/diagnostico/origens-sysaid";
+import type { ConfigConversa, Contexto, Opcao } from "@/lib/conversa-core";
 import { sugerirEmpresa, sugerirNome, primeiroNome } from "@/lib/conversa-core";
 import { isCorporateEmail } from "@/lib/email-domains";
+import { getUtm } from "@/lib/utm";
 import CenaPlaceholder from "@/components/diagnostico/CenaPlaceholder";
 // 12/11/2026: cartões visuais de DEMONSTRAÇÃO (provisórios; o roteiro final é do sysaid-growth)
 import { CARTOES_SYSAID } from "@/lib/diagnostico/cartoes-sysaid";
+
+export { LINK_SUPORTE };
 
 // Valores possíveis (documentação; o motor trata tudo como string)
 // situacao:  troca | sem | cliente | pesquisa
@@ -31,8 +35,6 @@ import { CARTOES_SYSAID } from "@/lib/diagnostico/cartoes-sysaid";
 // tecnicos:  1-2 | 3-10 | +10
 // papel:     decide | influencia | levanta | estuda
 // prazo:     tri | 6m | sem | cota
-
-export const LINK_SUPORTE = "https://www.sysaid.com/support";
 
 // --------------------------------------------------------------------------
 // Catálogos
@@ -122,53 +124,8 @@ function atualNoMapa(ctx: Contexto): string {
 }
 
 // v2: de onde a pessoa veio → origem + variáveis (concorrente, intenção, canal).
-// Mecanismo genérico (lib/conversa-core/origem.ts); o mapa campanha → contexto é daqui.
-const CONCORRENTES: [string, string][] = [
-  ["movidesk", "Movidesk"],
-  ["topdesk", "TopDesk"],
-  ["freshdesk", "Freshdesk"],
-  ["freshservice", "Freshservice"],
-  ["glpi", "GLPI"],
-  ["jira", "Jira Service Management"],
-  ["zendesk", "Zendesk"],
-  ["servicenow", "ServiceNow"],
-];
-
-const ORIGENS_REGRAS: OrigemRegra[] = [
-  // comparativa: página /movidesk, página de entrada, ?de=movidesk, termo/anúncio/campanha com o nome, ou veio da comparativa
-  ...CONCORRENTES.map(
-    ([slug, nome]): OrigemRegra => ({
-      id: `comp-${slug}`,
-      quando: {
-        alguma: [
-          { caminho: slug },
-          { entrada: slug },
-          { parametro: { de: slug } },
-          { utm_term: { contem: slug } },
-          { utm_content: { contem: slug } },
-          { utm_campaign: { contem: slug } },
-          { referrer: { contem: `/${slug}` } },
-        ],
-      },
-      origem: "comparativa",
-      variaveis: { concorrente: nome, slug },
-    })
-  ),
-  // marca: campanha Brand ou termo com "sysaid" (quem já conhece; muitas vezes cliente querendo suporte)
-  { id: "brand", quando: { alguma: [{ utm_campaign: { contem: "brand" } }, { utm_term: { contem: ["sysaid", "sys aid"] } }] }, origem: "brand", variaveis: { canal: "busca pela SysAid" } },
-  // qualquer outro clique pago (Conquista genérica, ITSM, ESM): origem genérica
-  { id: "paga", quando: { alguma: [{ gclid: true }, { utm_medium: { contem: ["cpc", "paid", "ppc"] } }] }, origem: "generica" },
-  // intenção lida no termo comprado
-  { id: "preco", modo: "acrescentar", quando: { utm_term: { contem: ["preço", "preco", "valor", "custo", "quanto custa", "licença", "licenca", "plano"] } }, variaveis: { intencao: "preco" } },
-  { id: "troca", modo: "acrescentar", quando: { utm_term: { contem: ["migrar", "migração", "migracao", "alternativa", "substituir", "trocar", "sair do"] } }, variaveis: { intencao: "troca" } },
-  // canal, pro resumo e pra ficha
-  { id: "canal-google", modo: "acrescentar", quando: { alguma: [{ gclid: true }, { utm_source: { contem: "google" } }] }, variaveis: { canal: "anúncio no Google" } },
-  { id: "canal-linkedin", modo: "acrescentar", quando: { utm_source: { contem: "linkedin" } }, variaveis: { canal: "LinkedIn" } },
-  { id: "canal-meta", modo: "acrescentar", quando: { utm_source: { contem: ["facebook", "instagram", "meta"] } }, variaveis: { canal: "Instagram ou Facebook" } },
-  { id: "canal-chatgpt", modo: "acrescentar", quando: { alguma: [{ utm_source: { contem: ["chatgpt", "openai"] } }, { referrer: { contem: "chatgpt.com" } }] }, variaveis: { canal: "ChatGPT" } },
-  { id: "canal-organico", modo: "acrescentar", quando: { semCampanha: true, referrer: { contem: ["google.", "bing.", "duckduckgo."] } }, variaveis: { canal: "busca orgânica" } },
-  { id: "canal-direto", modo: "acrescentar", quando: { semCampanha: true, referrer: "" }, variaveis: { canal: "acesso direto" } },
-];
+// Mecanismo genérico (lib/conversa-core/origem.ts); o mapa campanha → contexto
+// mora em origens-sysaid.ts desde 24/11/2026 (regras + o que muda na conversa).
 
 // --------------------------------------------------------------------------
 // A configuração
@@ -354,21 +311,11 @@ export const configSysaid: ConfigConversa = {
   totalPassos: 7,
   digitandoMs: 300,
 
-  origens: {
-    padrao: "generica",
-    lembrar: "qualifica_sysaid",
-    regras: ORIGENS_REGRAS,
-    porSlug: {
-      movidesk: { origem: "comparativa", variaveis: { concorrente: "Movidesk", slug: "movidesk" } },
-      topdesk: { origem: "comparativa", variaveis: { concorrente: "TopDesk", slug: "topdesk" } },
-      freshdesk: { origem: "comparativa", variaveis: { concorrente: "Freshdesk", slug: "freshdesk" } },
-      freshservice: { origem: "comparativa", variaveis: { concorrente: "Freshservice", slug: "freshservice" } },
-      glpi: { origem: "comparativa", variaveis: { concorrente: "GLPI", slug: "glpi" } },
-      jira: { origem: "comparativa", variaveis: { concorrente: "Jira Service Management", slug: "jira" } },
-      zendesk: { origem: "comparativa", variaveis: { concorrente: "Zendesk", slug: "zendesk" } },
-      servicenow: { origem: "comparativa", variaveis: { concorrente: "ServiceNow", slug: "servicenow" } },
-    },
-  },
+  // 24/11/2026: sem campanha na URL nem na sessão, vale o que a LP guardou por 30 dias
+  // (lib/utm.ts: UTM do pouso em qualquer página da LP, ou o gclid do cookie _gcl_aw do
+  // Google em .sysaid.com.br). Caso Sertrading (18/11): anúncio → sitelink → site da
+  // SysAid → LP: chega aqui pelo menos como clique pago do Google.
+  origens: { ...ORIGENS_SYSAID, sinaisExtras: getUtm },
 
   catalogos: {
     ferramentas: FERRAMENTAS,
