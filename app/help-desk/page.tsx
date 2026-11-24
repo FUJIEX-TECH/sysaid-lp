@@ -7,7 +7,7 @@ import { datasDaPagina } from "@/lib/seo";
 export const metadata: Metadata = {
   title: "Help desk: o que é, o que faz e como funciona | SysAid",
   description:
-    "Help desk é o suporte que resolve o problema técnico do usuário: o que faz, como funciona o atendimento em níveis e quando ele precisa virar service desk.",
+    "Help desk (ou helpdesk) é o suporte que resolve o problema técnico do usuário: significado, o que faz, níveis N1 a N3, tipos de help desk e como escolher o sistema.",
   alternates: { canonical: "/help-desk" },
   openGraph: {
     title: "Help desk: o que é, o que faz e como funciona",
@@ -128,10 +128,33 @@ const CRITERIOS = [
   },
 ];
 
+const TIPOS = [
+  {
+    t: "Help desk interno de TI",
+    d: "Atende os próprios funcionários da empresa: computador, sistema, acesso, rede e impressora. É o modelo mais comum, e o que este guia descreve.",
+  },
+  {
+    t: "Help desk para clientes",
+    d: "Atende quem usa o produto ou serviço da empresa, como software, equipamento ou internet. O processo é o mesmo (chamado, níveis, prazo); muda quem está do outro lado.",
+  },
+  {
+    t: "Help desk terceirizado (on-line)",
+    d: "Uma empresa especializada presta o atendimento, quase sempre remoto, por telefone, chat e acesso à máquina. A operação sai de casa, mas a fila, o prazo e a base de conhecimento continuam precisando de dono.",
+  },
+];
+
 const FAQ = [
   {
     q: "O que é help desk?",
     a: "Help desk é a área ou o serviço de suporte técnico que atende os usuários quando algo deixa de funcionar: computador, sistema, acesso, impressora, rede. Ele recebe o relato, registra como chamado, faz o diagnóstico, resolve o que é conhecido e encaminha ao especialista o que exige mais conhecimento, até o problema estar resolvido. O termo descreve ao mesmo tempo o time, o processo de atendimento e o software que organiza os chamados.",
+  },
+  {
+    q: "O que significa help desk?",
+    a: "Help desk vem do inglês e significa, ao pé da letra, \u201cbalcão de ajuda\u201d. Na TI, o termo nomeia o ponto de contato onde o usuário pede suporte técnico quando algo deixa de funcionar, e descreve ao mesmo tempo o time que atende, o processo de atendimento e o sistema que registra os chamados.",
+  },
+  {
+    q: "Help desk e helpdesk são a mesma coisa?",
+    a: "Sim. Help desk, helpdesk e help-desk são grafias da mesma palavra, todas usadas no Brasil para o suporte técnico organizado em chamados. A forma separada (help desk) é a mais comum em textos formais; a junta (helpdesk) aparece muito em nomes de software.",
   },
   {
     q: "O que faz um help desk?",
@@ -152,6 +175,10 @@ const FAQ = [
   {
     q: "Help desk e suporte técnico são a mesma coisa?",
     a: "Na prática, quase. Suporte técnico é a atividade de resolver problemas de tecnologia; help desk é a estrutura organizada para prestar esse suporte, com registro de chamados, níveis de atendimento, prazos e indicadores. Todo help desk faz suporte técnico, mas suporte feito por mensagem avulsa, sem registro nem prazo, não chega a ser um help desk.",
+  },
+  {
+    q: "Quais indicadores um help desk acompanha?",
+    a: "Os três que mais pesam são a taxa de resolução no primeiro contato, o tempo médio de atendimento e o cumprimento do SLA (o prazo combinado por tipo de chamado). Somam-se o volume de chamados por categoria e a satisfação do usuário. As fórmulas e as metas usuais estão no guia de service desk.",
   },
   {
     q: "Qual software de help desk escolher?",
@@ -258,11 +285,12 @@ export default function HelpDeskPage() {
               <h2>O que é help desk</h2>
             </div>
             <p className="section-head__sub">
-              Help desk é a área ou o serviço que presta suporte técnico aos
-              usuários de tecnologia de uma empresa. Quando algo deixa de
-              funcionar, é para ele que o usuário recorre, e cada relato vira um
-              chamado registrado, com responsável e prazo. O nome vem do inglês
-              e significa, ao pé da letra, &ldquo;balcão de ajuda&rdquo;. Hoje o
+              Help desk (ou helpdesk) é a área ou o serviço que presta suporte
+              técnico aos usuários de tecnologia de uma empresa, registrando
+              cada problema como chamado, com responsável e prazo, até ele ser
+              resolvido. O nome vem do inglês e significa, ao pé da letra,
+              &ldquo;balcão de ajuda&rdquo;: quando algo deixa de funcionar, é
+              para ele que o usuário recorre. Hoje o
               termo descreve ao mesmo tempo o time, o processo de atendimento e
               o software que organiza os chamados, o{" "}
               <a href="/sistema-de-chamados">sistema de chamados</a>. O help
@@ -282,9 +310,12 @@ export default function HelpDeskPage() {
               <p className="eyebrow">Na prática</p>
               <h2>O que faz um help desk</h2>
               <p className="section-head__sub">
-                Atender o telefone é a parte visível. Por trás, são cinco
-                responsabilidades encadeadas, e o chamado só termina quando o
-                usuário confirma que voltou a funcionar.
+                Um help desk registra o problema relatado pelo usuário, faz o
+                diagnóstico inicial, resolve no primeiro contato o que é
+                conhecido, escala ao especialista o que exige mais conhecimento
+                e acompanha o chamado até o usuário confirmar que voltou a
+                funcionar. Atender o telefone é só a parte visível dessas cinco
+                responsabilidades.
               </p>
             </div>
             <div className="grid-3">
@@ -322,8 +353,31 @@ export default function HelpDeskPage() {
           </div>
         </section>
 
-        {/* HELP DESK x SERVICE DESK */}
+        {/* TIPOS */}
         <section className="section section--soft">
+          <div className="container">
+            <div className="section-head">
+              <p className="eyebrow">Modelos</p>
+              <h2>Tipos de help desk</h2>
+              <p className="section-head__sub">
+                O que muda de um tipo para outro é quem é atendido e quem
+                atende. Para saber quando vale terceirizar, o guia de{" "}
+                <a href="/service-desk">service desk</a> compara os modelos.
+              </p>
+            </div>
+            <div className="grid-3">
+              {TIPOS.map((t) => (
+                <div className="card" key={t.t}>
+                  <h3>{t.t}</h3>
+                  <p>{t.d}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* HELP DESK x SERVICE DESK */}
+        <section className="section">
           <div className="container">
             <div className="section-head">
               <p className="eyebrow">A confusão mais comum</p>
@@ -347,7 +401,7 @@ export default function HelpDeskPage() {
         </section>
 
         {/* SINAIS DE AMADURECIMENTO */}
-        <section className="section">
+        <section className="section section--soft">
           <div className="container">
             <div className="section-head">
               <p className="eyebrow">Hora de amadurecer</p>
@@ -409,7 +463,14 @@ export default function HelpDeskPage() {
           <div className="container">
             <div className="section-head">
               <p className="eyebrow">Na hora de escolher</p>
-              <h2>Seis critérios para escolher um software de help desk</h2>
+              <h2>Sistema de help desk: seis critérios para escolher</h2>
+              <p className="section-head__sub">
+                Sistema de help desk é o software que recebe os chamados de
+                todos os canais, distribui entre os níveis de atendimento e
+                controla o prazo de cada um. Para planilha contra sistema,
+                migração e implantação, veja o guia de{" "}
+                <a href="/sistema-de-chamados">sistema de chamados</a>.
+              </p>
             </div>
             <div className="grid-3">
               {CRITERIOS.map((c) => (
