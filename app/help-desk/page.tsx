@@ -138,8 +138,8 @@ const TIPOS = [
     d: "Atende quem usa o produto ou serviço da empresa, como software, equipamento ou internet. O processo é o mesmo (chamado, níveis, prazo); muda quem está do outro lado.",
   },
   {
-    t: "Help desk terceirizado (on-line)",
-    d: "Uma empresa especializada presta o atendimento, quase sempre remoto, por telefone, chat e acesso à máquina. A operação sai de casa, mas a fila, o prazo e a base de conhecimento continuam precisando de dono.",
+    t: "Help desk terceirizado",
+    d: "Uma empresa especializada presta o atendimento on-line, quase sempre remoto: telefone, chat e acesso à máquina. A operação sai de casa, mas a fila, o prazo e a base de conhecimento continuam precisando de dono.",
   },
 ];
 
