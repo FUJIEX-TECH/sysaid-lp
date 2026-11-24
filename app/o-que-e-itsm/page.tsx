@@ -6,14 +6,14 @@ import { breadcrumbSchema, datasDaPagina, ORG_ID } from "@/lib/seo";
 import { altCliente } from "@/lib/marcas";
 
 export const metadata: Metadata = {
-  title: "O que é ITSM? Conceito, ITIL e como escolher | SysAid",
+  title: "O que é ITSM? Significado, processos e ferramenta | SysAid",
   description:
-    "ITSM é a gestão de serviços de TI: processos, papéis e ferramentas para entregar TI como serviço. Conceito, relação com ITIL e como escolher a plataforma.",
+    "ITSM é a gestão de serviços de TI. Veja o significado da sigla, a diferença entre ITIL e ITSM, os processos principais e o que uma ferramenta de ITSM precisa ter.",
   alternates: { canonical: "/o-que-e-itsm" },
   openGraph: {
-    title: "O que é ITSM? Conceito, ITIL e Como Escolher uma Plataforma",
+    title: "O que é ITSM? Significado, processos e ferramenta",
     description:
-      "Conceito, relação com ITIL, processos principais e critérios para escolher uma plataforma de ITSM.",
+      "Significado de ITSM, diferença entre ITIL e ITSM, processos principais e o que uma ferramenta de ITSM precisa ter.",
     locale: "pt_BR",
     type: "article",
   },
@@ -74,7 +74,7 @@ const PROCESSOS = [
 const CRITERIOS = [
   {
     n: "01",
-    t: "Ela resolve ou só registra?",
+    t: "O software resolve ou só registra?",
     d: "Uma ferramenta que apenas organiza a fila transfere o trabalho, não reduz. Automação e IA nativas são o que tiram volume do time em vez de redistribuí-lo.",
   },
   {
@@ -85,17 +85,21 @@ const CRITERIOS = [
   {
     n: "03",
     t: "Ela acompanha o amadurecimento?",
-    d: "Começar por incidentes é normal. O problema é ter que trocar de plataforma quando entrarem ativos, mudanças e catálogo. Verifique se tudo já está na mesma base.",
+    d: "Começar por incidentes é normal. O problema é ter que trocar de ferramenta quando entrarem ativos, mudanças e catálogo. Verifique se tudo já está na mesma base.",
   },
 ];
 
 const FAQ = [
   {
+    q: "O que significa ITSM?",
+    a: "ITSM significa IT Service Management, em português gestão de serviços de TI. A sigla vem do inglês e é usada assim mesmo no Brasil. Designa o conjunto de processos, papéis, métricas e ferramentas com que a área de TI entrega e melhora os serviços que presta ao resto da empresa.",
+  },
+  {
     q: "O que é ITSM?",
     a: "ITSM é a sigla de IT Service Management, ou gestão de serviços de TI. É a disciplina que organiza como a área de TI entrega valor para o negócio na forma de serviços, com processos definidos, papéis claros, prazos acordados e métricas de acompanhamento. Na prática, ITSM é o que faz a TI deixar de ser um grupo que apaga incêndio e passar a ser um prestador de serviço com catálogo, prazo e qualidade medida.",
   },
   {
-    q: "Qual a diferença entre ITSM e ITIL?",
+    q: "Qual a diferença entre ITIL e ITSM?",
     a: "ITSM é a prática, ITIL é o guia. ITSM é o que a empresa faz para gerir seus serviços de TI. ITIL é a biblioteca de boas práticas mais adotada no mundo para orientar como fazer isso, com recomendações de processos, papéis e fluxos. Uma empresa pode fazer ITSM sem seguir ITIL à risca, e adotar ITIL sem implementar tudo que está lá. A ITIL é referência, não obrigação.",
   },
   {
@@ -111,8 +115,16 @@ const FAQ = [
     a: "Pelo básico que gera dado: um canal único de abertura, categorias que façam sentido para a sua realidade, uma matriz simples de prioridade e SLA por tipo de chamado. Com isso rodando por alguns meses, aparecem os números que dizem onde a operação dói, e aí a escolha dos próximos processos deixa de ser opinião.",
   },
   {
-    q: "O que uma plataforma de ITSM precisa ter?",
-    a: "No mínimo: canal único de abertura, catálogo de serviços, matriz de prioridade, SLA com escalonamento, base de conhecimento, gestão de ativos e relatórios prontos. O diferencial hoje está na automação e na IA, que resolvem sozinhas parte do que chega, em vez de apenas organizar a fila para uma pessoa resolver.",
+    q: "O que uma ferramenta de ITSM precisa ter?",
+    a: "No mínimo: canal único de abertura, gestão de incidentes e requisições, catálogo de serviços, matriz de prioridade, SLA com escalonamento, base de conhecimento, gestão de ativos e relatórios prontos. Problemas e mudanças entram conforme a operação amadurece, então convém que já estejam na mesma base. O diferencial hoje está na automação e na IA, que resolvem sozinhas parte do que chega, em vez de apenas organizar a fila para uma pessoa resolver.",
+  },
+  {
+    q: "Qual a melhor ferramenta de ITSM?",
+    a: "Não existe uma melhor para todo mundo. A melhor ferramenta de ITSM é a que cobre os processos que a sua operação usa hoje e os que vai usar daqui a dois anos, com custo total que caiba (licença, servidor, atualização e horas da equipe mantendo) e automação que tire volume do time. Compare as candidatas pelos mesmos critérios, com a sua fila real, em vez de confiar em ranking genérico.",
+  },
+  {
+    q: "O que é central de serviços em ITSM?",
+    a: "Central de serviços é o nome em português do service desk: o ponto único de contato entre os usuários e a TI. É por ela que entram incidentes, requisições e dúvidas, e é ela que acompanha cada chamado até o fim e comunica o usuário. Dentro do ITSM, a central de serviços é a porta de entrada; os demais processos (problemas, mudanças, ativos, nível de serviço) trabalham por trás dela.",
   },
 ];
 
@@ -132,7 +144,7 @@ const articleSchema = {
   "@type": "Article",
   ...datasDaPagina("/o-que-e-itsm"),
   mainEntityOfPage: "https://itsm.sysaid.com.br/o-que-e-itsm",
-  headline: "O que é ITSM? Conceito, ITIL e Como Escolher uma Plataforma",
+  headline: "O que é ITSM? Significado, processos e ferramenta",
   description: metadata.description,
   inLanguage: "pt-BR",
   image: "https://itsm.sysaid.com.br/logos/logo.png",
@@ -185,11 +197,12 @@ export default function OQueEItsmPage() {
               papel da TI
             </h1>
             <p className="hero__sub">
-              ITSM é a sigla de IT Service Management, ou gestão de serviços de
-              TI. É a disciplina que organiza como a área entrega valor ao
-              negócio na forma de serviços, com processos definidos, prazos
-              acordados e qualidade medida. Abaixo, o conceito, a relação com a
-              ITIL, os processos principais e como escolher uma plataforma.
+              ITSM (IT Service Management, ou gestão de serviços de TI) é a
+              disciplina que organiza como a área de TI entrega valor ao
+              negócio na forma de serviços: com processos definidos, papéis
+              claros, prazos acordados e qualidade medida. Abaixo, o significado
+              da sigla, a diferença entre ITIL e ITSM, os processos principais e
+              o que uma ferramenta de ITSM precisa ter.
             </p>
             <p className="hero__trust">
               Guia escrito pela SysAid Brasil · Mais de 400 empresas no país
@@ -231,10 +244,10 @@ export default function OQueEItsmPage() {
           <div className="container container--narrow">
             <div className="section-head">
               <p className="eyebrow">A confusão mais comum</p>
-              <h2>ITSM é a prática. ITIL é o guia</h2>
+              <h2>Qual a diferença entre ITIL e ITSM?</h2>
             </div>
             <p className="section-head__sub">
-              ITSM é o que a empresa faz para gerir seus serviços de TI. ITIL é
+              ITSM é a prática. ITIL é o guia. ITSM é o que a empresa faz para gerir seus serviços de TI. ITIL é
               a biblioteca de boas práticas mais adotada no mundo para orientar
               como fazer isso, com recomendações de processos, papéis e fluxos.
               Uma empresa pode praticar ITSM sem seguir a ITIL à risca, e pode
@@ -250,7 +263,7 @@ export default function OQueEItsmPage() {
           <div className="container">
             <div className="section-head">
               <p className="eyebrow">Na prática</p>
-              <h2>Os processos que sustentam uma operação de ITSM</h2>
+              <h2>Processos de ITSM: os que sustentam a operação</h2>
               <p className="section-head__sub">
                 Ninguém implanta todos de uma vez. A maioria das operações
                 começa pelos dois primeiros e agrega os demais conforme o volume
@@ -309,7 +322,20 @@ export default function OQueEItsmPage() {
           <div className="container">
             <div className="section-head">
               <p className="eyebrow">Como escolher</p>
-              <h2>Três perguntas antes de contratar uma plataforma de ITSM</h2>
+              <h2>Ferramenta de ITSM: o que é e o que precisa ter</h2>
+              <p className="section-head__sub">
+                Ferramenta de ITSM é o software onde os processos acima
+                acontecem: é nela que o chamado entra, ganha prioridade e prazo,
+                passa pela aprovação e fecha com registro. O mínimo que ela
+                precisa cobrir na mesma base: abertura por canal único,
+                incidentes e requisições, catálogo de serviços, SLA com
+                escalonamento, base de conhecimento, problemas, mudanças, gestão
+                de ativos com <a href="/cmdb">CMDB</a> e relatórios prontos. Quem
+                está começando costuma usar só o{" "}
+                <a href="/sistema-de-chamados">sistema de chamados</a>; o resto
+                entra conforme a operação amadurece. Antes de contratar, três
+                perguntas separam as ferramentas:
+              </p>
             </div>
             <div className="grid-3">
               {CRITERIOS.map((c) => (
@@ -326,6 +352,16 @@ export default function OQueEItsmPage() {
               <a href="/topdesk">SysAid x TOPdesk</a>,{" "}
               <a href="/jira">SysAid x Jira Service Management</a> e{" "}
               <a href="/glpi">SysAid x GLPI</a>.
+            </p>
+            <h3 style={{ marginTop: 48 }}>Implantação de ITSM: por onde começar</h3>
+            <p className="section-head__sub">
+              Implantar ITSM não é instalar uma ferramenta e ligar todos os
+              processos no mesmo dia. A implementação que dá certo começa pelo
+              que gera dado (canal único, categorias, prioridade e SLA), roda
+              alguns meses e só então escolhe os próximos processos pelo que os
+              números mostram. O roteiro passo a passo, com as práticas da ITIL 4,
+              está no guia de{" "}
+              <a href="/gestao-de-servicos-de-ti">gestão de serviços de TI</a>.
             </p>
           </div>
         </section>
