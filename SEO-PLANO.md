@@ -67,34 +67,39 @@ Referências de pesquisa: `../semrush-itsm-analise.md` e `../semrush-gerenciamen
 - Keywords/impressões (GSC): não lido ainda.
 - Aparece nas IAs pras queries-alvo? **não medido** — rodar os 10 prompts do modo manual.
 
-## Backlog (P0 = faz primeiro)
+## Backlog (único; consolidado em 13/10/2026)
 
-### P0
-- [ ] Schema `Organization` global no layout (name, url, logo, sameAs → sysaid.com, LinkedIn, G2)
-      · _falha se:_ o teste de rich results do Google não reconhecer a entidade em todas as rotas.
-- [ ] Links internos da raiz `sysaid.com.br` → subdomínio via WPVibe (menu, rodapé e/ou posts de blog
-      relacionados apontando pras LPs certas) · _falha se:_ Semrush seguir com 0 backlinks em 30 dias.
-- [ ] GSC: confirmar propriedade do subdomínio, sitemap submetido e pedir indexação das 10 rotas
-      (skill `gsc-fujiex`) · _falha se:_ cobertura não mostrar as 10 rotas indexadas em 2 semanas.
-- [ ] Bing Webmaster Tools: cadastrar subdomínio + sitemap (ChatGPT usa o índice do Bing); avaliar
-      IndexNow · _falha se:_ `site:itsm.sysaid.com.br` no Bing seguir zerado em 2 semanas.
+> Até 13/10 este plano tinha dois backlogs (o de 13/08 e o "Backlog novo" de 26/08), com itens repetidos. Ficou um só, aqui, com o estado de cada item conferido no git e no Search Console em 13/10/2026. O andamento do dia a dia está em `../_growth/backlog.md`; o que está "em branch" sai no deploy único (decisão D-20261008-1630 em `09-Agentes/decisoes.md`).
+
+### Feito
+- [x] `Organization` schema global no `app/layout.tsx` com `@id` estável; `sameAs` com sysaid.com, sysaid.com.br, LinkedIn e G2 (**no ar**: `51fcf77` e `4017d4f`).
+- [x] `llms.txt` completo (**no ar**, `51fcf77`; as páginas novas da 7c atualizam ele em branch).
+- [x] Links internos cruzados entre comparativas e guias pelo rodapé `SiteFooter` (**no ar** desde 01/10, merge `b8f27bc`). Medir 30 dias depois: saída pelo rodapé × formulário no GA4.
+- [x] IndexNow (**no ar**; chave `df788ab4e8e335bc73c8ac2a84941392.txt` responde 200). Rodar `npm run indexnow` depois de cada deploy.
+- [x] Search Console: propriedade, sitemap e indexação pedida; **12 de 12 rotas indexadas em 09/10**. Primeira semana com volume: 06–11/10 = 429 impressões, 2 cliques, posição média 27,6.
+- [x] Baseline de AI visibility (fechado em 13/10, `../_growth/ai-visibility-baseline-2026-10-12.md`): SysAid espontânea só na pergunta de IA agêntica (2º). Reteste 4 semanas depois do deploy único.
+- [x] Em branch, esperando o deploy único: `Article`/`WebPage` + `BreadcrumbList` nos guias, `dateModified` em todos os FAQPage/Article e sitemap com data real por página (`7bf4220`, datas em `lib/seo.ts`); canonical da home e links no corpo (`2eec961`); comparativas `/servicenow` e `/freshservice`, guias `/cmdb` e `/itil-5`; titles ≤ 60 e descriptions ≤ 155 em 16 rotas (`116a890`).
+
+### P0 (depende de decisão ou de terceiro)
+- [ ] **Deploy único** (D-20261008-1630): tira do branch tudo o que está acima. Depois: `npm run indexnow`, pedir indexação das 4 páginas novas, 301 do post BR do ITIL 5 → `/itil-5`.
+- [ ] **Links da raiz `sysaid.com.br` → subdomínio** (rodapé, menu e 1 post âncora). Depende do site novo (D-20261002-1700) ou de acesso ao WordPress atual. _Falha se:_ Semrush seguir com 0 domínio de referência em 30 dias.
+- [ ] **Bing Webmaster Tools:** cadastrar (dá pra importar do Search Console). Precisa do login do Fernando. _Falha se:_ `site:itsm.sysaid.com.br` no Bing seguir zerado em 2 semanas.
 
 ### P1
-- [ ] Baseline manual de AI visibility: perguntar os 10 prompts de `ai-visibility-prompts.txt` no
-      ChatGPT e Perplexity, registrar aqui (X/10 com menção à SysAid, quem domina)
-      · _falha se:_ não der pra comparar na re-medição em 30-60 dias.
-- [ ] Subir densidade de dado do guia `/gestao-de-servicos-de-ti`: números com fonte (mercado ITSM,
-      dados G2 da SysAid, data de atualização visível) · _falha se:_ Citability não passar de 80.
-- [ ] Article + Breadcrumb schema e data de atualização em `/o-que-e-itsm` e `/sistema-de-chamados`
-      · _falha se:_ rich results não validar.
-- [ ] PageSpeed mobile das 3 páginas-chave quando a quota do PSI voltar · _falha se:_ perf < 80 mobile.
+- [ ] Seção "o que faz um service desk" + FAQ na `/service-desk` (Search Console 06–11/10: `service desk o que faz` pos. 19,6 e `o que faz um service desk` pos. 12,3). Depois do deploy único.
+- [ ] Ângulo de IA agêntica em português nas páginas-guia (única pergunta em que a SysAid aparece espontânea no baseline de IA).
+- [ ] `sameAs` do Capterra (link exato; responde 403 a bot; navegador ou Kaique).
+- [ ] Densidade de dado em `/gestao-de-servicos-de-ti` (mercado ITSM, Gartner, HDI, com fonte e data). _Falha se:_ citability não passar de 80.
+- [ ] `alt` descritivo das imagens (`/clientes/*.png`, `/badges/*.svg`).
+- [ ] Perfis em B2B Stack, Capterra/GetApp BR e G2 apontando pro subdomínio quando couber.
+- [ ] Title por CTR só quando a posição média das páginas-chave chegar perto do top 10 (hoje o gargalo é posição, não CTR).
 
-### P2
-- [ ] Inventário de menções BR: B2B Stack, Capterra/GetApp BR, Wikidata (entidade SysAid),
-      perfil LinkedIn BR · _falha se:_ nenhuma menção nova indexada em 90 dias.
-- [ ] Avaliar bloco "atualizado em + autor" (EEAT) nas páginas-guia com um nome real do time
-      · _falha se:_ Kaique não aprovar autoria pessoal.
-- [ ] Cauda longa informacional nova só depois do cluster atual indexar (evitar diluir).
+### P2 (30–60 dias)
+- [ ] Diferenciar H1/H2 das comparativas (anti-canibalização).
+- [ ] Bloco "atualizado em + autor" (E-E-A-T) com um nome real do time. _Falha se:_ o Kaique não aprovar autoria pessoal.
+- [ ] PageSpeed mobile das 3 páginas-chave. _Falha se:_ perf < 80 no celular.
+- [ ] Inventário de menções BR (B2B Stack, Capterra/GetApp BR, Wikidata, LinkedIn BR) e guest post em 1–2 veículos BR.
+- [ ] Cauda longa informacional nova só depois que o cluster atual ganhar posição (evitar diluir).
 
 ## Feito
 - [x] (2026-08-13) Setup da skill + auditoria de seed dos 4 pilares + baseline Semrush + prompts de IA.
@@ -141,29 +146,7 @@ Saúde geral do site: **6/10** (técnico 8/10 · conteúdo 6/10 · autoridade 1/
 
 ## Backlog novo
 
-### P0 (esta semana)
-- [x] **C1** — `Organization` schema no `app/layout.tsx` ✅ **30/09/2026** (commit `51fcf77`, branch `feat/rota-service-desk`, **sem deploy**). Declarado uma vez, com `@id` estável `https://itsm.sysaid.com.br/#organization`, então vale em todas as páginas sem duplicar entidade. `name`, `alternateName`, `url`, `logo` (1682×1682), `description`, `areaServed` BR, `knowsLanguage`. `sameAs` só com URL verificada: `sysaid.com`, `sysaid.com.br`, `linkedin.com/company/sysaid-technologies`. **G2 e Capterra ficaram fora**: respondem 403 a bot e não deu pra confirmar o slug — `sameAs` errado é pior que curto. Os `Article` de `/service-desk` e `/gestao-de-servicos-de-ti` agora referenciam o `@id` no `author`/`publisher`.
-- [x] **C2** — `Article` + `BreadcrumbList` schema em `/o-que-e-itsm` e `/sistema-de-chamados` (03/10/2026, branch `seo/schema-article-breadcrumb`; na `/sistema-de-chamados` é `WebPage`, não `Article`, porque é página de produto)
-- [x] **C3** — `dateModified` em todos os schemas FAQPage/Article (03/10/2026, mesmo branch; datas em `lib/seo.ts`, atualizar à mão no commit que muda conteúdo)
-- [ ] **C4 (pendência aberta do C1)** — confirmar as URLs de G2 e Capterra da SysAid pra entrar no `sameAs`. Ambas respondem **403 a bot**; precisa de navegador ou de o Kaique confirmar o link oficial.
-- [ ] **C4** — Adicionar links da raiz WordPress `sysaid.com.br` → subdomínio (rodapé + menu + 1 post âncora)
-- [ ] **C5** — Submeter sitemap no GSC + pedir indexação das 10 URLs (skill `gsc-fujiex`)
-- [x] **llms.txt** — completo ✅ **30/09/2026** (mesmo commit). Lista as **11 rotas**, separadas em "Guias e conteúdo de referência" e "Comparativos e alternativas", com descrição tirada do conteúdo real de cada página, não do metadata. O `sitemap.ts` já estava completo com as 11.
-
-### P1 (próximas 2 semanas)
-- [ ] Cadastrar no Bing Webmaster Tools (precisa do login do Fernando; dá pra importar do Search Console)
-- [x] IndexNow pronto em branch (01/10/2026 20h, `feat/seo-indexnow`): chave `public/df788ab4e8e335bc73c8ac2a84941392.txt` + `npm run indexnow` (lê o sitemap de produção e pinga `api.indexnow.org`; `--dry-run` e rotas avulsas). **Rodar logo depois do deploy** e a cada página nova. Recusa enviar se a chave não estiver no ar.
-- [x] (03/10/2026, mesmo branch: lastmod vem de `lib/seo.ts`) `sitemap.ts` usa `lastModified: now` em todas as URLs: cada build diz que tudo mudou. Bing/IndexNow desconfiam de lastmod que sempre muda; trocar por data real por página (junto com o C3 `dateModified`).
-- [x] Internal linking cruzado entre as 6 comparativas (cluster semântico) ✅ **01/10/2026** (commit `7af39be`, branch `feat/seo-links-cluster` em cima da `feat/rota-service-desk`, **sem deploy**). Componente `components/SiteFooter.tsx` nas 11 páginas de conteúdo (6 comparativas, 4 guias e home): coluna "Compare o SysAid" + coluna "Guias de ITSM", omitindo a própria página. Fica **depois do formulário final** de propósito, pra não vazar conversão das LPs de Ads. Medir 30 dias após o deploy: queda de saída pelo rodapé x formulário (GA4) e páginas comparativas descobertas pelo Google.
-- [ ] Reescrever `alt` descritivo das imagens (`/clientes/*.png`, `/badges/*.svg`)
-- [ ] Submeter pra B2B Stack, Capterra/GetApp BR, G2 (perfil de produto)
-- [ ] Aumentar densidade de dado em `/gestao-de-servicos-de-ti` (Gartner, HDI)
-
-### P2 (30–60 dias)
-- [ ] Diferenciar H1/H2 das 6 comparativas (anti-canibalização)
-- [ ] Avaliar bloco "atualizado em + autor" (E-E-A-T) com Kaique
-- [ ] PageSpeed mobile das 3 páginas-chave
-- [ ] Guest post em 1–2 veículos BR
+Juntado ao backlog único lá em cima em 13/10/2026.
 
 ## O que NÃO fazer (armadilhas detectadas)
 

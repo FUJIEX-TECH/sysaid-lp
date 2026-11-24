@@ -12,11 +12,13 @@ const COMPARATIVAS = [
   { href: "/zendesk", label: "SysAid vs Zendesk" },
   { href: "/jira", label: "SysAid vs Jira Service Management" },
   { href: "/servicenow", label: "SysAid vs ServiceNow" },
+  { href: "/manageengine", label: "SysAid vs ManageEngine" },
 ];
 
 const GUIAS = [
   { href: "/o-que-e-itsm", label: "O que é ITSM" },
   { href: "/service-desk", label: "Service desk" },
+  { href: "/help-desk", label: "Help desk" },
   { href: "/sistema-de-chamados", label: "Sistema de chamados" },
   { href: "/gestao-de-servicos-de-ti", label: "Gestão de serviços de TI" },
   { href: "/esm", label: "ESM: gestão de serviços corporativos" },

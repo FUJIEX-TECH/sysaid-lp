@@ -2,13 +2,15 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import LeadEntry from "@/components/LeadEntry";
+import QuantoCusta from "@/components/QuantoCusta";
 import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
+import { altCliente, altSelo } from "@/lib/marcas";
 
 export const metadata: Metadata = {
-  title: "Alternativa ao Movidesk | ITSM com IA para a sua TI — SysAid Brasil",
+  title: "Alternativa ao Movidesk: ITSM com IA para a TI | SysAid",
   description:
-    "Sua operação cresceu além do Movidesk? Conheça a plataforma ITSM com IA que resolve até 90% dos chamados antes de virarem ticket, com gestão de ativos, SLA e suporte em português.",
+    "Sua operação cresceu além do Movidesk? ITSM com IA que resolve até 90% dos chamados antes de virarem ticket, com ativos, SLA e suporte em português.",
   alternates: { canonical: "/movidesk" },
   openGraph: {
     title: "Alternativa ao Movidesk: ITSM com IA — SysAid Brasil",
@@ -88,12 +90,16 @@ const FAQ = [
     a: "Se a operação é de atendimento ao cliente e o volume é estável, talvez não precise. A troca faz sentido quando a TI vira o usuário principal: aí entram gestão de mudanças, CMDB, vínculo de incidente com ativo, SLA de operação e auditoria, que são o território de uma plataforma ITSM. Nas avaliações públicas da G2, essa diferença aparece: 94 contra 61 em facilidade de uso e 90 contra 63 em gestão de mudanças.",
   },
   {
+    q: "Quanto custa o SysAid?",
+    a: "O SysAid é cotado pelo número de administradores (quem atende os chamados), em três planos, Básico, Completo e Enterprise, com assinatura anual ou licença perpétua, na nuvem ou no seu servidor. A SysAid Brasil não publica tabela de preço: a proposta sai do tamanho do time e dos módulos que entram, e dá para testar todas as funcionalidades por 30 dias sem custo antes de decidir.",
+  },
+  {
     q: "Dá para migrar o histórico de tickets?",
     a: "Sim. Os tickets do Movidesk saem pela API pública com as ações, os anexos e quem atendeu, e entram no SysAid ligados ao solicitante e à categoria nova. O que é histórico de atendimento ao cliente e não interessa à TI pode ficar arquivado fora da migração.",
   },
   {
-    q: "Qual é a diferença prática da IA do SysAid?",
-    a: "O SysAid Copilot não se limita a sugerir texto. Ele entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho, além de sugerir respostas ao agente no que chega ao time. O efeito é o ticket que não precisa existir deixar de existir.",
+    q: "O SysAid é um service desk com IA agêntica, que resolve chamados sozinho?",
+    a: "Sim. O SysAid Copilot é IA agêntica: não se limita a sugerir texto, ele entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho, até 90% antes de virar chamado. A plataforma traz mais de 100 agentes de IA prontos para tarefas de ITSM e um AI Builder no-code para criar novos; o Copilot está incluído na plataforma, sem pacote de créditos. No Movidesk, a IA não é o centro do produto.",
   },
   {
     q: "O suporte também é no Brasil?",
@@ -193,7 +199,7 @@ export default function MovideskPage() {
                 <Image
                   key={c}
                   src={`/clientes/${c}.png`}
-                  alt={c}
+                  alt={altCliente(c)}
                   width={150}
                   height={60}
                   className="proof__logo"
@@ -340,7 +346,7 @@ export default function MovideskPage() {
                 <Image
                   key={b}
                   src={`/badges/${b}.svg`}
-                  alt="Reconhecimento SysAid"
+                  alt={altSelo(b)}
                   width={78}
                   height={78}
                   className="badge"
@@ -349,6 +355,12 @@ export default function MovideskPage() {
             </div>
           </div>
         </section>
+
+        {/* QUANTO CUSTA */}
+        <QuantoCusta
+          concorrente="Movidesk"
+          nota="Não há preço de tabela: a proposta sai depois de entender quantos administradores atendem, quais módulos entram na primeira onda e quanto do histórico do Movidesk vale migrar. Antes de decidir, dá para testar todas as funcionalidades por 30 dias sem custo."
+        />
 
         {/* FAQ */}
         <section className="section">

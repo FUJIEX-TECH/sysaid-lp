@@ -3,11 +3,12 @@ import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
+import { altCliente, altSelo } from "@/lib/marcas";
 
 export const metadata: Metadata = {
-  title: "Alternativa ao Zendesk | ITSM com IA para a sua TI — SysAid Brasil",
+  title: "Alternativa ao Zendesk: ITSM com IA para a TI | SysAid",
   description:
-    "Zendesk é atendimento ao cliente. Sua TI precisa de ITSM. Conheça a plataforma com IA que resolve até 90% dos chamados antes de virarem ticket, com gestão de ativos, SLA e suporte em português.",
+    "Zendesk é atendimento ao cliente; sua TI precisa de ITSM. Plataforma com IA que resolve até 90% dos chamados, com ativos, SLA e suporte em português.",
   alternates: { canonical: "/zendesk" },
   openGraph: {
     title: "Alternativa ao Zendesk: ITSM com IA — SysAid Brasil",
@@ -90,8 +91,8 @@ const FAQ = [
     a: "Sim. Os tickets do Zendesk são exportados com comentários, tags e campos personalizados e importados no SysAid; o número original pode ir num campo de referência, para quem buscar um chamado antigo achar. O diagnóstico define o recorte (todo o histórico ou só os últimos anos) e o que acontece com tickets ainda abertos no dia da virada.",
   },
   {
-    q: "Qual é a diferença prática da IA do SysAid?",
-    a: "O SysAid Copilot não se limita a sugerir texto. Ele entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho, além de sugerir respostas ao agente no que chega ao time. E está incluído na plataforma, sem add-on.",
+    q: "O SysAid é um service desk com IA agêntica, que resolve chamados sozinho?",
+    a: "Sim. O SysAid Copilot é IA agêntica: não se limita a sugerir texto, ele entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho, até 90% antes de virar chamado. A plataforma traz mais de 100 agentes de IA prontos para tarefas de ITSM e um AI Builder no-code para criar novos; o Copilot está incluído na plataforma, sem pacote de créditos. No Zendesk, a IA é um add-on pago.",
   },
   {
     q: "E o custo, como se compara?",
@@ -190,7 +191,7 @@ export default function ZendeskPage() {
                 <Image
                   key={c}
                   src={`/clientes/${c}.png`}
-                  alt={c}
+                  alt={altCliente(c)}
                   width={150}
                   height={60}
                   className="proof__logo"
@@ -338,7 +339,7 @@ export default function ZendeskPage() {
                 <Image
                   key={b}
                   src={`/badges/${b}.svg`}
-                  alt="Reconhecimento SysAid"
+                  alt={altSelo(b)}
                   width={78}
                   height={78}
                   className="badge"

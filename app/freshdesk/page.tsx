@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
+import QuantoCusta from "@/components/QuantoCusta";
 import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
+import { altCliente, altSelo } from "@/lib/marcas";
 
 export const metadata: Metadata = {
-  title: "Alternativa ao Freshdesk e Freshservice | ITSM com IA — SysAid",
+  title: "Alternativa ao Freshdesk e Freshservice com IA | SysAid",
   description:
-    "Freshdesk atende clientes; no Freshservice a IA é adicional por agente. Conheça o ITSM com IA que resolve até 90% dos chamados, com ativos, SLA e suporte em português.",
+    "Freshdesk atende clientes; no Freshservice a IA é adicional por agente. ITSM com IA que resolve até 90% dos chamados, com ativos e suporte em português.",
   alternates: { canonical: "/freshdesk" },
   openGraph: {
     title: "Alternativa ao Freshdesk e ao Freshservice: ITSM com IA — SysAid Brasil",
@@ -86,6 +88,10 @@ const FAQ = [
     a: "Porque help desk de atendimento e ITSM resolvem problemas diferentes. O Freshdesk organiza conversas com clientes; uma plataforma ITSM gerencia o serviço de TI inteiro: incidentes ligados a ativos, mudanças com aprovação, problemas com causa raiz e SLA de operação. Se a sua TI usa uma ferramenta de CX, ela está preenchendo essa lacuna manualmente.",
   },
   {
+    q: "Quanto custa o SysAid?",
+    a: "O SysAid é cotado pelo número de administradores (quem atende os chamados), em três planos, Básico, Completo e Enterprise, com assinatura anual ou licença perpétua, na nuvem ou no seu servidor. A SysAid Brasil não publica tabela de preço: a proposta sai do tamanho do time e dos módulos que entram, e dá para testar todas as funcionalidades por 30 dias sem custo antes de decidir.",
+  },
+  {
     q: "E comparado ao Freshservice, que é o ITSM da mesma suíte?",
     a: "O Freshservice cobre ITSM, mas mantém o modelo da suíte: preço por agente, IA como adicional de US$ 29 por agente ao mês (Freddy AI Copilot, no plano Pro) e gestão de mudanças e problemas só a partir do Pro. No SysAid, Copilot, gestão de ativos e workflows fazem parte da plataforma, com implementação e suporte local em português inclusos. No G2, o SysAid tem nota 4,5/5, com mais de 750 avaliações.",
   },
@@ -94,8 +100,8 @@ const FAQ = [
     a: "Sim. Os tickets saem do Freshdesk pela API, com conversas, notas privadas, tags e campos personalizados, e entram no SysAid com o número original num campo de referência. Se parte da TI já usa o Freshservice, os ativos de lá vêm na mesma carga. O diagnóstico define o recorte do histórico e o que acontece com o que estiver aberto no dia da virada.",
   },
   {
-    q: "Qual é a diferença prática da IA do SysAid?",
-    a: "O SysAid Copilot não se limita a sugerir texto. Ele entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho, além de sugerir respostas ao agente no que chega ao time. E está incluído na plataforma, sem pacote de créditos.",
+    q: "O SysAid é um service desk com IA agêntica, que resolve chamados sozinho?",
+    a: "Sim. O SysAid Copilot é IA agêntica: não se limita a sugerir texto, ele entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho, até 90% antes de virar chamado. A plataforma traz mais de 100 agentes de IA prontos para tarefas de ITSM e um AI Builder no-code para criar novos; o Copilot está incluído na plataforma, sem pacote de créditos. No Freshservice, o Freddy AI Copilot é um adicional de US$ 29 por agente ao mês.",
   },
   {
     q: "Quanto tempo leva a implantação?",
@@ -190,7 +196,7 @@ export default function FreshdeskPage() {
                 <Image
                   key={c}
                   src={`/clientes/${c}.png`}
-                  alt={c}
+                  alt={altCliente(c)}
                   width={150}
                   height={60}
                   className="proof__logo"
@@ -338,7 +344,7 @@ export default function FreshdeskPage() {
                 <Image
                   key={b}
                   src={`/badges/${b}.svg`}
-                  alt="Reconhecimento SysAid"
+                  alt={altSelo(b)}
                   width={78}
                   height={78}
                   className="badge"
@@ -347,6 +353,12 @@ export default function FreshdeskPage() {
             </div>
           </div>
         </section>
+
+        {/* QUANTO CUSTA */}
+        <QuantoCusta
+          concorrente="Freshdesk"
+          nota="No lugar da IA cobrada à parte por agente, Copilot, gestão de ativos e workflows fazem parte da plataforma, sem add-on. A proposta sai do número de administradores e dos módulos da primeira onda, e dá para testar tudo por 30 dias sem custo antes."
+        />
 
         {/* FAQ */}
         <section className="section">

@@ -3,11 +3,12 @@ import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
+import { altCliente, altSelo } from "@/lib/marcas";
 
 export const metadata: Metadata = {
-  title: "Alternativa ao Jira Service Management | ITSM com IA — SysAid Brasil",
+  title: "Alternativa ao Jira Service Management com IA | SysAid",
   description:
-    "IA de nível empresarial numa plataforma tudo em um: o SysAid entrega ITSM completo sem a complexidade e os add-ons do Jira. Gestão de ativos inclusa e suporte em português.",
+    "ITSM completo com IA nativa, sem a complexidade e os add-ons do Jira Service Management. Gestão de ativos inclusa e suporte em português.",
   alternates: { canonical: "/jira" },
   openGraph: {
     title: "Alternativa ao Jira Service Management: ITSM com IA — SysAid Brasil",
@@ -94,8 +95,8 @@ const FAQ = [
     a: "Não. O SysAid inclui funcionalidades críticas como gestão de ativos de TI, automação com IA e integrações, sem taxas surpresa ou add-ons caros. No Jira, muitos recursos importantes exigem a compra de apps adicionais no Atlassian Marketplace, aumentando o custo total.",
   },
   {
-    q: "Quão avançada é a IA do SysAid em comparação com a do Jira?",
-    a: "O SysAid oferece mais de 100 agentes de IA prontos para tarefas de ITSM e um AI Builder no-code para personalização. O Copilot entende o chamado, responde o usuário e executa a resolução sozinho, incluído na plataforma, sem pacote de créditos.",
+    q: "O SysAid é um service desk com IA agêntica, que resolve chamados sozinho?",
+    a: "Sim. O SysAid Copilot é IA agêntica: não se limita a sugerir texto, ele entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho, até 90% antes de virar chamado. A plataforma traz mais de 100 agentes de IA prontos para tarefas de ITSM e um AI Builder no-code para criar novos; o Copilot está incluído na plataforma, sem pacote de créditos. No Jira Service Management, a IA varia por plano e consome créditos.",
   },
   {
     q: "E se o time de desenvolvimento continuar no Jira Software?",
@@ -191,7 +192,7 @@ export default function JiraPage() {
                 <Image
                   key={c}
                   src={`/clientes/${c}.png`}
-                  alt={c}
+                  alt={altCliente(c)}
                   width={150}
                   height={60}
                   className="proof__logo"
@@ -289,7 +290,7 @@ export default function JiraPage() {
               usuários na G2.com.
             </p>
             <p className="section-head__sub" style={{ marginTop: 32 }}>
-              O Jira Service Management faz sentido quando o time de desenvolvimento já vive no Jira; para a TI de infraestrutura e suporte, o peso está em ativos, SLA e autoatendimento. O guia de <a href="/service-desk">service desk</a> detalha esses pontos, e a página de <a href="/esm">ESM</a> mostra como estender o atendimento para outras áreas. Outras comparações: <a href="/topdesk">SysAid x TOPdesk</a> e <a href="/zendesk">SysAid x Zendesk</a>.
+              O Jira Service Management faz sentido quando o time de desenvolvimento já vive no Jira; para a TI de infraestrutura e suporte, o peso está em ativos, SLA e autoatendimento. O guia de <a href="/service-desk">service desk</a> detalha esses pontos, e a página de <a href="/esm">ESM</a> mostra como estender o atendimento para outras áreas. Outras comparações: <a href="/topdesk">SysAid x TOPdesk</a>, <a href="/manageengine">SysAid x ManageEngine</a> e <a href="/zendesk">SysAid x Zendesk</a>.
             </p>
           </div>
         </section>
@@ -339,7 +340,7 @@ export default function JiraPage() {
                 <Image
                   key={b}
                   src={`/badges/${b}.svg`}
-                  alt="Reconhecimento SysAid"
+                  alt={altSelo(b)}
                   width={78}
                   height={78}
                   className="badge"

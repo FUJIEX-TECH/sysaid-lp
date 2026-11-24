@@ -3,6 +3,7 @@ import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
+import { altCliente, altSelo } from "@/lib/marcas";
 
 // Comparativa nova (7c, spec em clientes/sysaid/_growth/spec-7c-freshservice.md, 08/10/2026).
 // Alvo: quem avalia o Freshservice ("freshservice pricing", "freshservice itsm", "freshservice demo"),
@@ -112,6 +113,10 @@ const FAQ = [
     q: "Como migrar do Freshservice para a SysAid?",
     a: "Chamados, usuários, categorias e ativos saem do Freshservice pela API e entram na SysAid com o número original como referência. Integrações feitas pela orquestração viram automações configuradas em tela. O diagnóstico inicial define o recorte do histórico e o prazo antes de começar.",
   },
+  {
+    q: "O SysAid é um service desk com IA agêntica, que resolve chamados sozinho?",
+    a: "Sim. O SysAid Copilot é IA agêntica: não se limita a sugerir texto, ele entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho, até 90% antes de virar chamado. A plataforma traz mais de 100 agentes de IA prontos para tarefas de ITSM e um AI Builder no-code para criar novos; o Copilot está incluído na plataforma, sem pacote de créditos. No Freshservice, o Freddy AI Copilot é um adicional de US$ 29 por agente ao mês, em cima do Pro ou do Enterprise.",
+  },
 ];
 
 const faqSchema = {
@@ -201,7 +206,7 @@ export default function FreshservicePage() {
                 <Image
                   key={c}
                   src={`/clientes/${c}.png`}
-                  alt={c}
+                  alt={altCliente(c)}
                   width={150}
                   height={60}
                   className="proof__logo"
@@ -421,7 +426,7 @@ export default function FreshservicePage() {
                 <Image
                   key={b}
                   src={`/badges/${b}.svg`}
-                  alt="Reconhecimento SysAid"
+                  alt={altSelo(b)}
                   width={78}
                   height={78}
                   className="badge"

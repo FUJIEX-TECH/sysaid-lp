@@ -3,11 +3,12 @@ import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
+import { altCliente, altSelo } from "@/lib/marcas";
 
 export const metadata: Metadata = {
-  title: "Alternativa ao GLPI | ITSM com IA que resolve o chamado — SysAid Brasil",
+  title: "Alternativa ao GLPI: ITSM com IA e suporte local | SysAid",
   description:
-    "Roda GLPI e a TI segue apagando incêndio? Conheça a plataforma ITSM com IA que resolve até 90% dos chamados antes de virarem ticket, com gestão de ativos, SLA e suporte local em português.",
+    "Roda GLPI e a TI segue apagando incêndio? ITSM com IA que resolve até 90% dos chamados antes de virarem ticket, com ativos, SLA e suporte em português.",
   alternates: { canonical: "/glpi" },
   openGraph: {
     title: "Alternativa ao GLPI: ITSM com IA — SysAid Brasil",
@@ -87,12 +88,16 @@ const FAQ = [
     a: "A licença é gratuita, a operação não. Somando servidor, atualizações de versão, compatibilidade de plugins e as horas da sua equipe mantendo a ferramenta, existe um custo real que não aparece na fatura. A conta que importa é o custo total: quanto a sua TI gasta para manter a ferramenta de pé, e quanto ela deixa de resolver enquanto faz isso.",
   },
   {
+    q: "O GLPI 10 ainda tem suporte?",
+    a: "Não. A versão 10.0.28, de 30/09/2026, foi anunciada pelo projeto GLPI como a última da linha 10.0, que deixa de receber correções. O GLPI 12.0.0 saiu em 07/10/2026 e as correções seguem só nas linhas 11 e 12 (as versões 11.0.13 e 12.0.2 saíram em 12/11/2026, sem equivalente para o 10). Quem está no GLPI 10 precisa escolher entre migrar para o 11 ou o 12, revalidando servidor e plugins, ou aproveitar a migração obrigatória para avaliar outra plataforma.",
+  },
+  {
     q: "Dá para migrar o histórico de chamados e o inventário?",
     a: "Sim. Chamados, categorias, usuários e ativos são importados na migração. O diagnóstico inicial define exatamente o que vem, em que formato e em qual ordem, para o go live não perder rastreabilidade.",
   },
   {
-    q: "Qual é a diferença prática da IA do SysAid?",
-    a: "O SysAid Copilot não se limita a sugerir texto. Ele entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho, além de sugerir respostas ao agente no que chega ao time. O efeito é o ticket que não precisa existir deixar de existir.",
+    q: "O SysAid é um service desk com IA agêntica, que resolve chamados sozinho?",
+    a: "Sim. O SysAid Copilot é IA agêntica: não se limita a sugerir texto, ele entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho, até 90% antes de virar chamado. A plataforma traz mais de 100 agentes de IA prontos para tarefas de ITSM e um AI Builder no-code para criar novos; o Copilot está incluído na plataforma, sem pacote de créditos. No GLPI, não há IA nativa que resolva o chamado.",
   },
   {
     q: "Nossa TI já customizou muito o GLPI. Isso se perde?",
@@ -191,7 +196,7 @@ export default function GlpiPage() {
                 <Image
                   key={c}
                   src={`/clientes/${c}.png`}
-                  alt={c}
+                  alt={altCliente(c)}
                   width={150}
                   height={60}
                   className="proof__logo"
@@ -293,6 +298,41 @@ export default function GlpiPage() {
           </div>
         </section>
 
+        {/* FIM DO GLPI 10 */}
+        <section className="section">
+          <div className="container">
+            <div className="section-head">
+              <p className="eyebrow">Fim do GLPI 10</p>
+              <h2>O GLPI 10 parou de receber correções. A migração já é obrigatória</h2>
+              <p className="section-head__sub">
+                Em 30/09/2026 o projeto GLPI publicou a versão 10.0.28 e
+                avisou que ela é a última da linha 10.0. Em 07/10/2026 saiu o
+                GLPI 12, e desde então as correções de segurança chegam só nas
+                linhas 11 e 12. Quem segue no 10 roda sem patch.
+              </p>
+            </div>
+            <div className="grid-3">
+              <div className="card">
+                <h3>Ficar no GLPI 10</h3>
+                <p>Nenhuma correção nova, nem de segurança. Cada falha publicada daqui para frente fica aberta no seu servidor.</p>
+              </div>
+              <div className="card">
+                <h3>Subir para o 11 ou o 12</h3>
+                <p>É um projeto de upgrade: requisitos novos de servidor, plugins revalidados um a um, teste e janela de parada. E daqui a uma versão, o ciclo se repete.</p>
+              </div>
+              <div className="card">
+                <h3>Trocar de plataforma</h3>
+                <p>Se a migração é obrigatória de qualquer jeito, ela pode levar a TI para um ITSM em nuvem, com IA nativa e suporte em português, sem upgrade para manter.</p>
+              </div>
+            </div>
+            <p className="ctable__note">
+              Fontes: anúncio da versão 10.0.28 no blog oficial do GLPI
+              (glpi-project.org, 30/09/2026) e histórico de versões do
+              repositório oficial no GitHub, consultado em 13/11/2026.
+            </p>
+          </div>
+        </section>
+
         {/* MIGRAÇÃO */}
         <section className="section">
           <div className="container">
@@ -338,7 +378,7 @@ export default function GlpiPage() {
                 <Image
                   key={b}
                   src={`/badges/${b}.svg`}
-                  alt="Reconhecimento SysAid"
+                  alt={altSelo(b)}
                   width={78}
                   height={78}
                   className="badge"

@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
+import QuantoCusta from "@/components/QuantoCusta";
 import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
+import { altCliente, altSelo } from "@/lib/marcas";
 
 export const metadata: Metadata = {
-  title: "Alternativa ao TopDesk | ITSM com IA para a sua TI — SysAid Brasil",
+  title: "Alternativa ao TopDesk: ITSM com IA para a TI | SysAid",
   description:
-    "TopDesk é forte em CMDB e Asset Management, mas a resolução ainda depende do analista. Conheça a plataforma ITSM com IA que resolve até 90% dos chamados antes de virarem ticket, com suporte em português.",
+    "TopDesk é forte em CMDB e ativos, mas a resolução ainda depende do analista. ITSM com IA que resolve até 90% dos chamados, com suporte em português.",
   alternates: { canonical: "/topdesk" },
   openGraph: {
     title: "Alternativa ao TopDesk: ITSM com IA — SysAid Brasil",
@@ -86,12 +88,16 @@ const FAQ = [
     a: "Porque o TopDesk registra e relaciona bem os ativos, mas a resolução do chamado continua manual. O SysAid Copilot entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho — o CMDB deixa de ser só um cadastro e passa a alimentar automação de verdade.",
   },
   {
+    q: "Quanto custa o SysAid?",
+    a: "O SysAid é cotado pelo número de administradores (quem atende os chamados), em três planos, Básico, Completo e Enterprise, com assinatura anual ou licença perpétua, na nuvem ou no seu servidor. A SysAid Brasil não publica tabela de preço: a proposta sai do tamanho do time e dos módulos que entram, e dá para testar todas as funcionalidades por 30 dias sem custo antes de decidir.",
+  },
+  {
     q: "Dá para migrar o CMDB e os ativos já cadastrados?",
     a: "Sim. Ativos, relações de CMDB, chamados, categorias e usuários são importados na migração. O diagnóstico inicial mapeia exatamente a estrutura que você já modelou no TopDesk para reaproveitar esse trabalho, não recomeçar do zero.",
   },
   {
-    q: "Qual é a diferença prática da IA do SysAid?",
-    a: "O SysAid Copilot não se limita a sugerir texto ou automatizar um workflow fixo. Ele entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho, além de sugerir respostas ao agente no que chega ao time — e está incluído na plataforma, sem add-on.",
+    q: "O SysAid é um service desk com IA agêntica, que resolve chamados sozinho?",
+    a: "Sim. O SysAid Copilot é IA agêntica: não se limita a sugerir texto, ele entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho, até 90% antes de virar chamado. A plataforma traz mais de 100 agentes de IA prontos para tarefas de ITSM e um AI Builder no-code para criar novos; o Copilot está incluído na plataforma, sem pacote de créditos. No TopDesk, o foco é o ITSM tradicional, forte em CMDB, mas a resolução do chamado continua manual.",
   },
   {
     q: "E o custo, como se compara?",
@@ -190,7 +196,7 @@ export default function TopDeskPage() {
                 <Image
                   key={c}
                   src={`/clientes/${c}.png`}
-                  alt={c}
+                  alt={altCliente(c)}
                   width={150}
                   height={60}
                   className="proof__logo"
@@ -339,7 +345,7 @@ export default function TopDeskPage() {
                 <Image
                   key={b}
                   src={`/badges/${b}.svg`}
-                  alt="Reconhecimento SysAid"
+                  alt={altSelo(b)}
                   width={78}
                   height={78}
                   className="badge"
@@ -348,6 +354,12 @@ export default function TopDeskPage() {
             </div>
           </div>
         </section>
+
+        {/* QUANTO CUSTA */}
+        <QuantoCusta
+          concorrente="TopDesk"
+          nota="No lugar de tiers que sobem por agente, Copilot, gestão de ativos e workflows fazem parte da plataforma, sem add-on. A proposta sai do número de administradores e dos módulos da primeira onda, e dá para testar tudo por 30 dias sem custo antes."
+        />
 
         {/* FAQ */}
         <section className="section">

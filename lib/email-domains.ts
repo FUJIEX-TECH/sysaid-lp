@@ -34,6 +34,9 @@ export const DISPOSABLE_EMAIL_DOMAINS = new Set([
   "dispostable.com", "trashmail.com", "getnada.com", "maildrop.cc",
   "fakeinbox.com", "mytemp.email", "moakt.com", "emailondeck.com",
   "spamgourmet.com", "mailnesia.com", "tempr.email", "discard.email",
+  // visto num "lead completo" falso em 04/11/2026; a lista inteira (~10 mil)
+  // fica só no servidor: lib/email-domains-server.ts
+  "uorak.com",
 ]);
 
 export function getEmailDomain(email: string): string {

@@ -3,6 +3,7 @@ import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
 import { datasDaPagina } from "@/lib/seo";
+import { altCliente, altSelo } from "@/lib/marcas";
 
 // Comparativa nova (7c, spec em clientes/sysaid/_growth/spec-7c-servicenow.md, 06/10/2026).
 // Alvo: quem avalia o ServiceNow para ITSM ("itsm servicenow", "o que é servicenow", "servicenow preço"),
@@ -10,7 +11,7 @@ import { datasDaPagina } from "@/lib/seo";
 export const metadata: Metadata = {
   title: "ServiceNow ITSM: o que é, preço e alternativa | SysAid",
   description:
-    "O que é o ServiceNow, como ele cobra e quando faz sentido. Compare com a SysAid: ITSM com ITIL 4, CMDB e IA, sem projeto de plataforma e com suporte em português.",
+    "O que é o ServiceNow, como ele cobra e quando faz sentido. Compare com a SysAid: ITSM com ITIL 4, CMDB e IA, sem projeto de plataforma e em português.",
   alternates: { canonical: "/servicenow" },
   openGraph: {
     title: "Alternativa ao ServiceNow para ITSM — SysAid Brasil",
@@ -105,6 +106,10 @@ const FAQ = [
     q: "É difícil migrar do ServiceNow para a SysAid?",
     a: "Depende de quanto a sua instância foi customizada. Chamados, usuários, categorias e itens do CMDB migram; fluxos escritos sob medida são refeitos como automações por configuração na SysAid. O diagnóstico inicial mapeia isso e define o prazo antes de começar.",
   },
+  {
+    q: "O SysAid é um service desk com IA agêntica, que resolve chamados sozinho?",
+    a: "Sim. O SysAid Copilot é IA agêntica: não se limita a sugerir texto, ele entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho, até 90% antes de virar chamado. A plataforma traz mais de 100 agentes de IA prontos para tarefas de ITSM e um AI Builder no-code para criar novos; o Copilot está incluído na plataforma, sem pacote de créditos. No ServiceNow, a IA generativa (Now Assist) fica nos pacotes superiores.",
+  },
 ];
 
 const faqSchema = {
@@ -195,7 +200,7 @@ export default function ServiceNowPage() {
                 <Image
                   key={c}
                   src={`/clientes/${c}.png`}
-                  alt={c}
+                  alt={altCliente(c)}
                   width={150}
                   height={60}
                   className="proof__logo"
@@ -350,8 +355,9 @@ export default function ServiceNowPage() {
               Pra montar a sua régua de avaliação: os processos do ITIL 4 no
               guia de <a href="/gestao-de-servicos-de-ti">gestão de serviços de TI</a>,
               o papel do <a href="/service-desk">service desk</a> na operação e,
-              na mesma faixa de mercado, <a href="/topdesk">SysAid x TOPdesk</a> e{" "}
-              <a href="/jira">SysAid x Jira Service Management</a>.
+              na mesma faixa de mercado, <a href="/topdesk">SysAid x TOPdesk</a>,{" "}
+              <a href="/jira">SysAid x Jira Service Management</a> e{" "}
+              <a href="/manageengine">SysAid x ManageEngine ServiceDesk Plus</a>.
             </p>
           </div>
         </section>
@@ -377,7 +383,7 @@ export default function ServiceNowPage() {
                 <Image
                   key={b}
                   src={`/badges/${b}.svg`}
-                  alt="Reconhecimento SysAid"
+                  alt={altSelo(b)}
                   width={78}
                   height={78}
                   className="badge"

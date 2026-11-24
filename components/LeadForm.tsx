@@ -6,20 +6,12 @@ import {
   isFreeEmail,
   CORPORATE_EMAIL_ERROR,
 } from "@/lib/email-domains";
+import { getUtm } from "@/lib/utm";
 
 type Props = {
   variant?: "hero" | "final";
   submitLabel?: string;
 };
-
-const UTM_KEYS = [
-  "utm_source",
-  "utm_medium",
-  "utm_campaign",
-  "utm_content",
-  "utm_term",
-  "gclid",
-] as const;
 
 // sugestao heuristica de nome de empresa a partir do dominio do e-mail
 // corporativo. Nao é enriquecimento real (sem API paga) - so um chute
@@ -35,16 +27,6 @@ function suggestCompanyFromEmail(email: string): string {
     .filter(Boolean)
     .map((w) => w[0].toUpperCase() + w.slice(1))
     .join(" ");
-}
-
-function getUtm(): Record<string, string> {
-  const params = new URLSearchParams(window.location.search);
-  const found: Record<string, string> = {};
-  for (const k of UTM_KEYS) {
-    const v = params.get(k);
-    if (v) found[k] = v;
-  }
-  return found;
 }
 
 export default function LeadForm({ variant = "hero", submitLabel }: Props) {
@@ -200,7 +182,10 @@ export default function LeadForm({ variant = "hero", submitLabel }: Props) {
       }
       // marca o envio para a /obrigado disparar a conversao, e redireciona.
       // Envio descartado pelo honeypot (hp) nao vira conversao: nao entrou no banco.
-      if (!data.hp) sessionStorage.setItem("sysaid_lead", "1");
+      // Guarda o id do lead: a /obrigado manda como transaction_id pro Google Ads, o que
+      // permite retirar pela API uma conversao que se prove falsa (sem Order ID o Google
+      // recusa o ajuste: "Adjustment for website conversion requires Order ID", 14/11/2026).
+      if (!data.hp) sessionStorage.setItem("sysaid_lead", data.id ? `lead:${data.id}` : "1");
       window.location.href = "/obrigado";
     } catch {
       setError("Erro de conexão. Tente novamente em instantes.");

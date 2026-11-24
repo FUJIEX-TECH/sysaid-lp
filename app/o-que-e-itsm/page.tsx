@@ -3,11 +3,12 @@ import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import SiteFooter from "@/components/SiteFooter";
 import { breadcrumbSchema, datasDaPagina, ORG_ID } from "@/lib/seo";
+import { altCliente } from "@/lib/marcas";
 
 export const metadata: Metadata = {
-  title: "O que é ITSM? Conceito, ITIL e Como Escolher uma Plataforma | SysAid Brasil",
+  title: "O que é ITSM? Conceito, ITIL e como escolher | SysAid",
   description:
-    "ITSM é a gestão de serviços de TI: processos, papéis e ferramentas para entregar TI como serviço. Entenda o conceito, a relação com ITIL, os processos principais e como escolher uma plataforma.",
+    "ITSM é a gestão de serviços de TI: processos, papéis e ferramentas para entregar TI como serviço. Conceito, relação com ITIL e como escolher a plataforma.",
   alternates: { canonical: "/o-que-e-itsm" },
   openGraph: {
     title: "O que é ITSM? Conceito, ITIL e Como Escolher uma Plataforma",
@@ -340,7 +341,7 @@ export default function OQueEItsmPage() {
                 <Image
                   key={c}
                   src={`/clientes/${c}.png`}
-                  alt={c}
+                  alt={altCliente(c)}
                   width={150}
                   height={60}
                   className="proof__logo"
