@@ -29,24 +29,26 @@ export const LINK_SUPORTE = "https://www.sysaid.com/support";
 // --------------------------------------------------------------------------
 // 1. Concorrentes com página comparativa na LP (slug = rota /<slug> e ?de=<slug>)
 // --------------------------------------------------------------------------
-export type Concorrente = { slug: string; nome: string; termos: string[] };
+// `curto`: como chamar depois da 1ª menção (ex.: "Jira" no lugar de "Jira Service Management")
+export type Concorrente = { slug: string; nome: string; termos: string[]; curto?: string };
 export const CONCORRENTES: Concorrente[] = [
   { slug: "movidesk", nome: "Movidesk", termos: ["movidesk", "movi desk"] },
   { slug: "topdesk", nome: "TOPdesk", termos: ["topdesk", "top desk"] },
   { slug: "freshdesk", nome: "Freshdesk", termos: ["freshdesk", "fresh desk"] },
   { slug: "freshservice", nome: "Freshservice", termos: ["freshservice", "fresh service"] },
   { slug: "glpi", nome: "GLPI", termos: ["glpi"] },
-  { slug: "jira", nome: "Jira Service Management", termos: ["jira"] },
+  { slug: "jira", nome: "Jira Service Management", termos: ["jira"], curto: "Jira" },
   { slug: "zendesk", nome: "Zendesk", termos: ["zendesk"] },
   { slug: "servicenow", nome: "ServiceNow", termos: ["servicenow", "service now"] },
   { slug: "manageengine", nome: "ManageEngine ServiceDesk Plus", termos: ["manageengine", "manage engine", "servicedesk plus"] },
 ];
+export const nomeCurtoConcorrente = (nome: string | null | undefined): string => (nome ? CONCORRENTES.find((c) => c.nome === nome)?.curto ?? nome : "");
 export const concorrentePorSlug = (slug: string | null | undefined): Concorrente | undefined => CONCORRENTES.find((c) => c.slug === slug);
 
 export const ORIGENS_REGRAS: OrigemRegra[] = [
   // comparativa: página /movidesk, página de entrada, ?de=movidesk, termo/anúncio/campanha com o nome, ou veio da comparativa
   ...CONCORRENTES.map(
-    ({ slug, nome, termos }): OrigemRegra => ({
+    ({ slug, nome, termos, curto }): OrigemRegra => ({
       id: `comp-${slug}`,
       quando: {
         alguma: [
@@ -60,7 +62,7 @@ export const ORIGENS_REGRAS: OrigemRegra[] = [
         ],
       },
       origem: "comparativa",
-      variaveis: { concorrente: nome, slug },
+      variaveis: { concorrente: nome, concorrente_curto: curto ?? nome, slug },
     })
   ),
   // marca: campanha Brand ou termo com "sysaid" (quem já conhece; muitas vezes cliente querendo suporte)
@@ -84,7 +86,7 @@ export const ORIGENS_SYSAID = {
   padrao: "generica",
   lembrar: "qualifica_sysaid",
   regras: ORIGENS_REGRAS,
-  porSlug: Object.fromEntries(CONCORRENTES.map((c) => [c.slug, { origem: "comparativa", variaveis: { concorrente: c.nome, slug: c.slug } }])),
+  porSlug: Object.fromEntries(CONCORRENTES.map((c) => [c.slug, { origem: "comparativa", variaveis: { concorrente: c.nome, concorrente_curto: c.curto ?? c.nome, slug: c.slug } }])),
 };
 
 // --------------------------------------------------------------------------
@@ -213,7 +215,7 @@ export const ABERTURA_ORIGENS: Texto[] = [
   {
     padrao: "No fim você leva o mapa do seu caso: quanto tempo isso tira do time e por onde começar.",
     casos: [
-      { quando: COMP, texto: "O que está pesando aí tem jeito. No fim você leva o documento do seu caso: o que muda saindo do {{concorrente}} e por onde começar." },
+      { quando: COMP, texto: "O que está pesando aí tem jeito. No fim você leva o documento do seu caso: o que muda saindo do {{concorrente_curto}} e por onde começar." },
       { quando: BRAND, texto: "Suporte, módulos novos ou troca de ferramenta: me diz o que você precisa e eu te levo pro caminho certo." },
       { quando: PRECO, texto: "O investimento sai do tamanho do time, então primeiro o que pesa aí. No fim você leva o mapa do seu caso." },
     ],
@@ -223,8 +225,8 @@ export const ABERTURA_ORIGENS: Texto[] = [
 export const FRASE_CABECALHO_ORIGENS: Texto = {
   padrao: "Atendimento de TI sem chamado perdido.",
   casos: [
-    { quando: COMP_PRECO, texto: "O que muda na conta se você sair do {{concorrente}}." },
-    { quando: COMP, texto: "O que muda se você sair do {{concorrente}}." },
+    { quando: COMP_PRECO, texto: "O que muda na conta se você sair do {{concorrente_curto}}." },
+    { quando: COMP, texto: "O que muda se você sair do {{concorrente_curto}}." },
     { quando: BRAND, texto: "Suporte, módulos novos ou troca de ferramenta." },
     { quando: PRECO, texto: "Primeiro o que a sua TI precisa, depois o investimento." },
   ],
@@ -233,7 +235,7 @@ export const FRASE_CABECALHO_ORIGENS: Texto = {
 export const PERGUNTA1_ORIGENS: Texto = {
   padrao: "Qual é o maior problema no atendimento de TI aí hoje?",
   casos: [
-    { quando: COMP, texto: "O que está pesando no {{concorrente}} hoje?" },
+    { quando: COMP, texto: "O que está pesando no {{concorrente_curto}} hoje?" },
     { quando: BRAND, texto: "Como está o atendimento de TI aí hoje?" },
     { quando: PRECO, texto: "Antes do investimento: qual é o maior problema no atendimento de TI aí hoje?" },
   ],

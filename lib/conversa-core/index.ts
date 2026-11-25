@@ -51,7 +51,7 @@ export {
 } from "./horarios";
 // 18/11/2026: reações a um assunto trazido em qualquer passo (objeção etc.)
 export { chaveReacao, decidirReacao, reacaoValeNaEtapa, textoLivre } from "./reacoes";
-export { mascararTexto, padraoTermo, mascaraDaEntrega, mascararMapa } from "./mascara";
+export { mascararTexto, padraoTermo, mascaraDaEntrega, mascaraDoMapa, mascararMapa } from "./mascara";
 export { resolverDocumento, type DocumentoPronto, type SecaoPronta } from "./documento";
 export { dominioDe, pedirEmpresa } from "./enriquecimento";
 export { comTimeout, rotularComJev, pedirGeracao, novaSessao } from "./jev";

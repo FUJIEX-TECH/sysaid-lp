@@ -792,4 +792,6 @@ export const MASCARA_PDF: MascaraConfig = {
     "o nosso": `a nossa ${FERRAMENTA}`, "a nossa": `a nossa ${FERRAMENTA}`, "do nosso": `da nossa ${FERRAMENTA}`, "da nossa": `da nossa ${FERRAMENTA}`,
     "no nosso": `na nossa ${FERRAMENTA}`, "na nossa": `na nossa ${FERRAMENTA}`, nosso: `nossa ${FERRAMENTA}`, nossa: `nossa ${FERRAMENTA}`,
   },
+  // no mapa: "Fujiex · Movidesk hoje" vira "Fujiex · ferramenta atual" (e não "· a ferramenta atual hoje")
+  mapa: { por: FERRAMENTA, tirar: /(?<=ferramenta atual)\s+hoje\b/giu },
 };

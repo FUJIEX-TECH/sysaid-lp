@@ -5,7 +5,7 @@ import Resumo from "./Resumo";
 import Mapa from "./graficos/Mapa";
 import Cartao from "./graficos/Cartao";
 import { resolverDocumento, type SecaoPronta } from "../documento";
-import { mascaraDaEntrega, mascararMapa } from "../mascara";
+import { mascaraDaEntrega, mascaraDoMapa, mascararMapa } from "../mascara";
 import type { CartaoPronto } from "../cartoes";
 import type { Motor } from "../motor";
 import type { ConfigConversa, Contexto } from "../tipos";
@@ -72,7 +72,7 @@ function Secao({ s, config, motor, ctx }: { s: SecaoPronta; config: ConfigConver
       {s.tipo === "mapa" &&
         (() => {
           const m = motor.mapaVisual(ctx);
-          return m ? <Mapa mapa={config.entrega?.mascarar ? mascararMapa(m, mascaraDaEntrega(config, ctx)) : m} escalonado /> : null;
+          return m ? <Mapa mapa={config.entrega?.mascarar ? mascararMapa(m, mascaraDoMapa(config, ctx)) : m} escalonado /> : null;
         })()}
       {s.tipo === "resumo" && config.resumo && <Resumo config={config.resumo} ctx={ctx} motor={motor} mascarar={mascaraDaEntrega(config, ctx)} />}
       {s.tipo === "cartoes" && (

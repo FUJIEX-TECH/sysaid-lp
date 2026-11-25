@@ -73,6 +73,19 @@ export function mascaraDaEntrega(config: ConfigConversa, ctx: Contexto): (t: str
   return (t) => (t ? mascararTexto(t, termos, m) : t);
 }
 
+// a troca dos rótulos do mapa: a mesma lista de termos, com a troca curta de
+// `mascarar.mapa` quando houver (só depois de ter trocado algum termo)
+export function mascaraDoMapa(config: ConfigConversa, ctx: Contexto): (t: string) => string {
+  const m = config.entrega?.mascarar;
+  if (!m?.mapa) return mascaraDaEntrega(config, ctx);
+  const x = mascaraDaEntrega({ ...config, entrega: { ...config.entrega!, mascarar: { ...m, por: m.mapa.por ?? m.por } } }, ctx);
+  const tirar = m.mapa.tirar;
+  return (t) => {
+    const y = x(t);
+    return tirar && y !== t ? y.replace(tirar, "").replace(/\s{2,}/g, " ").trim() : y;
+  };
+}
+
 export function mascararMapa(mapa: Mapa, x: (t: string) => string): Mapa {
   return {
     ...mapa,

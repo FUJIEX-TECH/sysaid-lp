@@ -17,7 +17,7 @@
 
 import { REACAO_CUSTO_ANTERIOR } from "@/lib/diagnostico/custo-sysaid";
 import { MASCARA_PDF, termosConcorrente } from "@/lib/diagnostico/generica-sysaid";
-import { LINK_SUPORTE, ORIGENS_SYSAID } from "@/lib/diagnostico/origens-sysaid";
+import { LINK_SUPORTE, ORIGENS_SYSAID, nomeCurtoConcorrente } from "@/lib/diagnostico/origens-sysaid";
 import type { ConfigConversa, Contexto, Opcao } from "@/lib/conversa-core";
 import { sugerirEmpresa, sugerirNome, primeiroNome } from "@/lib/conversa-core";
 import { isCorporateEmail } from "@/lib/email-domains";
@@ -325,6 +325,8 @@ export const configSysaid: ConfigConversa = {
   },
 
   variaveis: {
+    // o concorrente depois da 1ª menção ("Jira" no lugar de "Jira Service Management")
+    concorrente_curto: (ctx) => nomeCurtoConcorrente(ctx.variaveis.concorrente),
     ferramenta_rotulo: rotuloFerramenta,
     atual: nomeAtual,
     atual_mapa: atualNoMapa,

@@ -706,6 +706,9 @@ export type MascaraConfig = {
   por: string; // ex.: "a ferramenta atual"
   // palavra logo antes do termo → troca inteira (ex.: { do: "da ferramenta atual" })
   contracoes?: Record<string, string>;
+  // rótulos do mapa são curtos e sem frase: troca própria e o que tirar depois
+  // (ex.: "Fujiex · Movidesk hoje" → "Fujiex · ferramenta atual"; 25/11/2026)
+  mapa?: { por?: string; tirar?: RegExp };
 };
 
 export type DocumentoConfig = {
