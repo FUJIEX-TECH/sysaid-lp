@@ -17,7 +17,7 @@ type Pagina = {
 export const PAGINAS: Record<string, Pagina> = {
   "/": { nome: "SysAid Brasil", publicado: "2026-07-24", modificado: "2026-10-04", prioridade: 1, frequencia: "weekly" },
   "/sistema-de-chamados": { nome: "Sistema de chamados", publicado: "2026-08-04", modificado: "2026-11-20", prioridade: 0.9, frequencia: "monthly" },
-  "/o-que-e-itsm": { nome: "O que é ITSM", publicado: "2026-08-04", modificado: "2026-10-06", prioridade: 0.8, frequencia: "monthly" },
+  "/o-que-e-itsm": { nome: "O que é ITSM", publicado: "2026-08-04", modificado: "2026-11-24", prioridade: 0.8, frequencia: "monthly" },
   "/service-desk": { nome: "Service desk", publicado: "2026-09-30", modificado: "2026-11-22", prioridade: 0.8, frequencia: "monthly" },
   "/help-desk": { nome: "Help desk", publicado: "2026-10-28", modificado: "2026-11-24", prioridade: 0.8, frequencia: "monthly" },
   "/gestao-de-servicos-de-ti": { nome: "Gestão de serviços de TI", publicado: "2026-08-13", modificado: "2026-11-23", prioridade: 0.8, frequencia: "monthly" },
