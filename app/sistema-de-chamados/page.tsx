@@ -139,6 +139,12 @@ const FAQ = [
   {
     q: "Qual a diferença entre sistema de chamados, help desk e service desk?",
     a: "O sistema de chamados é a base: registra e organiza os pedidos. O help desk é o time e o processo que atendem esses chamados, focados em resolver o incidente do usuário. O service desk é mais amplo: além dos chamados, cobre gestão de ativos, mudanças, SLAs e a operação de TI como um todo, alinhada à ITIL. O SysAid entrega os três na mesma plataforma, então a empresa não troca de ferramenta quando a operação amadurece.",
+    leia: (
+      <>
+        Em detalhe: <a href="/help-desk">o que é help desk</a> e{" "}
+        <a href="/service-desk">o que é service desk</a>.
+      </>
+    ),
   },
   {
     q: "Dá para migrar o que a gente já controla em planilha?",
@@ -515,6 +521,7 @@ export default function SistemaDeChamadosPage() {
                 <details className="faq__item" key={item.q}>
                   <summary>{item.q}</summary>
                   <p>{item.a}</p>
+                  {item.leia && <p>{item.leia}</p>}
                 </details>
               ))}
             </div>
