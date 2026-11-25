@@ -208,7 +208,8 @@ export default function OQueEItsmPage() {
                 Os quatro termos aparecem juntos e são tratados como sinônimos,
                 mas descrevem camadas diferentes. Entender a diferença evita
                 comprar a ferramenta errada para o problema que se tem. Quem
-                quiser a camada do meio em detalhe pode ler o guia sobre{" "}
+                quiser as camadas do meio em detalhe pode ler os guias sobre{" "}
+                <a href="/help-desk">help desk</a> e{" "}
                 <a href="/service-desk">service desk</a>. E quando o mesmo
                 modelo sai da TI e vai para RH, Facilities e Financeiro, o
                 nome muda para <a href="/esm">ESM</a>, a gestão de serviços
