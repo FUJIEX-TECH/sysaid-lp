@@ -8,10 +8,13 @@ import { altCliente, altSelo } from "@/lib/marcas";
 // Comparativa nova (7c, spec em clientes/sysaid/_growth/spec-7c-servicenow.md, 06/10/2026).
 // Alvo: quem avalia o ServiceNow para ITSM ("itsm servicenow", "o que é servicenow", "servicenow preço"),
 // não o "servicenow" seco, que é login de funcionário. O ServiceNow não publica preço: não inventar número.
+// v2 (28/11/2026, plano em _growth/plano-servicenow-2026-11-28.md): camada informacional (definição, como
+// funciona, pacotes de ITSM, custo da licença) e pacotes novos de 09/04/2026 (Foundation, Advanced, Prime),
+// conferidos na página oficial servicenow.com/products/itsm/pricing.html em 28/11/2026.
 export const metadata: Metadata = {
-  title: "ServiceNow ITSM: o que é, preço e alternativa | SysAid",
+  title: "O que é ServiceNow? Como funciona, ITSM e preço | SysAid",
   description:
-    "O que é o ServiceNow, como ele cobra e quando faz sentido. Compare com a SysAid: ITSM com ITIL 4, CMDB e IA, sem projeto de plataforma e em português.",
+    "O que é o ServiceNow, como funciona, o que entra em cada pacote de ITSM e como a licença é cobrada. Compare com a SysAid: ITIL 4, CMDB e IA, em português.",
   alternates: { canonical: "/servicenow" },
   openGraph: {
     title: "Alternativa ao ServiceNow para ITSM — SysAid Brasil",
@@ -46,8 +49,8 @@ const TRAVAS = [
     d: "A plataforma lança duas versões por ano. Cada atualização pede teste das customizações feitas, e quanto mais a instância foi personalizada, mais trabalho o upgrade dá.",
   },
   {
-    t: "IA generativa nos pacotes de cima",
-    d: "O Now Assist, a IA generativa do ServiceNow, vem nos pacotes superiores da plataforma. Pra quem contrata o pacote de entrada, a IA vira mais um item da negociação.",
+    t: "Mudança e problema só no pacote do meio",
+    d: "Desde abril de 2026 o ITSM do ServiceNow vem em três pacotes. O de entrada, o Foundation, não traz gestão de mudanças, de problemas nem de incidente grave: esses processos do ITIL começam no Advanced.",
   },
   {
     t: "Escala de grande corporação",
@@ -60,9 +63,9 @@ const COMPARE = [
   { crit: "Preço", them: "Não publicado: licença por usuário e por pacote, sob consulta", sysaid: "Proposta personalizada, com gestão de ativos e Copilot inclusos, sem add-on" },
   { crit: "Implantação", them: "Projeto, geralmente com parceiro certificado", sysaid: "Configuração guiada com suporte local em português; prazo definido no diagnóstico" },
   { crit: "Quem administra no dia a dia", them: "Administrador da plataforma e, pra customizar, desenvolvedor", sysaid: "O próprio time de TI, por configuração em tela, sem código" },
-  { crit: "Processos ITIL 4", them: "Incidente, problema, mudança e requisição, com cobertura ampla", sysaid: "Incidente, problema, mudança com aprovação e requisição, prontos pra usar" },
+  { crit: "Processos ITIL 4", them: "Incidente e requisição no Foundation; problema, mudança e incidente grave a partir do Advanced", sysaid: "Incidente, problema, mudança com aprovação e requisição, prontos pra usar" },
   { crit: "CMDB e ativos", them: "CMDB na plataforma; descoberta automática em módulo de operações (ITOM)", sysaid: "CMDB nativo e gestão de ativos inclusos na mesma base" },
-  { crit: "IA generativa", them: "Now Assist, nos pacotes superiores", sysaid: "SysAid Copilot incluído na plataforma" },
+  { crit: "IA generativa", them: "ServiceNow Otto (antigo Now Assist) em todos os pacotes, com uso que cresce do Foundation ao Prime", sysaid: "SysAid Copilot incluído na plataforma" },
   { crit: "ESM (RH, facilities, financeiro)", them: "Sim, em módulos próprios por área", sysaid: "Sim, na mesma plataforma do ITSM" },
   { crit: "Atendimento no Brasil", them: "Escritório no Brasil; implantação e sustentação em geral com parceiro", sysaid: "Suporte local da SysAid Brasil, em português" },
 ];
@@ -88,15 +91,27 @@ const MIGRACAO = [
 const FAQ = [
   {
     q: "O que é o ServiceNow?",
-    a: "É uma plataforma americana de fluxos de trabalho corporativos que nasceu como ferramenta de ITSM. Hoje reúne módulos de TI, RH, atendimento ao cliente e segurança sobre a mesma base, a Now Platform, e é usada principalmente por grandes empresas.",
+    a: "É uma plataforma americana de nuvem para automatizar fluxos de trabalho de empresas, que nasceu como ferramenta de ITSM. Hoje reúne módulos de TI, RH, atendimento ao cliente e segurança sobre a mesma base, a Now Platform, e é usada principalmente por grandes empresas.",
+  },
+  {
+    q: "Para que serve o ServiceNow?",
+    a: "Serve para registrar, encaminhar e automatizar pedidos e processos dentro da empresa. O uso mais comum é na TI: abrir e resolver chamados, aprovar mudanças, investigar problemas recorrentes, controlar ativos e manter o CMDB. As mesmas ferramentas são usadas por RH, atendimento ao cliente e segurança.",
   },
   {
     q: "O ServiceNow é uma ferramenta de ITSM?",
     a: "Sim. O ITSM é o módulo de origem e o mais usado: incidentes, problemas, mudanças, requisições, catálogo e CMDB, seguindo o ITIL. A diferença pra uma ferramenta de ITSM dedicada está no tamanho da plataforma em volta e no esforço pra implantar e manter.",
   },
   {
+    q: "O que é o ServiceNow ITSM?",
+    a: "É o produto de gestão de serviços de TI do ServiceNow: portal e catálogo para o usuário pedir, fila e SLA para o analista atender e os processos do ITIL (incidente, requisição, problema e mudança) ligados ao CMDB. É vendido em pacotes, e o que entra em cada um muda bastante.",
+  },
+  {
+    q: "Quais são os pacotes do ServiceNow ITSM?",
+    a: "Desde abril de 2026 são três: Foundation (incidente básico, requisição, ativos e custo, Virtual Agent e IA), Advanced (Foundation mais gestão de mudanças, de problemas, incidente grave e plantão) e Prime (Advanced mais agentes de IA autônomos e criação de agentes e skills próprios). Os antigos Standard, Pro e Enterprise saíram da oferta nova.",
+  },
+  {
     q: "Quanto custa o ServiceNow?",
-    a: "O ServiceNow não publica preço. A licença é negociada por usuário que atende chamados e por pacote, e o custo total inclui a implantação, em geral com parceiro, e as pessoas que administram a plataforma. Pra comparar com a SysAid, peça as duas propostas com o mesmo escopo e some licença, implantação e sustentação de três anos.",
+    a: "O ServiceNow não publica preço: a página oficial só oferece cotação sob medida. A licença é negociada por usuário que atende chamados e por pacote (Foundation, Advanced ou Prime), e o custo total inclui a implantação, em geral com parceiro, e as pessoas que administram a plataforma. Pra comparar com a SysAid, peça as duas propostas com o mesmo escopo e some licença, implantação e sustentação de três anos.",
   },
   {
     q: "Existe alternativa ao ServiceNow com suporte em português?",
@@ -108,7 +123,7 @@ const FAQ = [
   },
   {
     q: "O SysAid é um service desk com IA agêntica, que resolve chamados sozinho?",
-    a: "Sim. O SysAid Copilot é IA agêntica: não se limita a sugerir texto, ele entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho, até 90% antes de virar chamado. A plataforma traz mais de 100 agentes de IA prontos para tarefas de ITSM e um AI Builder no-code para criar novos; o Copilot está incluído na plataforma, sem pacote de créditos. No ServiceNow, a IA generativa (Now Assist) fica nos pacotes superiores.",
+    a: "Sim. O SysAid Copilot é IA agêntica: não se limita a sugerir texto, ele entende a solicitação, responde o usuário e executa a resolução de casos comuns sozinho, até 90% antes de virar chamado. A plataforma traz mais de 100 agentes de IA prontos para tarefas de ITSM e um AI Builder no-code para criar novos; o Copilot está incluído na plataforma, sem pacote de créditos. No ServiceNow, a IA (Otto, antigo Now Assist) vem em todos os pacotes, mas os agentes que trabalham sozinhos e a criação de agentes próprios ficam no Prime, o pacote mais alto.",
   },
 ];
 
@@ -217,13 +232,18 @@ export default function ServiceNowPage() {
               <p className="eyebrow">Antes de comparar</p>
               <h2>O que é o ServiceNow e para que serve</h2>
             </div>
+            <p className="section-head__sub" style={{ marginBottom: 20 }}>
+              <strong>O ServiceNow é uma plataforma de nuvem para automatizar
+              fluxos de trabalho de empresas.</strong> Nasceu como ferramenta de
+              ITSM e hoje reúne, na mesma base, módulos de TI, RH, atendimento ao
+              cliente e segurança. É usado principalmente por grandes
+              corporações, que contratam por módulo e por pacote.
+            </p>
             <p>
-              O ServiceNow é uma plataforma americana de fluxos de trabalho
-              corporativos, fundada em 2004 na Califórnia. Começou como
-              ferramenta de ITSM, a gestão de serviços de TI, e virou uma
-              plataforma inteira, a Now Platform, onde rodam módulos de TI
-              (serviços, operações e ativos), RH, atendimento ao cliente,
-              segurança e o que mais a empresa quiser construir em cima dela.
+              A empresa é americana, fundada em 2004 na Califórnia. A base
+              onde tudo roda se chama Now Platform: além dos módulos prontos de
+              TI (serviços, operações e ativos), a empresa pode construir em
+              cima dela os fluxos que quiser.
             </p>
             <p style={{ marginTop: 16 }}>
               Por isso ele é referência em grandes corporações: quem tem um time
@@ -235,6 +255,95 @@ export default function ServiceNowPage() {
               próprio termo ainda é novo pra você, o guia{" "}
               <a href="/o-que-e-itsm">o que é ITSM</a> explica o conceito antes
               da comparação.
+            </p>
+          </div>
+        </section>
+
+        {/* COMO FUNCIONA */}
+        <section className="section section--soft">
+          <div className="container container--narrow">
+            <div className="section-head">
+              <p className="eyebrow">Por dentro da plataforma</p>
+              <h2>Como funciona o ServiceNow</h2>
+            </div>
+            <h3>Cada empresa tem a própria instância</h3>
+            <p>
+              O ServiceNow roda na nuvem da própria ServiceNow, e cada cliente
+              ganha um ambiente separado, a instância, com endereço próprio no
+              formato <em>empresa.service-now.com</em>. É por isso que tanta
+              gente busca “servicenow” só pra entrar no sistema do trabalho.
+            </p>
+            <h3 style={{ marginTop: 28 }}>Módulos sobre a mesma base</h3>
+            <p>
+              Em cima da instância a empresa liga os módulos que contratou: ITSM
+              para a TI, operações (ITOM), RH, atendimento ao cliente,
+              segurança. Todos usam o mesmo banco de dados e o mesmo motor de
+              fluxos, o que permite ligar um pedido de RH a uma tarefa da TI,
+              mas também faz de cada customização uma peça a manter.
+            </p>
+            <h3 style={{ marginTop: 28 }}>Quem atende e quem pede</h3>
+            <p>
+              Quem trabalha os chamados (analista, técnico, aprovador) precisa
+              de licença. Quem só abre pedidos usa o portal de autoatendimento.
+              Por isso a conta do ServiceNow é feita pelo número de pessoas que
+              atendem, não pelo total de funcionários.
+            </p>
+            <h3 style={{ marginTop: 28 }}>Duas versões por ano</h3>
+            <p>
+              A ServiceNow lança duas famílias de versão por ano e dá suporte só
+              à atual e à anterior. Quem fica pra trás precisa atualizar, e cada
+              atualização pede teste de tudo o que foi customizado na instância.
+            </p>
+          </div>
+        </section>
+
+        {/* PACOTES ITSM */}
+        <section className="section">
+          <div className="container container--narrow">
+            <div className="section-head">
+              <p className="eyebrow">O que se contrata</p>
+              <h2>ServiceNow ITSM: o que entra em cada pacote</h2>
+              <p className="section-head__sub">
+                Em abril de 2026 o ServiceNow trocou os pacotes de ITSM (os
+                antigos Standard, Pro e Enterprise) por três novos. O que muda
+                de um pra outro não é só a IA: são os próprios processos do ITIL.
+              </p>
+            </div>
+            <h3>ITSM Foundation</h3>
+            <p>
+              Incidente no nível básico, requisição, gestão de ativos e custo,
+              Virtual Agent, Predictive Intelligence e o Otto, a IA do
+              ServiceNow, para ITSM. <strong>Não inclui gestão de mudanças, de
+              problemas nem de incidente grave.</strong>
+            </p>
+            <h3 style={{ marginTop: 28 }}>ITSM Advanced</h3>
+            <p>
+              Tudo do Foundation mais gestão de mudanças, gestão de problemas,
+              incidente grave e plantão (on-call), agentes de voz com IA,
+              analytics avançado e mineração de processos. É o primeiro pacote
+              com o ITIL completo.
+            </p>
+            <h3 style={{ marginTop: 28 }}>ITSM Prime</h3>
+            <p>
+              Tudo do Advanced mais um “especialista de IA” para o service desk
+              de primeiro nível, criação de agentes e skills de IA próprios e
+              recursos de release e DevOps. É o pacote que a ServiceNow
+              recomenda.
+            </p>
+            <h3 style={{ marginTop: 40 }}>Quanto custa a licença do ServiceNow</h3>
+            <p>
+              A ServiceNow não publica preço de nenhum dos três pacotes: a
+              página oficial só oferece cotação sob medida. A licença é cobrada
+              por usuário que atende e por pacote, e o uso da IA cresce do
+              Foundation ao Prime. No custo total entram ainda a implantação,
+              em geral feita por parceiro certificado, o time que administra a
+              plataforma e o trabalho de cada atualização de versão. Pra
+              comparar de verdade, some licença, implantação e sustentação de
+              três anos nas duas propostas.
+            </p>
+            <p className="ctable__note" style={{ marginTop: 20 }}>
+              Fonte: página de pacotes de ITSM da ServiceNow
+              (servicenow.com/products/itsm/pricing), consultada em 28/11/2026.
             </p>
           </div>
         </section>
@@ -322,9 +431,11 @@ export default function ServiceNowPage() {
               ))}
             </div>
             <p className="ctable__note">
-              ServiceNow e Now Assist são marcas de seus respectivos titulares.
-              O ServiceNow não divulga preço; comparativo elaborado pela SysAid
-              Brasil com base em informações públicas das soluções.
+              ServiceNow, ServiceNow Otto e Now Assist são marcas de seus
+              respectivos titulares. O ServiceNow não divulga preço; pacotes
+              conferidos na página oficial de ITSM da ServiceNow em novembro de
+              2026. Comparativo elaborado pela SysAid Brasil com base em
+              informações públicas das soluções.
             </p>
           </div>
         </section>
